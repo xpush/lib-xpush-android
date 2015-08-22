@@ -1,0 +1,195 @@
+package io.xpush.sampleChat.activities;
+
+/**
+ * Created by 정진영 on 2015-08-22.
+ */
+import android.app.ProgressDialog;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+
+import android.content.Intent;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import io.xpush.chat.ApplicationController;
+import io.xpush.chat.activities.ChannelActivity;
+import io.xpush.chat.network.LoginRequest;
+import io.xpush.chat.network.StringRequest;
+import io.xpush.chat.util.JSONUtils;
+import io.xpush.sampleChat.R;
+import io.xpush.sampleChat.models.LoggedInUser;
+
+public class LoginActivity extends AppCompatActivity  {
+    private static final String TAG = "LoginActivity";
+    private static final int REQUEST_SIGNUP = 0;
+
+    EditText _idText;
+    EditText _passwordText;
+    Button _loginButton;
+    TextView _signupLink;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        _idText = (EditText)findViewById(R.id.input_id);
+        _passwordText = (EditText)findViewById(R.id.input_password);
+        _loginButton = (Button)findViewById(R.id.btn_login);
+        _signupLink = (TextView)findViewById(R.id.link_signup);
+
+        _loginButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                login();
+            }
+        });
+
+        _signupLink.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // Start the Signup activity
+                Toast.makeText(getBaseContext(), "Check homepage", Toast.LENGTH_LONG).show();
+                /**
+                Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+                startActivityForResult(intent, REQUEST_SIGNUP);
+                 */
+            }
+        });
+    }
+
+    public void login() {
+        Log.d(TAG, "Login");
+
+        if (!validate()) {
+            onLoginFailed();
+            return;
+        }
+
+        _loginButton.setEnabled(false);
+
+        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        progressDialog.setIndeterminate(true);
+        progressDialog.setMessage("Authenticating...");
+        progressDialog.show();
+
+        String id = _idText.getText().toString();
+        String password = _passwordText.getText().toString();
+
+        final Map<String,String> params = new HashMap<String, String>();
+
+        params.put("A", getString(R.string.app_id));
+        params.put("U", id);
+        params.put("PW", password);
+        params.put("D", "web");
+
+        String url = getString(R.string.host_name)+"/auth";
+
+        LoginRequest request = new LoginRequest(url, params,
+            new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    Log.d(TAG, "Login success ======================");
+                    Log.d(TAG, response.toString());
+                    try {
+                        if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                            progressDialog.dismiss();
+                            onLoginSuccess();
+                        } else {
+                            progressDialog.dismiss();
+                            onLoginFailed();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            },
+            new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Log.d(TAG, "Login error ======================");
+                    error.printStackTrace();
+                    progressDialog.dismiss();
+                    onLoginFailed();
+                }
+            }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        queue.add(request);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_SIGNUP) {
+            if (resultCode == RESULT_OK) {
+                // TODO: Implement successful signup logic here
+                // By default we just finish the Activity and log them in automatically
+                this.finish();
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        // disable going back to the MainActivity
+        moveTaskToBack(true);
+    }
+
+    public void onLoginSuccess() {
+        _loginButton.setEnabled(true);
+        Intent intent = new Intent(LoginActivity.this, ChannelActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void onLoginFailed() {
+        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+
+        _loginButton.setEnabled(true);
+    }
+
+    public boolean validate() {
+        boolean valid = true;
+
+        String email = _idText.getText().toString();
+        String password = _passwordText.getText().toString();
+
+        //if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (email.isEmpty() ) {
+            _idText.setError("enter a valid email address");
+            valid = false;
+        } else {
+            _idText.setError(null);
+        }
+
+        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
+            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            valid = false;
+        } else {
+            _passwordText.setError(null);
+        }
+
+        return valid;
+    }
+}

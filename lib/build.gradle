@@ -1,0 +1,38 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        minSdkVersion 15
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            res.srcDirs = ['src/main/res']
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.android.support:design:22.2.0'
+    compile 'com.android.support:recyclerview-v7:22.2.0'
+    compile 'com.github.rahatarmanahmed:circularprogressview:2.3.2'
+    compile 'com.jakewharton:butterknife:6.1.0'
+
+    compile 'com.mcxiaoke.volley:library:1.0.16'
+    //compile 'org.jsoup:jsoup:1.8.2'
+
+    compile 'com.google.android.gms:play-services-gcm:7.5.+'
+
+    //compile 'com.github.nkzawa:engine.io-client:0.5.1'
+    compile 'com.github.nkzawa:socket.io-client:0.5.2'
+
+    //compile 'com.squareup.okhttp:okhttp-ws:2.4.0'
+
+    compile 'com.facebook.fresco:fresco:0.6.1+'
+}

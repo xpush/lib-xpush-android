@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="host_name">http://stalk-front-l01.cloudapp.net:8000</string>
+    <string name="app_id">zeroapp</string>
+    <string name="gcm_defaultSenderId">944977353393</string>
+</resources>

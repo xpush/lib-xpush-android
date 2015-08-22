@@ -1,0 +1,499 @@
+package io.xpush.chat.fragments;
+
+import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+import io.xpush.chat.ApplicationController;
+import io.xpush.chat.R;
+import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushMessage;
+import io.xpush.chat.persist.ChannelTable;
+import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.views.adapters.MessageAdapter;
+
+
+/**
+ * A chat fragment containing messages view and input form.
+ */
+public class ChatFragment extends Fragment {
+
+    public static final String TAG = ChatFragment.class.getSimpleName();
+
+    private static final int REQUEST_LOGIN = 0;
+
+    private static final int TYPING_TIMER_LENGTH = 600;
+
+    private RecyclerView mMessagesView;
+    private EditText mInputMessageView;
+    private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
+    private RecyclerView.Adapter mAdapter;
+    private boolean mTyping = false;
+    private Handler mTypingHandler = new Handler();
+    private String mUsername = "ceo01";
+    private Socket mSocket;
+
+    private XPushChannel mXpushChannel;
+    private String mChannel;
+
+    public ChatFragment() {
+        super();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mAdapter = new MessageAdapter(activity, mXpushMessages);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_chat, container, false);
+    }
+
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if( mSocket == null || !mSocket.connected() ) {
+            connect();
+        }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        if( mSocket != null && mSocket.connected() ) {
+            disconnect();
+        }
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
+        mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mMessagesView.setAdapter(mAdapter);
+
+        mInputMessageView = (EditText) view.findViewById(R.id.message_input);
+        mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int id, KeyEvent event) {
+                if (id == R.id.send || id == EditorInfo.IME_NULL) {
+                    attemptSend();
+                    return true;
+                }
+                return false;
+            }
+        });
+        mInputMessageView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (null == mUsername) return;
+                if (!mSocket.connected()) return;
+
+                if (!mTyping) {
+                    mTyping = true;
+                    mSocket.emit("typing");
+                }
+
+                mTypingHandler.removeCallbacks(onTypingTimeout);
+                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
+        sendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                attemptSend();
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (Activity.RESULT_OK != resultCode) {
+            getActivity().finish();
+            return;
+        }
+
+        mUsername = data.getStringExtra("U");
+        int numUsers = data.getIntExtra("numUsers", 1);
+
+        addLog(getResources().getString(R.string.message_welcome));
+        addParticipantsLog(numUsers);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_leave) {
+            leave();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void connect(){
+        try {
+            Log.d(TAG, "========== connect ==========");
+
+
+            String url = "http://stalk-front-l01.cloudapp.net:8880/channel";
+            String dt = "{\"action\":\"add\",\"signId\":\"ceo01\",\"nickName\":\"def\",\"memberSex\":\"1\",\"partnerCode\":\"P-00001\",\"roomLevel\":\"0\",\"path\":\"5\",\"fanLevel\":\"0\",\"memberLevel\":\"1\"}";
+
+            Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+            mXpushChannel = new XPushChannel(bundle);
+            mChannel = mXpushChannel.getId();
+
+            IO.Options opts = new IO.Options();
+            opts.forceNew = true;
+            opts.query = "A=" + ApplicationController.getInstance().getXpushSession().getAppId()+"&C="+ mChannel+"&S=33&D=web&MD=CHANNEL_ONLY&U=ceo01&DT="+dt;
+
+            mSocket = IO.socket( url, opts );
+
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        mSocket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+        mSocket.on(Socket.EVENT_CONNECT, onConnectSuccess);
+
+
+        mSocket.on("message", onNewMessage);
+        mSocket.on("user joined", onUserJoined);
+        mSocket.on("user left", onUserLeft);
+        mSocket.on("typing", onTyping);
+        mSocket.on("stop typing", onStopTyping);
+
+        mSocket.connect();
+    }
+
+    private void addLog(String message) {
+        mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_LOG)
+                .message(message).build());
+        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        scrollToBottom();
+    }
+
+    private void addParticipantsLog(int numUsers) {
+        addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
+    }
+
+    private void addMessage(XPushMessage xpushMessage) {
+
+        int type = -1;
+        if( xpushMessage.getUsername().equals(mUsername) ){
+            type = XPushMessage.TYPE_SEND_MESSAGE;
+        } else {
+            type = XPushMessage.TYPE_RECEIVE_MESSAGE;
+        }
+
+        System.out.println( "==========" );
+        System.out.println( xpushMessage.getUsername() );
+        System.out.println( mUsername );
+        System.out.println( type );
+
+        xpushMessage.setType(type);
+        mXpushMessages.add(xpushMessage);
+        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        scrollToBottom();
+    }
+
+    private void addTyping(String username) {
+        mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
+                .username(username).build());
+        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        scrollToBottom();
+    }
+
+    private void removeTyping(String username) {
+        for (int i = mXpushMessages.size() - 1; i >= 0; i--) {
+            XPushMessage xpushMessage = mXpushMessages.get(i);
+            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getUsername().equals(username)) {
+                mXpushMessages.remove(i);
+                mAdapter.notifyItemRemoved(i);
+            }
+        }
+    }
+
+    private void attemptSend() {
+        if (null == mUsername) return;
+        if (!mSocket.connected()) return;
+
+        mTyping = false;
+
+        String message = mInputMessageView.getText().toString().trim();
+        if (TextUtils.isEmpty(message)) {
+            mInputMessageView.requestFocus();
+            return;
+        }
+
+        mInputMessageView.setText("");
+        // perform the sending message attempt.
+
+        JSONObject json = new JSONObject();
+        JSONObject data = new JSONObject();
+        JSONObject user = new JSONObject();
+
+        try {
+
+            user.put( "U", mUsername );
+            data.put( "UO", user  );
+            data.put( "MG", message );
+
+            json.put("DT", data );
+            json.put("NM", "message" );
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mSocket.emit("send", json);
+    }
+
+    private void leave() {
+        mUsername = null;
+        mSocket.disconnect();
+        mSocket.connect();
+    }
+
+    private void scrollToBottom() {
+        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+
+
+    private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ContentValues values = new ContentValues();
+                values.put(ChannelTable.KEY_ID, mChannel );
+                values.put(ChannelTable.KEY_COUNT, 0);
+
+                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
+                getActivity().getContentResolver().update(singleUri, values, null, null);
+            }
+        });
+        }
+    };
+
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //Toast.makeText(getActivity().getApplicationContext(),R.string.error_connect, Toast.LENGTH_LONG).show();
+            }
+        });
+        }
+    };
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            JSONObject data = (JSONObject) args[0];
+
+            final XPushMessage xpushMessage = new XPushMessage( data );
+
+            try {
+                ContentValues values = new ContentValues();
+                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
+                values.put(ChannelTable.KEY_UPDATED, xpushMessage.getTimestamp());
+                values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+                values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
+                values.put(ChannelTable.KEY_COUNT, 0);
+
+                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
+                getActivity().getContentResolver().update(singleUri, values, null, null);
+
+            } catch (Exception e ){
+                e.printStackTrace();
+            }
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    addMessage(xpushMessage);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onUserJoined = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    int numUsers;
+                    try {
+                        username = data.getString("U");
+                        numUsers = data.getInt("numUsers");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    addLog(getResources().getString(R.string.message_user_joined, username));
+                    addParticipantsLog(numUsers);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onUserLeft = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    int numUsers;
+                    try {
+                        username = data.getString("U");
+                        numUsers = data.getInt("numUsers");
+                    } catch (JSONException e) {
+                        return;
+                    }
+
+                    addLog(getResources().getString(R.string.message_user_left, username));
+                    addParticipantsLog(numUsers);
+                    removeTyping(username);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    try {
+                        username = data.getString("U");
+                    } catch (JSONException e) {
+                        return;
+                    }
+                    addTyping(username);
+                }
+            });
+        }
+    };
+
+    private Emitter.Listener onStopTyping = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    try {
+                        username = data.getString("U");
+                    } catch (JSONException e) {
+                        return;
+                    }
+                    removeTyping(username);
+                }
+            });
+        }
+    };
+
+    private Runnable onTypingTimeout = new Runnable() {
+        @Override
+        public void run() {
+            if (!mTyping) return;
+
+            mTyping = false;
+            mSocket.emit("stop typing");
+        }
+    };
+
+    private void disconnect(){
+        if( mSocket != null && mSocket.connected() ) {
+            mSocket.disconnect();
+            mSocket.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            mSocket.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
+            mSocket.off("message", onNewMessage);
+            mSocket.off("user joined", onUserJoined);
+            mSocket.off("user left", onUserLeft);
+            mSocket.off("typing", onTyping);
+            mSocket.off("stop typing", onStopTyping);
+        }
+    }
+}
+

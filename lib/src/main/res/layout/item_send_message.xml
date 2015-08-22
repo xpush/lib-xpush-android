@@ -1,0 +1,47 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="right"
+    android:paddingTop="@dimen/spacing">
+
+
+    <TextView
+        android:id="@+id/tvUser"
+        style="?android:textAppearanceMedium"
+        android:textColor="?android:textColorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:gravity="right"
+        android:layout_alignParentRight="true"
+        android:text="user01"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvMessage"
+        style="?android:textAppearanceMedium"
+        android:textColor="?android:textColorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/spacing"
+        android:paddingRight="@dimen/spacing"
+        android:layout_toLeftOf="@id/tvUser"
+        android:text="message"
+        android:singleLine="true"/>
+
+    <TextView
+        android:id="@+id/tvTime"
+        style="?android:textAppearanceMedium"
+        android:textColor="?android:textColorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="@dimen/spacing"
+        android:paddingRight="@dimen/spacing"
+        android:layout_toLeftOf="@id/tvMessage"
+        android:text="04:31"
+        android:singleLine="true"/>
+
+
+</RelativeLayout>
