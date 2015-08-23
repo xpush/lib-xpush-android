@@ -106,40 +106,6 @@ public class RegistrationIntentService extends IntentService {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString("REGISTERED_NOTIFICATION_ID", token);
         editor.commit();
-
-        // Add custom implementation, as needed.
-
-        /**
-        Map<String,String> params = new HashMap<String, String>();
-
-        params.put("A", ApplicationController.getInstance().getXpushSession().getAppId());
-        params.put("U", ApplicationController.getInstance().getXpushSession().getId());
-        params.put("PW", ApplicationController.getInstance().getXpushSession().getPassword());
-        params.put("D", ApplicationController.getInstance().getXpushSession().getDeviceId());
-        params.put("N", token);
-
-        String url = getString(R.string.host_name)+"/user/register";
-        StringRequest request = new StringRequest(url, params,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putBoolean("REGISTER_NOTIFICATION", true);
-                    editor.commit();
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            }
-        );
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
-        */
     }
 
     /**

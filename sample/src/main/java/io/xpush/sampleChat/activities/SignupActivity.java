@@ -1,8 +1,9 @@
 package io.xpush.sampleChat.activities;
 
 import android.app.ProgressDialog;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -22,64 +23,66 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.xpush.chat.activities.ChannelActivity;
-import io.xpush.chat.network.LoginRequest;
+import io.xpush.chat.ApplicationController;
+import io.xpush.chat.network.StringRequest;
 import io.xpush.sampleChat.R;
 
-public class LoginActivity extends AppCompatActivity  {
-    private static final String TAG = LoginActivity.class.getSimpleName();
-    private static final int REQUEST_SIGNUP = 0;
+public class SignupActivity extends AppCompatActivity {
+    private static final String TAG = SignupActivity.class.getSimpleName();
 
-    EditText _idText;
-    EditText _passwordText;
-    Button _loginButton;
-    TextView _signupLink;
+    private EditText _nameText;
+    private EditText _idText;
+    private EditText _passwordText;
+    private Button _signupButton;
+    private TextView _loginLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_signup);
 
+        _nameText = (EditText)findViewById(R.id.input_name);
         _idText = (EditText)findViewById(R.id.input_id);
         _passwordText = (EditText)findViewById(R.id.input_password);
-        _loginButton = (Button)findViewById(R.id.btn_login);
-        _signupLink = (TextView)findViewById(R.id.link_signup);
+        _signupButton = (Button)findViewById(R.id.btn_signup);
+        _loginLink = (TextView)findViewById(R.id.link_login);
 
-        _loginButton.setOnClickListener(new View.OnClickListener() {
-
+        _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                login();
+                signup();
             }
         });
 
-        _signupLink.setOnClickListener(new View.OnClickListener() {
-
+        _loginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
+                // Finish the registration screen and return to the Login activity
+                finish();
             }
         });
     }
 
-    public void login() {
-        Log.d(TAG, "Login");
+    public void signup() {
+        Log.d(TAG, "Signup");
 
         if (!validate()) {
-            onLoginFailed();
+            onSignupFailed();
             return;
         }
 
-        _loginButton.setEnabled(false);
+        _signupButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
+        final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
+        progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
+        String name = _nameText.getText().toString();
         String id = _idText.getText().toString();
         String password = _passwordText.getText().toString();
+
+        // TODO: Implement your own signup logic here.
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -87,22 +90,28 @@ public class LoginActivity extends AppCompatActivity  {
         params.put("U", id);
         params.put("PW", password);
         params.put("D", "web");
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
+            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
+        }
+        String url = getString(R.string.host_name)+"/user/register";
 
-        String url = getString(R.string.host_name)+"/auth";
 
-        LoginRequest request = new LoginRequest(url, params,
+
+        Log.d(TAG, "====================== : " + url );
+        StringRequest request = new StringRequest(url, params,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    Log.d(TAG, "Login success ======================");
+                    Log.d(TAG, "SignUp success ======================");
                     Log.d(TAG, response.toString());
                     try {
                         if( "ok".equalsIgnoreCase(response.getString("status")) ){
                             progressDialog.dismiss();
-                            onLoginSuccess();
+                            onSignupSuccess();
                         } else {
                             progressDialog.dismiss();
-                            onLoginFailed();
+                            onSignupFailed();
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -112,10 +121,10 @@ public class LoginActivity extends AppCompatActivity  {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, "Login error ======================");
+                    Log.d(TAG, "SignUp error ======================");
                     error.printStackTrace();
                     progressDialog.dismiss();
-                    onLoginFailed();
+                    onSignupFailed();
                 }
             }
         );
@@ -125,43 +134,33 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SIGNUP) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(getBaseContext(), "Signup success", Toast.LENGTH_LONG).show();
-                //this.finish();
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        // disable going back to the MainActivity
-        moveTaskToBack(true);
-    }
-
-    public void onLoginSuccess() {
-        _loginButton.setEnabled(true);
-        Intent intent = new Intent(LoginActivity.this, ChannelActivity.class);
-        startActivity(intent);
+    public void onSignupSuccess() {
+        _signupButton.setEnabled(true);
+        setResult(RESULT_OK, null);
         finish();
     }
 
-    public void onLoginFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
+    public void onSignupFailed() {
+        Toast.makeText(getBaseContext(), "SignUp failed", Toast.LENGTH_LONG).show();
 
-        _loginButton.setEnabled(true);
+        _signupButton.setEnabled(true);
     }
 
     public boolean validate() {
         boolean valid = true;
 
+        String name = _nameText.getText().toString();
         String email = _idText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        //if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-        if (email.isEmpty() ) {
+        if (name.isEmpty() || name.length() < 3) {
+            _nameText.setError("at least 3 characters");
+            valid = false;
+        } else {
+            _nameText.setError(null);
+        }
+
+        if (email.isEmpty()) {
             _idText.setError("enter a valid email address");
             valid = false;
         } else {
