@@ -8,7 +8,7 @@ import io.xpush.chat.R;
 
 public class DBHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "xpush.db";
+    private static final String DATABASE_NAME = "xpush1.db";
     private static final int DATABASE_VERSION = 1;
     private String CHANNEL_TABLE_NAME;
     private String MESSAGE_TABLE_NAME;
@@ -19,11 +19,13 @@ public class DBHelper extends SQLiteOpenHelper {
         MESSAGE_TABLE_NAME = context.getString(R.string.message_table_name);
     }
 
+    @Override
     public void onCreate(SQLiteDatabase db) {
         MessageTable.onCreate(db, MESSAGE_TABLE_NAME);
         ChannelTable.onCreate(db, CHANNEL_TABLE_NAME);
     }
 
+    @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         MessageTable.onUpgrade(db, oldVersion, newVersion, MESSAGE_TABLE_NAME);
         ChannelTable.onUpgrade(db, oldVersion, newVersion, CHANNEL_TABLE_NAME);

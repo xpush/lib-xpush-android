@@ -1,8 +1,13 @@
 package io.xpush.chat.models;
 
+import android.database.Cursor;
+
 import org.json.JSONObject;
 
 import java.net.URLDecoder;
+
+import io.xpush.chat.persist.ChannelTable;
+import io.xpush.chat.persist.MessageTable;
 
 public class XPushMessage {
 
@@ -27,10 +32,6 @@ public class XPushMessage {
         return mType;
     };
 
-    public int getmType() {
-        return mType;
-    }
-
     public void setType(int type) {
         this.mType = type;
     }
@@ -39,7 +40,7 @@ public class XPushMessage {
         return mUsername;
     }
 
-    public void setmUsername(String username) {
+    public void setUsername(String username) {
         this.mUsername = username;
     }
 
@@ -47,7 +48,7 @@ public class XPushMessage {
         return mMessage;
     }
 
-    public void setmMessage(String message) {
+    public void setMessage(String message) {
         this.mMessage = message;
     }
 
@@ -98,6 +99,16 @@ public class XPushMessage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public XPushMessage(Cursor cursor){
+        //this.id= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
+        this.mUsername= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_SENDER));
+        this.mImage= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_IMAGE));
+        //this.count= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_COUNT));
+        this.mMessage= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
+        this.mType= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_TYPE));
+        this.mTimestamp= cursor.getLong(cursor.getColumnIndexOrThrow(MessageTable.KEY_UPDATED));
     }
 
     public static class Builder {

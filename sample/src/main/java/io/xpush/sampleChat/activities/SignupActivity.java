@@ -150,7 +150,7 @@ public class SignupActivity extends AppCompatActivity {
         boolean valid = true;
 
         String name = _nameText.getText().toString();
-        String email = _idText.getText().toString();
+        String id = _idText.getText().toString();
         String password = _passwordText.getText().toString();
 
         if (name.isEmpty() || name.length() < 3) {
@@ -160,8 +160,8 @@ public class SignupActivity extends AppCompatActivity {
             _nameText.setError(null);
         }
 
-        if (email.isEmpty()) {
-            _idText.setError("enter a valid email address");
+        if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
+            _idText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
             _idText.setError(null);

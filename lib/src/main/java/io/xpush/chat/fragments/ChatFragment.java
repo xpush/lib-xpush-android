@@ -3,10 +3,14 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -21,8 +25,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -38,17 +44,20 @@ import java.util.List;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.persist.ChannelTable;
+import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.views.adapters.MessageAdapter;
+import io.xpush.chat.views.adapters.ChannelCursorAdapter;
+import io.xpush.chat.views.adapters.MessageCursorAdapter;
 
 
 /**
  * A chat fragment containing messages view and input form.
  */
-public class ChatFragment extends Fragment {
+public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final String TAG = ChatFragment.class.getSimpleName();
 
@@ -56,17 +65,19 @@ public class ChatFragment extends Fragment {
 
     private static final int TYPING_TIMER_LENGTH = 600;
 
-    private RecyclerView mMessagesView;
+    private ListView mMessagesView;
     private EditText mInputMessageView;
     private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
-    private RecyclerView.Adapter mAdapter;
+    private MessageCursorAdapter mDataAdapter;
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
-    private String mUsername = "ceo01";
+    private String mUsername;
     private Socket mSocket;
 
     private XPushChannel mXpushChannel;
     private String mChannel;
+
+    private Activity mActivity;
 
     public ChatFragment() {
         super();
@@ -75,11 +86,13 @@ public class ChatFragment extends Fragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageAdapter(activity, mXpushMessages);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        mUsername = ApplicationController.getInstance().getXpushSession().getId();
+
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
     }
@@ -111,9 +124,7 @@ public class ChatFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mMessagesView = (RecyclerView) view.findViewById(R.id.messages);
-        mMessagesView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mMessagesView.setAdapter(mAdapter);
+        displayListView();
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
         mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -177,17 +188,13 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_chat, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_leave) {
             leave();
             return true;
@@ -235,7 +242,7 @@ public class ChatFragment extends Fragment {
     private void addLog(String message) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_LOG)
                 .message(message).build());
-        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        mDataAdapter.notifyDataSetChanged();
         scrollToBottom();
     }
 
@@ -259,14 +266,14 @@ public class ChatFragment extends Fragment {
 
         xpushMessage.setType(type);
         mXpushMessages.add(xpushMessage);
-        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        mDataAdapter.notifyDataSetChanged();
         scrollToBottom();
     }
 
     private void addTyping(String username) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
                 .username(username).build());
-        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        mDataAdapter.notifyDataSetChanged();
         scrollToBottom();
     }
 
@@ -275,7 +282,7 @@ public class ChatFragment extends Fragment {
             XPushMessage xpushMessage = mXpushMessages.get(i);
             if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getUsername().equals(username)) {
                 mXpushMessages.remove(i);
-                mAdapter.notifyItemRemoved(i);
+                mDataAdapter.notifyDataSetChanged();
             }
         }
     }
@@ -322,7 +329,7 @@ public class ChatFragment extends Fragment {
     }
 
     private void scrollToBottom() {
-        mMessagesView.scrollToPosition(mAdapter.getItemCount() - 1);
+        mMessagesView.setSelection(mDataAdapter.getCount() - 1);
     }
 
 
@@ -494,6 +501,73 @@ public class ChatFragment extends Fragment {
             mSocket.off("typing", onTyping);
             mSocket.off("stop typing", onStopTyping);
         }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+            MessageTable.KEY_ROWID,
+            MessageTable.KEY_ID,
+            MessageTable.KEY_SENDER,
+            MessageTable.KEY_IMAGE,
+            MessageTable.KEY_COUNT,
+            MessageTable.KEY_MESSAGE,
+            MessageTable.KEY_TYPE,
+            MessageTable.KEY_UPDATED
+        };
+
+        CursorLoader cursorLoader = new CursorLoader(getActivity(),
+                XpushContentProvider.MESSAGE_CONTENT_URI, projection, null, null, null);
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mDataAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mDataAdapter.swapCursor(null);
+    }
+
+    private void displayListView() {
+
+        String[] columns = new String[]{
+                MessageTable.KEY_ROWID,
+                MessageTable.KEY_ID,
+                MessageTable.KEY_SENDER,
+                MessageTable.KEY_IMAGE,
+                MessageTable.KEY_COUNT,
+                MessageTable.KEY_MESSAGE,
+                MessageTable.KEY_TYPE,
+                MessageTable.KEY_UPDATED
+        };
+
+        mActivity = getActivity();
+        mDataAdapter = new MessageCursorAdapter(mActivity, null, 0);
+
+
+        final ListView listView = (ListView) getActivity().findViewById(R.id.messages);
+        listView.setAdapter(mDataAdapter);
+
+        getLoaderManager().initLoader(0, null, this);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
+                Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+
+                XPushChannel xpushChannel = new XPushChannel(cursor);
+
+
+                Bundle bundle = xpushChannel.toBundle();
+
+                Intent intent = new Intent(mActivity, ChatActivity.class);
+                intent.putExtra(xpushChannel.CHANNEL_BUNDLE, bundle);
+                startActivity(intent);
+            }
+        });
     }
 }
 

@@ -47,7 +47,7 @@
 
         <activity
             android:name="io.xpush.chat.activities.ChannelActivity"
-            android:label="@string/app_name">
+            android:label="Channels">
         </activity>
 
         <receiver

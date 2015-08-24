@@ -62,10 +62,8 @@ public class MessageCursorAdapter extends CursorAdapter {
         View view =  mInflater.inflate(layout, null);
         ViewHolder holder = new ViewHolder();
 
-        holder.tvTitle = (TextView) view.findViewById(R.id.tvTitle);
-        holder.tvDate = (TextView) view.findViewById(R.id.tvDate);
-        holder.tvCount = (TextView) view.findViewById(R.id.tvCount);
-        holder.tvWriter = (TextView) view.findViewById(R.id.tvWriter);
+        holder.tvTime = (TextView) view.findViewById(R.id.tvTime);
+        holder.tvUser = (TextView) view.findViewById(R.id.tvUser);
         holder.tvMessage = (TextView) view.findViewById(R.id.tvMessage);
         holder.thumbNail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
         view.setTag(holder);
@@ -77,38 +75,24 @@ public class MessageCursorAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
 
         ViewHolder holder = (ViewHolder) view.getTag();
-        XPushChannel xpushChannel = new XPushChannel(cursor);
+        XPushMessage xpushMessage = new XPushMessage(cursor);
 
-        String title = xpushChannel.getId();
-        long date = xpushChannel.getUpdated();
+        String userId = xpushMessage.getUsername();
+        long date = xpushMessage.getTimestamp();
 
-        if( xpushChannel.getImage() != null && !"".equals(xpushChannel.getImage()) ) {
-            holder.thumbNail.setImageURI(Uri.parse(xpushChannel.getImage()));
-        } else {
-            //holder.thumbNail.setDefaultImageResId(R.drawable.default_user);
+        if( holder.thumbNail != null && xpushMessage.getImage() != null && !"".equals(xpushMessage.getImage()) ) {
+            holder.thumbNail.setImageURI(Uri.parse(xpushMessage.getImage()));
         }
 
-        holder.tvWriter.setText(xpushChannel.getUsers());
-        holder.tvMessage.setText(xpushChannel.getMessage());
-
-        if( xpushChannel.getCount() > 0 ) {
-            holder.tvCount.setText(String.valueOf(xpushChannel.getCount()));
-            holder.tvCount.setVisibility(View.VISIBLE);
-        } else {
-            holder.tvCount.setText(String.valueOf(xpushChannel.getCount()));
-            holder.tvCount.setVisibility(View.INVISIBLE);
-        }
-        holder.tvDate.setText(DateUtils.getTimeString(date) );
-
-        holder.tvTitle.setText(title);
+        holder.tvMessage.setText(xpushMessage.getMessage());
+        holder.tvTime.setText( DateUtils.getDate(date, "a h:mm") );
+        holder.tvMessage.setText(userId);
     }
 
     public static class ViewHolder {
-        public TextView tvTitle;
-        public TextView tvDate;
-        public TextView tvCount;
-        public TextView tvWriter;
-        public TextView tvMessage;
+        private TextView tvUser;
+        private TextView tvMessage;
+        private TextView tvTime;
         public SimpleDraweeView thumbNail;
     }
 }

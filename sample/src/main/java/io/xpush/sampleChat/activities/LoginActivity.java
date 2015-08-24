@@ -157,12 +157,11 @@ public class LoginActivity extends AppCompatActivity  {
     public boolean validate() {
         boolean valid = true;
 
-        String email = _idText.getText().toString();
+        String id = _idText.getText().toString();
         String password = _passwordText.getText().toString();
 
-        //if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-        if (email.isEmpty() ) {
-            _idText.setError("enter a valid email address");
+        if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
+            _idText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
             _idText.setError(null);

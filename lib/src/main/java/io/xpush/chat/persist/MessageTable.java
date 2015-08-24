@@ -32,9 +32,11 @@ public class MessageTable {
                         KEY_IMAGE + "," +
                         KEY_COUNT + " integer ," +
                         KEY_MESSAGE + "," +
-                        KEY_TYPE + "integer ," +
+                        KEY_TYPE + " integer ," +
                         KEY_UPDATED + " integer );";
 
+        System.out.println( "====== DATABASE_CREATE ======" );
+        System.out.println( DATABASE_CREATE );
         db.execSQL(DATABASE_CREATE);
     }
 
