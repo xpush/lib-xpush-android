@@ -88,7 +88,8 @@ public class XpushContentProvider extends ContentProvider {
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+        Log.i(TAG,  "11111111111" );
+        Log.i(TAG, uri.toString() );
 
         String tableName = "";
         Uri contentUri = null;
@@ -145,15 +146,23 @@ public class XpushContentProvider extends ContentProvider {
                 break;
             case SINGLE_MESSAGE:
                 tableName = MESSAGE_TABLE;
+                if ( sortOrder == null ){
+                    sortOrder = MessageTable.KEY_UPDATED + " ASC";
+                }
 
-                id = uri.getPathSegments().get(1);
-                queryBuilder.appendWhere(MessageTable.KEY_ID + "='" + id+"'");
+                String channel = uri.getPathSegments().get(1);
+                queryBuilder.appendWhere(MessageTable.KEY_CHANNEL + "='" + channel+"'");
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
 
         queryBuilder.setTables(tableName);
+
+        Log.i(TAG, "=========  query =============");
+        Log.i(TAG, uri.toString());
+        Log.i(TAG, tableName);
+        Log.i(TAG, queryBuilder.toString() );
 
         Cursor cursor = queryBuilder.query(db, projection, selection,
                 selectionArgs, null, null, sortOrder);
@@ -237,8 +246,6 @@ public class XpushContentProvider extends ContentProvider {
         }
 
         int updateCount = db.update(tableName, values, selection, selectionArgs);
-
-        Log.i(TAG, String.valueOf(updateCount) );
 
         getContext().getContentResolver().notifyChange(uri, null);
         return updateCount;

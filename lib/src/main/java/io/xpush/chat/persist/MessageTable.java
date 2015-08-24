@@ -11,6 +11,7 @@ public class MessageTable {
 
     public static final String KEY_ROWID = "_id";
     public static final String KEY_ID = "id";
+    public static final String KEY_CHANNEL = "channel";
     public static final String KEY_SENDER = "sender";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_COUNT = "count";
@@ -27,6 +28,7 @@ public class MessageTable {
         String DATABASE_CREATE =
                 "CREATE TABLE if not exists " + tableName + " (" +
                         KEY_ROWID + " integer PRIMARY KEY autoincrement," +
+                        KEY_CHANNEL + ", " +
                         KEY_ID + "," +
                         KEY_SENDER + "," +
                         KEY_IMAGE + "," +
@@ -35,8 +37,6 @@ public class MessageTable {
                         KEY_TYPE + " integer ," +
                         KEY_UPDATED + " integer );";
 
-        System.out.println( "====== DATABASE_CREATE ======" );
-        System.out.println( DATABASE_CREATE );
         db.execSQL(DATABASE_CREATE);
     }
 

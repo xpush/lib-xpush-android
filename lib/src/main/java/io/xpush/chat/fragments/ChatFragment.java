@@ -30,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.IO;
@@ -47,6 +48,7 @@ import io.xpush.chat.R;
 import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
+import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XpushContentProvider;
@@ -90,6 +92,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+        mXpushChannel = new XPushChannel(bundle);
+
+        mChannel = mXpushChannel.getId();
 
         mUsername = ApplicationController.getInstance().getXpushSession().getId();
 
@@ -205,19 +212,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void connect(){
         try {
-            Log.d(TAG, "========== connect ==========");
 
-
+            XPushSession session = ApplicationController.getInstance().getXpushSession();
             String url = "http://stalk-front-l01.cloudapp.net:8880/channel";
-            String dt = "{\"action\":\"add\",\"signId\":\"ceo01\",\"nickName\":\"def\",\"memberSex\":\"1\",\"partnerCode\":\"P-00001\",\"roomLevel\":\"0\",\"path\":\"5\",\"fanLevel\":\"0\",\"memberLevel\":\"1\"}";
-
-            Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
-            mXpushChannel = new XPushChannel(bundle);
             mChannel = mXpushChannel.getId();
 
             IO.Options opts = new IO.Options();
             opts.forceNew = true;
-            opts.query = "A=" + ApplicationController.getInstance().getXpushSession().getAppId()+"&C="+ mChannel+"&S=33&D=web&MD=CHANNEL_ONLY&U=ceo01&DT="+dt;
+
+            String appId = getString(R.string.app_id);
+
+            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+session.getServerName()+"&D=web&U="+session.getId();
 
             mSocket = IO.socket( url, opts );
 
@@ -258,11 +263,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         } else {
             type = XPushMessage.TYPE_RECEIVE_MESSAGE;
         }
-
-        System.out.println( "==========" );
-        System.out.println( xpushMessage.getUsername() );
-        System.out.println( mUsername );
-        System.out.println( type );
 
         xpushMessage.setType(type);
         mXpushMessages.add(xpushMessage);
@@ -325,7 +325,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private void leave() {
         mUsername = null;
         mSocket.disconnect();
-        mSocket.connect();
     }
 
     private void scrollToBottom() {
@@ -336,18 +335,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
         @Override
-        public void call(Object... args) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ContentValues values = new ContentValues();
-                values.put(ChannelTable.KEY_ID, mChannel );
-                values.put(ChannelTable.KEY_COUNT, 0);
 
-                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
-                getActivity().getContentResolver().update(singleUri, values, null, null);
-            }
-        });
+        public void call(Object... args) {
+
+            Log.d(TAG, "========== connect success ==========");
+
+            ContentValues values = new ContentValues();
+            values.put(ChannelTable.KEY_ID, mChannel );
+            values.put(ChannelTable.KEY_COUNT, 0);
+
+            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
+            getActivity().getContentResolver().update(singleUri, values, null, null);
         }
     };
 
@@ -358,7 +356,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                //Toast.makeText(getActivity().getApplicationContext(),R.string.error_connect, Toast.LENGTH_LONG).show();
+                Toast.makeText(getActivity().getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
             }
         });
         }
@@ -380,18 +378,22 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 values.put(ChannelTable.KEY_COUNT, 0);
 
                 Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
+
+                Log.i(TAG, "111");
+                Log.i(TAG, singleUri.toString());
+                Log.i(TAG, values.toString());
                 getActivity().getContentResolver().update(singleUri, values, null, null);
+
+                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getTimestamp());
+                values.put(MessageTable.KEY_CHANNEL, xpushMessage.getChannel());
+
+                Log.i(TAG, "2222222");
+                Log.i(TAG, values.toString());
+                getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
 
             } catch (Exception e ){
                 e.printStackTrace();
             }
-
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    addMessage(xpushMessage);
-                }
-            });
         }
     };
 
@@ -508,6 +510,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         String[] projection = {
             MessageTable.KEY_ROWID,
             MessageTable.KEY_ID,
+            MessageTable.KEY_CHANNEL,
             MessageTable.KEY_SENDER,
             MessageTable.KEY_IMAGE,
             MessageTable.KEY_COUNT,
@@ -516,8 +519,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             MessageTable.KEY_UPDATED
         };
 
+        Uri singleUri = Uri.parse(XpushContentProvider.MESSAGE_CONTENT_URI + "/" + mChannel);
+
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                XpushContentProvider.MESSAGE_CONTENT_URI, projection, null, null, null);
+                singleUri, projection, null, null, null);
         return cursorLoader;
     }
 
@@ -533,27 +538,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void displayListView() {
 
-        String[] columns = new String[]{
-                MessageTable.KEY_ROWID,
-                MessageTable.KEY_ID,
-                MessageTable.KEY_SENDER,
-                MessageTable.KEY_IMAGE,
-                MessageTable.KEY_COUNT,
-                MessageTable.KEY_MESSAGE,
-                MessageTable.KEY_TYPE,
-                MessageTable.KEY_UPDATED
-        };
-
         mActivity = getActivity();
         mDataAdapter = new MessageCursorAdapter(mActivity, null, 0);
 
 
-        final ListView listView = (ListView) getActivity().findViewById(R.id.messages);
-        listView.setAdapter(mDataAdapter);
+        mMessagesView = (ListView) getActivity().findViewById(R.id.messages);
+        mMessagesView.setAdapter(mDataAdapter);
 
         getLoaderManager().initLoader(0, null, this);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mMessagesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
