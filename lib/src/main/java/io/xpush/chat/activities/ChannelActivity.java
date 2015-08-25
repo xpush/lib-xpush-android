@@ -32,8 +32,6 @@ public class ChannelActivity extends AppCompatActivity {
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setTitle(getString(R.string.action_bookmark));
-        //toolbar.getBackground().setAlpha(0);
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();

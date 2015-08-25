@@ -17,63 +17,89 @@ public class XPushMessage {
     public static final int TYPE_LOG = 2;
     public static final int TYPE_ACTION = 3;
 
-    private int mType;
+    private String rowId;
+    private String id;
+    private String channel;
+    private String sender;
+    private String image;
+    private String count;
+    private String message;
+    private int type;
+    private long updated;
 
-    private String mUsername = "";
-    private String mMessage;
-    private String mImage = "";
-    private String mChannel;
-    private long mTimestamp;
-
-
-    private XPushMessage() {}
-
-    public int getType() {
-        return mType;
-    };
-
-    public void setType(int type) {
-        this.mType = type;
+    public String getRowId() {
+        return rowId;
     }
 
-    public String getUsername() {
-        return mUsername;
+    public void setRowId(String rowId) {
+        this.rowId = rowId;
     }
 
-    public void setUsername(String username) {
-        this.mUsername = username;
+    public String getId() {
+        return id;
     }
 
-    public String getMessage() {
-        return mMessage;
-    }
-
-    public void setMessage(String message) {
-        this.mMessage = message;
-    }
-
-    public String getImage() {
-        return mImage;
-    }
-
-    public void setImage(String image) {
-        this.mImage = image;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getChannel() {
-        return mChannel;
+        return channel;
     }
 
-    public void setChannel(String mChannel) {
-        this.mChannel = mChannel;
+    public void setChannel(String channel) {
+        this.channel = channel;
     }
 
-    public long getTimestamp() {
-        return mTimestamp;
+    public String getSender() {
+        return sender;
     }
 
-    public void setTimestamp(long mTimestamp) {
-        this.mTimestamp = mTimestamp;
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getCount() {
+        return count;
+    }
+
+    public void setCount(String count) {
+        this.count = count;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public long getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(long updated) {
+        this.updated = updated;
+    }
+
+    public XPushMessage(){
     }
 
     public XPushMessage(JSONObject data) {
@@ -84,17 +110,17 @@ public class XPushMessage {
                 uo = data.getJSONObject("UO");
 
                 if( uo.has("U") ){
-                    this.mUsername = uo.getString("U");
+                    this.sender = uo.getString("U");
                 }
 
                 if( uo.has("I") ) {
-                    this.mImage = uo.getString("I");
+                    this.image = uo.getString("I");
                 }
             }
 
-            this.mMessage = URLDecoder.decode( data.getString("MG"), "UTF-8");
-            this.mTimestamp = data.getLong("TS");
-            this.mChannel = data.getString("C");
+            this.message = URLDecoder.decode( data.getString("MG"), "UTF-8");
+            this.updated = data.getLong("TS");
+            this.channel = data.getString("C");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -102,13 +128,13 @@ public class XPushMessage {
     }
 
     public XPushMessage(Cursor cursor){
-        //this.id= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
-        this.mUsername= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_SENDER));
-        this.mImage= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_IMAGE));
-        //this.count= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_COUNT));
-        this.mMessage= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
-        this.mType= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_TYPE));
-        this.mTimestamp= cursor.getLong(cursor.getColumnIndexOrThrow(MessageTable.KEY_UPDATED));
+        this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
+        this.id= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
+        this.sender= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_SENDER));
+        this.image= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_IMAGE));
+        this.message= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
+        this.type= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_TYPE));
+        this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(MessageTable.KEY_UPDATED));
     }
 
     public static class Builder {
@@ -138,12 +164,25 @@ public class XPushMessage {
 
         public XPushMessage build() {
             XPushMessage xpushMessage = new XPushMessage();
-            xpushMessage.mType = mType;
-            xpushMessage.mUsername = mUsername;
-            xpushMessage.mMessage = mMessage;
-            xpushMessage.mTimestamp = mTimestamp;
+            xpushMessage.type = mType;
+            xpushMessage.sender= mUsername;
+            xpushMessage.message = mMessage;
+            xpushMessage.updated = mTimestamp;
             return xpushMessage;
         }
+    }
+
+    @Override
+    public String toString(){
+        return "XPushMessage{" +
+                "rowId='" + rowId + '\'' +
+                ", id='" + id + '\'' +
+                ", sender='" + sender + '\'' +
+                ", image='" + image + '\'' +
+                ", message='" + message + '\'' +
+                ", type='" + type + '\'' +
+                ", updated='" + updated + '\'' +
+                '}';
     }
 }
 

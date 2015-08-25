@@ -121,8 +121,6 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
 
                 XPushChannel xpushChannel = new XPushChannel(cursor);
-
-
                 Bundle bundle = xpushChannel.toBundle();
 
                 Intent intent = new Intent(mActivity, ChatActivity.class);

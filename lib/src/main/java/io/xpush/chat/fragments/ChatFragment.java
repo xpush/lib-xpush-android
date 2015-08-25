@@ -11,6 +11,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -45,14 +46,12 @@ import java.util.List;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
-import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.views.adapters.ChannelCursorAdapter;
 import io.xpush.chat.views.adapters.MessageCursorAdapter;
 
 
@@ -66,6 +65,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private static final int REQUEST_LOGIN = 0;
 
     private static final int TYPING_TIMER_LENGTH = 600;
+
+    private int mViewCount;
 
     private ListView mMessagesView;
     private EditText mInputMessageView;
@@ -81,6 +82,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private Activity mActivity;
 
+    private XPushSession mSession;
+
+    private SwipeRefreshLayout mSwipeRefreshLayout = null;
+
+    private CursorLoader mCursorLoader;
+
     public ChatFragment() {
         super();
     }
@@ -92,6 +99,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        mActivity = getActivity();
+
+        mSession = ApplicationController.getInstance().getXpushSession();
 
         Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
         mXpushChannel = new XPushChannel(bundle);
@@ -130,6 +141,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        //Initialize swipe to refresh view
+        mSwipeRefreshLayout = (SwipeRefreshLayout) mActivity.findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(getActivity().getApplicationContext(), "Refreshing", Toast.LENGTH_LONG).show();
+                refreshContent();
+            }
+        });
 
         displayListView();
 
@@ -210,10 +231,33 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         return super.onOptionsItemSelected(item);
     }
 
+
+    private void refreshContent(){
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                /**
+                Cursor sCursor = (Cursor) mDataAdapter.getItem( mDataAdapter.getCount()-1);
+
+                mViewCount = mViewCount * 2;
+                String selection = MessageTable.KEY_UPDATED + " < " + sCursor.getLong(sCursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
+                String orderBy = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
+
+                mCursorLoader.setSelection(selection);
+                mCursorLoader.setSortOrder(orderBy);
+                Cursor cursor = mCursorLoader.loadInBackground();
+
+                mCursorLoader.deliverResult(cursor);
+                 */
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        }, 100);
+    }
+
+
     private void connect(){
         try {
-
-            XPushSession session = ApplicationController.getInstance().getXpushSession();
+            ;
             String url = "http://stalk-front-l01.cloudapp.net:8880/channel";
             mChannel = mXpushChannel.getId();
 
@@ -222,7 +266,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             String appId = getString(R.string.app_id);
 
-            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+session.getServerName()+"&D=web&U="+session.getId();
+            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+mSession.getServerName()+"&D=web&U="+mSession.getId();
 
             mSocket = IO.socket( url, opts );
 
@@ -248,39 +292,22 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_LOG)
                 .message(message).build());
         mDataAdapter.notifyDataSetChanged();
-        scrollToBottom();
     }
 
     private void addParticipantsLog(int numUsers) {
         addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
     }
 
-    private void addMessage(XPushMessage xpushMessage) {
-
-        int type = -1;
-        if( xpushMessage.getUsername().equals(mUsername) ){
-            type = XPushMessage.TYPE_SEND_MESSAGE;
-        } else {
-            type = XPushMessage.TYPE_RECEIVE_MESSAGE;
-        }
-
-        xpushMessage.setType(type);
-        mXpushMessages.add(xpushMessage);
-        mDataAdapter.notifyDataSetChanged();
-        scrollToBottom();
-    }
-
     private void addTyping(String username) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
                 .username(username).build());
         mDataAdapter.notifyDataSetChanged();
-        scrollToBottom();
     }
 
     private void removeTyping(String username) {
         for (int i = mXpushMessages.size() - 1; i >= 0; i--) {
             XPushMessage xpushMessage = mXpushMessages.get(i);
-            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getUsername().equals(username)) {
+            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getSender().equals(username)) {
                 mXpushMessages.remove(i);
                 mDataAdapter.notifyDataSetChanged();
             }
@@ -327,18 +354,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mSocket.disconnect();
     }
 
-    private void scrollToBottom() {
-        mMessagesView.setSelection(mDataAdapter.getCount() - 1);
-    }
-
-
-
     private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
         @Override
 
         public void call(Object... args) {
-
-            Log.d(TAG, "========== connect success ==========");
 
             ContentValues values = new ContentValues();
             values.put(ChannelTable.KEY_ID, mChannel );
@@ -372,23 +391,25 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             try {
                 ContentValues values = new ContentValues();
                 values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-                values.put(ChannelTable.KEY_UPDATED, xpushMessage.getTimestamp());
+                values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
                 values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
                 values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
                 values.put(ChannelTable.KEY_COUNT, 0);
 
                 Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-
-                Log.i(TAG, "111");
-                Log.i(TAG, singleUri.toString());
-                Log.i(TAG, values.toString());
                 getActivity().getContentResolver().update(singleUri, values, null, null);
 
-                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getTimestamp());
+                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getUpdated());
                 values.put(MessageTable.KEY_CHANNEL, xpushMessage.getChannel());
+                values.put(MessageTable.KEY_SENDER, xpushMessage.getSender());
 
-                Log.i(TAG, "2222222");
-                Log.i(TAG, values.toString());
+
+                if(  mSession.getId().equals( xpushMessage.getSender() ) ){
+                    values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_SEND_MESSAGE);
+                } else {
+                    values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_RECEIVE_MESSAGE);
+                }
+
                 getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
 
             } catch (Exception e ){
@@ -507,6 +528,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        mViewCount = 2;
+
         String[] projection = {
             MessageTable.KEY_ROWID,
             MessageTable.KEY_ID,
@@ -521,14 +545,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         Uri singleUri = Uri.parse(XpushContentProvider.MESSAGE_CONTENT_URI + "/" + mChannel);
 
-        CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                singleUri, projection, null, null, null);
-        return cursorLoader;
+        //String orderBy = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
+        String orderBy = null;
+        mCursorLoader = new CursorLoader(getActivity(),
+                singleUri, projection, null, null, orderBy);
+        return mCursorLoader;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mDataAdapter.swapCursor(data);
+        scrollToBottom();
     }
 
     @Override
@@ -537,11 +564,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void displayListView() {
-
-        mActivity = getActivity();
         mDataAdapter = new MessageCursorAdapter(mActivity, null, 0);
-
-
         mMessagesView = (ListView) getActivity().findViewById(R.id.messages);
         mMessagesView.setAdapter(mDataAdapter);
 
@@ -551,17 +574,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+                XPushMessage xpushMessage = new XPushMessage(cursor);
 
-                XPushChannel xpushChannel = new XPushChannel(cursor);
-
-
-                Bundle bundle = xpushChannel.toBundle();
-
-                Intent intent = new Intent(mActivity, ChatActivity.class);
-                intent.putExtra(xpushChannel.CHANNEL_BUNDLE, bundle);
-                startActivity(intent);
+                Log.d(TAG, xpushMessage.toString());
             }
         });
     }
-}
 
+    private void scrollToBottom() {
+        mMessagesView.setSelection( mDataAdapter.getCount() - 1);
+    }
+}

@@ -24,12 +24,17 @@ public class MessageCursorAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
     private Context context;
     private List<XPushChannel> objects;
-    private String charset;
-    private String publisher;
 
     public MessageCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    }
+
+
+    @Override
+    public int getItemViewType(int position) {
+        Cursor cursor = (Cursor) getItem(position);
+        return getItemViewType(cursor);
     }
 
     private int getItemViewType(Cursor cursor) {
@@ -77,16 +82,21 @@ public class MessageCursorAdapter extends CursorAdapter {
         ViewHolder holder = (ViewHolder) view.getTag();
         XPushMessage xpushMessage = new XPushMessage(cursor);
 
-        String userId = xpushMessage.getUsername();
-        long date = xpushMessage.getTimestamp();
+        String userId = xpushMessage.getSender();
+        long timestamp = xpushMessage.getUpdated();
 
         if( holder.thumbNail != null && xpushMessage.getImage() != null && !"".equals(xpushMessage.getImage()) ) {
             holder.thumbNail.setImageURI(Uri.parse(xpushMessage.getImage()));
         }
 
         holder.tvMessage.setText(xpushMessage.getMessage());
-        holder.tvTime.setText( DateUtils.getDate(date, "a h:mm") );
-        holder.tvMessage.setText(userId);
+        holder.tvTime.setText(DateUtils.getDate(timestamp, "a h:mm"));
+        //holder.tvTime.setText( String.valueOf( timestamp ) );
+
+
+        if( holder.tvUser != null ) {
+            holder.tvUser.setText(userId);
+        }
     }
 
     public static class ViewHolder {

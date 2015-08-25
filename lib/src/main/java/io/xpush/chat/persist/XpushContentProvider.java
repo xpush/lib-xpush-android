@@ -162,7 +162,10 @@ public class XpushContentProvider extends ContentProvider {
         Log.i(TAG, "=========  query =============");
         Log.i(TAG, uri.toString());
         Log.i(TAG, tableName);
-        Log.i(TAG, queryBuilder.toString() );
+
+        if( selection != null ){
+            Log.i(TAG, selection );
+        }
 
         Cursor cursor = queryBuilder.query(db, projection, selection,
                 selectionArgs, null, null, sortOrder);
