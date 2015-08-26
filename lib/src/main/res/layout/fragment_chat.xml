@@ -15,7 +15,7 @@
         android:layout_weight="1"
         >
 
-        <ListView
+        <android.support.v7.widget.RecyclerView
             android:id="@+id/messages"
             android:divider="@null"
             android:layout_width="match_parent"

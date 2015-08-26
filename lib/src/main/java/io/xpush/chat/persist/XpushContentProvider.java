@@ -88,9 +88,6 @@ public class XpushContentProvider extends ContentProvider {
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        Log.i(TAG,  "11111111111" );
-        Log.i(TAG, uri.toString() );
-
         String tableName = "";
         Uri contentUri = null;
 
@@ -159,14 +156,6 @@ public class XpushContentProvider extends ContentProvider {
 
         queryBuilder.setTables(tableName);
 
-        Log.i(TAG, "=========  query =============");
-        Log.i(TAG, uri.toString());
-        Log.i(TAG, tableName);
-
-        if( selection != null ){
-            Log.i(TAG, selection );
-        }
-
         Cursor cursor = queryBuilder.query(db, projection, selection,
                 selectionArgs, null, null, sortOrder);
 
@@ -219,8 +208,6 @@ public class XpushContentProvider extends ContentProvider {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         String id = null;
         String tableName = null;
-
-        Log.i(TAG, uri.toString() );
 
         switch (uriMatcher.match(uri)) {
             case ALL_CHANNELS:

@@ -30,4 +30,8 @@ public class DBHelper extends SQLiteOpenHelper {
         MessageTable.onUpgrade(db, oldVersion, newVersion, MESSAGE_TABLE_NAME);
         ChannelTable.onUpgrade(db, oldVersion, newVersion, CHANNEL_TABLE_NAME);
     }
+
+    public String getMessageTable(){
+        return MESSAGE_TABLE_NAME;
+    }
 }

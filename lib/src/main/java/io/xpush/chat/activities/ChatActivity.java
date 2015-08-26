@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChannelFragment;
 import io.xpush.chat.fragments.ChatFragment;
+import io.xpush.chat.fragments.ChatListFragment;
 import io.xpush.chat.services.XPushService;
 
 
@@ -20,7 +21,9 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        ChatFragment f = new ChatFragment();
+        ChatListFragment f = new ChatListFragment();
+
+        //ChatFragment f = new ChatFragment();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.list, f, TAG).commit();

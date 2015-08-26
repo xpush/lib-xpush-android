@@ -122,6 +122,8 @@ public class XPushMessage {
             this.updated = data.getLong("TS");
             this.channel = data.getString("C");
 
+            this.id = channel +"_" + updated;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
