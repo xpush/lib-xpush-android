@@ -3,15 +3,13 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -26,10 +24,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,36 +38,38 @@ import org.json.JSONObject;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.loaders.MessageDataLoader;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.ChannelTable;
+import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
+import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.views.adapters.MessageCursorAdapter;
+import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
+import io.xpush.chat.views.adapters.MessageListAdapter;
 
 
 /**
  * A chat fragment containing messages view and input form.
  */
-public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
     public static final String TAG = ChatFragment.class.getSimpleName();
 
-    private static final int REQUEST_LOGIN = 0;
-
     private static final int TYPING_TIMER_LENGTH = 600;
-
     private int mViewCount;
 
-    private ListView mMessagesView;
+    private RecyclerView mRecyclerView;
     private EditText mInputMessageView;
-    private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
-    private MessageCursorAdapter mDataAdapter;
+    private RecyclerView.Adapter mAdapter;
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
     private String mUsername;
@@ -84,9 +82,19 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private XPushSession mSession;
 
-    private SwipeRefreshLayout mSwipeRefreshLayout = null;
+    private SQLiteDatabase mDatabase;
+    private XPushMessageDataSource mDataSource;
+    private DBHelper mDbHelper;
 
-    private CursorLoader mCursorLoader;
+    private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
+
+    private MessageDataLoader mDataLoader;
+
+    private int mTotalMessageCount;
+
+    private RecyclerOnScrollListener mOnScrollListener;
+
+    private LinearLayoutManager mLayoutManager;
 
     public ChatFragment() {
         super();
@@ -95,12 +103,19 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+        mAdapter = new MessageListAdapter(activity, mXpushMessages);
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
+        mViewCount = 16;
+
         mActivity = getActivity();
+
+        mDbHelper = new DBHelper(mActivity);
+        mDatabase = mDbHelper.getWritableDatabase();
+        mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name));
 
         mSession = ApplicationController.getInstance().getXpushSession();
 
@@ -113,6 +128,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -142,17 +159,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Initialize swipe to refresh view
-        mSwipeRefreshLayout = (SwipeRefreshLayout) mActivity.findViewById(R.id.swipeRefreshLayout);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                Toast.makeText(getActivity().getApplicationContext(), "Refreshing", Toast.LENGTH_LONG).show();
-                refreshContent();
-            }
-        });
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.messages);
 
-        displayListView();
+
+        mLayoutManager = new LinearLayoutManager(getActivity());
+
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
 
         mInputMessageView = (EditText) view.findViewById(R.id.message_input);
         mInputMessageView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -236,22 +249,19 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                /**
-                Cursor sCursor = (Cursor) mDataAdapter.getItem( mDataAdapter.getCount()-1);
+                XPushMessage message =  mXpushMessages.get(0);
 
                 mViewCount = mViewCount * 2;
-                String selection = MessageTable.KEY_UPDATED + " < " + sCursor.getLong(sCursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
-                String orderBy = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
+                String selection = MessageTable.KEY_UPDATED + " < " + message.getUpdated();
+                String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
 
-                mCursorLoader.setSelection(selection);
-                mCursorLoader.setSortOrder(orderBy);
-                Cursor cursor = mCursorLoader.loadInBackground();
+                mDataLoader.setSelection(selection);
+                mDataLoader.setSortOrder(sortOrder);
 
-                mCursorLoader.deliverResult(cursor);
-                 */
-                mSwipeRefreshLayout.setRefreshing(false);
+                List<XPushMessage> messages = mDataLoader.loadInBackground();
+                mDataLoader.deliverResult(messages);
             }
-        }, 100);
+        }, 1);
     }
 
 
@@ -288,10 +298,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mSocket.connect();
     }
 
+    private void addMessage(XPushMessage xpushMessage) {
+        mXpushMessages.add(xpushMessage);
+        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        scrollToBottom();
+    }
+
     private void addLog(String message) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_LOG)
                 .message(message).build());
-        mDataAdapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
     }
 
     private void addParticipantsLog(int numUsers) {
@@ -301,7 +317,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private void addTyping(String username) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
                 .username(username).build());
-        mDataAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
+        scrollToBottom();
     }
 
     private void removeTyping(String username) {
@@ -309,7 +326,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             XPushMessage xpushMessage = mXpushMessages.get(i);
             if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getSender().equals(username)) {
                 mXpushMessages.remove(i);
-                mDataAdapter.notifyDataSetChanged();
+                mAdapter.notifyItemRemoved(i);
             }
         }
     }
@@ -372,12 +389,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getActivity().getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
-            }
-        });
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity().getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
+                }
+            });
         }
     };
 
@@ -399,18 +416,35 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
                 getActivity().getContentResolver().update(singleUri, values, null, null);
 
-                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getUpdated());
-                values.put(MessageTable.KEY_CHANNEL, xpushMessage.getChannel());
-                values.put(MessageTable.KEY_SENDER, xpushMessage.getSender());
+                /**
+                 values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getUpdated());
+                 values.put(MessageTable.KEY_CHANNEL, xpushMessage.getChannel());
+                 values.put(MessageTable.KEY_SENDER, xpushMessage.getSender());
 
+
+                 if(  mSession.getId().equals( xpushMessage.getSender() ) ){
+                 values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_SEND_MESSAGE);
+                 } else {
+                 values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_RECEIVE_MESSAGE);
+                 }
+
+                 getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
+                 */
 
                 if(  mSession.getId().equals( xpushMessage.getSender() ) ){
-                    values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_SEND_MESSAGE);
+                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
                 } else {
-                    values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_RECEIVE_MESSAGE);
+                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
                 }
 
-                getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
+                mDataSource.insert(xpushMessage);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addMessage(xpushMessage);
+                    }
+                });
 
             } catch (Exception e ){
                 e.printStackTrace();
@@ -527,61 +561,73 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<List<XPushMessage>> onCreateLoader(int id, Bundle args) {
 
-        mViewCount = 2;
+        String selection = MessageTable.KEY_CHANNEL + "='" + mChannel +"'";
+        String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + String.valueOf(mViewCount);
 
-        String[] projection = {
-            MessageTable.KEY_ROWID,
-            MessageTable.KEY_ID,
-            MessageTable.KEY_CHANNEL,
-            MessageTable.KEY_SENDER,
-            MessageTable.KEY_IMAGE,
-            MessageTable.KEY_COUNT,
-            MessageTable.KEY_MESSAGE,
-            MessageTable.KEY_TYPE,
-            MessageTable.KEY_UPDATED
-        };
+        mTotalMessageCount = mDataSource.count(selection, null);
 
-        Uri singleUri = Uri.parse(XpushContentProvider.MESSAGE_CONTENT_URI + "/" + mChannel);
-
-        //String orderBy = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
-        String orderBy = null;
-        mCursorLoader = new CursorLoader(getActivity(),
-                singleUri, projection, null, null, orderBy);
-        return mCursorLoader;
+        mDataLoader = new MessageDataLoader(getActivity(), mDataSource, selection, null, null, null, sortOrder);
+        return mDataLoader;
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mDataAdapter.swapCursor(data);
-        scrollToBottom();
+    public void onLoadFinished(Loader<List<XPushMessage>> loader, List<XPushMessage> data) {
+
+        boolean onStarting = false;
+        if( mXpushMessages.size() == 0 ){
+            onStarting = true;
+        }
+
+        Collections.sort(data, new TimestampAscCompare());
+
+        mXpushMessages.addAll(0, data);
+        mAdapter.notifyDataSetChanged();
+
+        if( onStarting ) {
+            scrollToBottom();
+
+            mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager) {
+                @Override
+                public void onLoadMore(int current_page) {
+                    Log.d(TAG, " onLoadMore : "+  current_page);
+                    refreshContent();
+                }
+            };
+
+            mRecyclerView.addOnScrollListener(mOnScrollListener);
+
+
+        } else {
+            mRecyclerView.scrollToPosition( mXpushMessages.size() - data.size() + 1);
+        }
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mDataAdapter.swapCursor(null);
+    public void onLoaderReset(Loader<List<XPushMessage>> loader) {
+        mXpushMessages.clear();
+        mAdapter.notifyDataSetChanged();
     }
 
-    private void displayListView() {
-        mDataAdapter = new MessageCursorAdapter(mActivity, null, 0);
-        mMessagesView = (ListView) getActivity().findViewById(R.id.messages);
-        mMessagesView.setAdapter(mDataAdapter);
-
-        getLoaderManager().initLoader(0, null, this);
-
-        mMessagesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
-                Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-                XPushMessage xpushMessage = new XPushMessage(cursor);
-
-                Log.d(TAG, xpushMessage.toString());
-            }
-        });
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mDbHelper.close();
+        mDatabase.close();
+        mDataSource = null;
+        mDbHelper = null;
+        mDatabase = null;
     }
 
     private void scrollToBottom() {
-        mMessagesView.setSelection( mDataAdapter.getCount() - 1);
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+
+    static class TimestampAscCompare implements Comparator<XPushMessage> {
+        public int compare(XPushMessage arg0, XPushMessage arg1) {
+            return arg0.getUpdated() < arg1.getUpdated() ? -1 : arg0.getUpdated() > arg1.getUpdated() ? 1:0;
+        }
     }
 }

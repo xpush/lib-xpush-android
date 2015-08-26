@@ -6,11 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import io.xpush.chat.R;
-import io.xpush.chat.fragments.ChannelFragment;
 import io.xpush.chat.fragments.ChatFragment;
-import io.xpush.chat.fragments.ChatListFragment;
-import io.xpush.chat.services.XPushService;
-
 
 public class ChatActivity extends AppCompatActivity{
 
@@ -21,17 +17,13 @@ public class ChatActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        ChatListFragment f = new ChatListFragment();
-
-        //ChatFragment f = new ChatFragment();
+        ChatFragment f = new ChatFragment();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.list, f, TAG).commit();
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //toolbar.setTitle(getString(R.string.action_bookmark));
-        //toolbar.getBackground().setAlpha(0);
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();

@@ -1,16 +1,10 @@
 package io.xpush.chat.activities;
-
-/**
- * Created by luffy on 2015-07-02.
- */
-
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
 
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChannelFragment;

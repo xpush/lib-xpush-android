@@ -23,9 +23,6 @@ import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.views.adapters.ChannelCursorAdapter;
 
-/**
- * Created by luffy on 2015-07-05.
- */
 public class ChannelFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String TAG = ChannelFragment.class.getSimpleName();
