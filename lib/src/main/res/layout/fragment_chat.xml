@@ -7,6 +7,7 @@
     android:orientation="vertical"
     tools:context=".MainFragment">
 
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/messages"
         android:divider="@null"
@@ -16,7 +17,6 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:scrollbars="vertical"
-
         android:transcriptMode="alwaysScroll"
         android:scrollbarStyle="outsideOverlay"/>
 

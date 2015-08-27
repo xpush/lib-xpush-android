@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -23,6 +24,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -56,7 +58,6 @@ import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.chat.views.adapters.MessageListAdapter;
 
-
 /**
  * A chat fragment containing messages view and input form.
  */
@@ -89,9 +90,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
 
     private MessageDataLoader mDataLoader;
-
-    private int mTotalMessageCount;
-
     private RecyclerOnScrollListener mOnScrollListener;
 
     private LinearLayoutManager mLayoutManager;
@@ -129,6 +127,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
+
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -160,8 +161,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onViewCreated(view, savedInstanceState);
 
         mRecyclerView = (RecyclerView) view.findViewById(R.id.messages);
-
-
         mLayoutManager = new LinearLayoutManager(getActivity());
 
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -178,6 +177,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 return false;
             }
         });
+
         mInputMessageView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -199,6 +199,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             @Override
             public void afterTextChanged(Editable s) {
+            }
+        });
+
+        mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+
+                // Keyboard Popup
+                if ( mInputMessageView.hasFocus() && oldBottom > bottom ) {
+                    mRecyclerView.scrollBy(0, oldBottom - bottom);
+                }
             }
         });
 
@@ -252,7 +263,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 XPushMessage message =  mXpushMessages.get(0);
 
                 mViewCount = mViewCount * 2;
-                String selection = MessageTable.KEY_UPDATED + " < " + message.getUpdated();
+                String selection = MessageTable.KEY_CHANNEL +  "='" + mChannel +"' and "+ MessageTable.KEY_UPDATED + " < " + message.getUpdated();
                 String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
 
                 mDataLoader.setSelection(selection);
@@ -318,7 +329,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
                 .username(username).build());
         mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
-        scrollToBottom();
     }
 
     private void removeTyping(String username) {
@@ -431,7 +441,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                  getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
                  */
 
-                if(  mSession.getId().equals( xpushMessage.getSender() ) ){
+                if (mSession.getId().equals(xpushMessage.getSender() ) ){
                     xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
                 } else {
                     xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
@@ -566,8 +576,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         String selection = MessageTable.KEY_CHANNEL + "='" + mChannel +"'";
         String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + String.valueOf(mViewCount);
 
-        mTotalMessageCount = mDataSource.count(selection, null);
-
         mDataLoader = new MessageDataLoader(getActivity(), mDataSource, selection, null, null, null, sortOrder);
         return mDataLoader;
     }
@@ -586,15 +594,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mAdapter.notifyDataSetChanged();
 
         if( onStarting ) {
-            scrollToBottom();
-
             mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager) {
                 @Override
                 public void onLoadMore(int current_page) {
                     Log.d(TAG, " onLoadMore : "+  current_page);
                     refreshContent();
+
                 }
             };
+
+            scrollToBottom();
 
             mRecyclerView.addOnScrollListener(mOnScrollListener);
 
@@ -622,6 +631,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void scrollToBottom() {
         mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+    private void checkStackFromEnd(){
+        if( mLayoutManager.getStackFromEnd() ){
+            return;
+        }
+
+        int visibleItemCount = mRecyclerView.getChildCount();
+        int totalItemCount = mLayoutManager.getItemCount();
+        if( totalItemCount >= visibleItemCount  ) {
+            mLayoutManager.setStackFromEnd(true);
+        }
     }
 
 
