@@ -20,11 +20,9 @@ import io.xpush.chat.util.DateUtils;
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.ViewHolder> {
 
     private List<XPushMessage> mXPushMessages;
-    private int[] mUsernameColors;
 
     public MessageListAdapter(Context context, List<XPushMessage> xpushMessages) {
         mXPushMessages = xpushMessages;
-        mUsernameColors = context.getResources().getIntArray(R.array.username_colors);
     }
 
     @Override

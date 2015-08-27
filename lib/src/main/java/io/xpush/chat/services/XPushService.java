@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -35,7 +36,10 @@ import java.util.concurrent.TimeUnit;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.persist.DBHelper;
+import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.persist.ChannelTable;
 
@@ -43,26 +47,24 @@ import io.xpush.chat.persist.ChannelTable;
  * Created by jhkim on 2014-12-17.
  */
 public class XPushService extends Service {
-    private static final String DEBUG_TAG = "XPushService"; // Debug TAG
-    private static final String TAG = "XPushService";
+    private static final String TAG = "XPushService"; // Debug TAG
 
-    private static final String XPUSH_THREAD_NAME = "XPushService[" + DEBUG_TAG + "]"; // Handler Thread ID
+    private static final String XPUSH_THREAD_NAME = "XPushService[" + TAG + "]"; // Handler Thread ID
 
     private static final int XPUSH_KEEP_ALIVE = 1000 * 5 * 60; // KeepAlive Interval in MS. 4 min
     private static final int PING_TIMEOUT = 1000 * 1 * 10; // KeepAlive Interval in MS. 4 min
 
-    private static final String ACTION_START = DEBUG_TAG + ".START"; // Action to start
-    private static final String ACTION_STOP = DEBUG_TAG + ".STOP"; // Action to stop
-    private static final String ACTION_KEEPALIVE = DEBUG_TAG + ".KEEPALIVE"; // Action to keep alive used by alarm manager
-    private static final String ACTION_RECONNECT = DEBUG_TAG + ".RECONNECT"; // Action to
-    private static final String ACTION_CHANGERECONNECT = DEBUG_TAG + ".CHANGERECONNECT";
+    private static final String ACTION_START = TAG + ".START"; // Action to start
+    private static final String ACTION_STOP = TAG + ".STOP"; // Action to stop
+    private static final String ACTION_KEEPALIVE = TAG + ".KEEPALIVE"; // Action to keep alive used by alarm manager
+    private static final String ACTION_RECONNECT = TAG + ".RECONNECT"; // Action to
+    private static final String ACTION_CHANGERECONNECT = TAG + ".CHANGERECONNECT";
 
-    private static final String ACTION_RESTART = DEBUG_TAG + ".RESTART"; // Action to
+    private static final String ACTION_RESTART = TAG + ".RESTART"; // Action to
 
 
     private static final String DEVICE_ID_FORMAT = "andr_%s"; // Device ID Format, add any prefix you'd like
-    // Note: There is a 23 character limit you will get
-    // An NPE if you go over that limit
+
     private boolean mStarted = false; // Is the Client started?
     private String mDeviceId;          // Device ID, Secure.ANDROID_ID
     private Handler mConnHandler;      // Seperate Handler thread for networking
@@ -82,6 +84,10 @@ public class XPushService extends Service {
     private boolean mConnecting = false;
 
     private XPushSession mXpushSession;
+
+    private SQLiteDatabase mDatabase;
+    private XPushMessageDataSource mDataSource;
+    private DBHelper mDbHelper;
 
     public static void actionStart(Context mContext) {
         Intent i = new Intent(mContext, XPushService.class);
@@ -131,7 +137,11 @@ public class XPushService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        Log.d(DEBUG_TAG, "onCreate");
+        Log.d(TAG, "onCreate");
+
+        mDbHelper = new DBHelper(this);
+        mDatabase = mDbHelper.getWritableDatabase();
+        mDataSource = new XPushMessageDataSource(mDatabase, getString(R.string.message_table_name));
 
         mDeviceId = String.format(DEVICE_ID_FORMAT,
                 Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
@@ -159,10 +169,10 @@ public class XPushService extends Service {
 
         String action = intent.getAction();
 
-        Log.i(DEBUG_TAG, "Received action of " + action);
+        Log.i(TAG, "Received action of " + action);
 
         if (action == null) {
-            Log.i(DEBUG_TAG, "Starting service with no action\n Probably from a crash");
+            Log.i(TAG, "Starting service with no action\n Probably from a crash");
         } else {
             if (action.equals(ACTION_START)) {
                 start();
@@ -195,7 +205,7 @@ public class XPushService extends Service {
 
         if( ApplicationController.getInstance().getXpushSession() == null) {
 
-            Log.i(DEBUG_TAG, "Not logged in user");
+            Log.i(TAG, "Not logged in user");
             mStarted = false;
             return;
         } else {
@@ -203,7 +213,7 @@ public class XPushService extends Service {
         }
 
         if (mStarted) {
-            Log.i(DEBUG_TAG, "Attempt to start while already started and connected");
+            Log.i(TAG, "Attempt to start while already started and connected");
             return;
         }
 
@@ -220,18 +230,18 @@ public class XPushService extends Service {
 
     private synchronized void stop() {
         if (!mStarted) {
-            Log.i(DEBUG_TAG, "Attemtpign to stop connection that isn't running");
+            Log.i(TAG, "Attemtpign to stop connection that isn't running");
             return;
         }
 
-        Log.d(DEBUG_TAG, "stop");
+        Log.d(TAG, "stop");
 
         if (mClient != null) {
             mConnHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        Log.d(DEBUG_TAG, "disconnect");
+                        Log.d(TAG, "disconnect");
                         if (mClient != null && mClient.connected()) {
                             mClient.disconnect();
                         }
@@ -273,10 +283,10 @@ public class XPushService extends Service {
         opts.query = "A="+appId+"&U="+mXpushSession.getId()+"&TK="+mXpushSession.getToken()+"&D="+mXpushSession.getDeviceId();
 
         mOpts = opts;
-        Log.i(DEBUG_TAG, "Connecting with URL: " + url);
+        Log.i(TAG, "Connecting with URL: " + url);
         try {
 
-            Log.i(DEBUG_TAG, "Connecting with MemStore");
+            Log.i(TAG, "Connecting with MemStore");
             mClient = IO.socket(url, mOpts);
 
             mClient.on(Socket.EVENT_CONNECT, onConnectSuccess);
@@ -297,7 +307,7 @@ public class XPushService extends Service {
                     mClient.connect();
 
                     mStarted = true; // Service is now connected
-                    Log.i(DEBUG_TAG, "Successfully connected and subscribed starting keep alives");
+                    Log.i(TAG, "Successfully connected and subscribed starting keep alives");
 
                     startKeepAlives();
                 } catch (Exception e) {
@@ -348,8 +358,8 @@ public class XPushService extends Service {
     }
 
     private synchronized void reconnectIfNecessary() {
-        Log.d(DEBUG_TAG, "reconnectIfNecessary");
-        Log.d(DEBUG_TAG, "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
+        Log.d(TAG, "reconnectIfNecessary");
+        Log.d(TAG, "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
         if (mStarted ) {
             if( !mConnecting  ){
                 connect();
@@ -368,8 +378,8 @@ public class XPushService extends Service {
     private boolean isConnected() {
 
         if (mStarted && mClient != null && !mClient.connected()) {
-            Log.i(DEBUG_TAG, "mClient.isConnected() : " + mClient.connected() );
-            Log.i(DEBUG_TAG, "Mismatch between what we think is connected and what is connected");
+            Log.i(TAG, "mClient.isConnected() : " + mClient.connected() );
+            Log.i(TAG, "Mismatch between what we think is connected and what is connected");
         }
 
         if (mClient != null) {
@@ -382,7 +392,7 @@ public class XPushService extends Service {
     private final BroadcastReceiver mConnectivityReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(DEBUG_TAG, "Connectivity Changed...");
+            Log.i(TAG, "Connectivity Changed...");
             if (isNetworkAvailable()) {
                 reconnectIfNecessary();
             } else {
@@ -396,12 +406,12 @@ public class XPushService extends Service {
 
     private synchronized void sendKeepAlive() {
 
-        Log.i(DEBUG_TAG, "Sending Keepalive to " + mXpushSession.getServerUrl());
+        Log.i(TAG, "Sending Keepalive to " + mXpushSession.getServerUrl());
 
         // Send a keep alive, if there is a connection.
-        Log.i(DEBUG_TAG, "ping " + mClient.connected());
+        Log.i(TAG, "ping " + mClient.connected());
         if (mStarted == true && mClient != null && mClient.connected()  ) {
-            Log.i(DEBUG_TAG, "ping " + mXpushSession.getServerUrl());
+            Log.i(TAG, "ping " + mXpushSession.getServerUrl());
 
             mClient.emit("ping", "ping");
 
@@ -413,7 +423,7 @@ public class XPushService extends Service {
                         public void run() {
                             pingTimeoutTimer = null;
                             mPingTimeout = true;
-                            Log.i(DEBUG_TAG, "ping timeout : " + mPingTimeout );
+                            Log.i(TAG, "ping timeout : " + mPingTimeout );
                         }
                     });
                 }
@@ -437,7 +447,7 @@ public class XPushService extends Service {
     }
 
     public void connectionLost(Throwable arg0) {
-        Log.e(DEBUG_TAG, "mqtt connection Lost");
+        Log.e(TAG, "mqtt connection Lost");
         stopKeepAlives();
 
         mClient = null;
@@ -449,10 +459,10 @@ public class XPushService extends Service {
 
     // 수신 메세지 noti
     private void broadcastReceivedMessage(String channel, String message) {
-        Log.d(DEBUG_TAG, "broadcastReceivedMessage:message = " + message);
+        Log.d(TAG, "broadcastReceivedMessage:message = " + message);
 
         Intent broadcastIntent = new Intent(getApplicationContext(), PushMsgReceiver.class);
-        broadcastIntent.setAction("com.gsshop.pms.mqtt.MGRECVD");
+        broadcastIntent.setAction("io.xpush.chat.MGRECVD");
 
         broadcastIntent.putExtra("rcvd.C", channel);
         broadcastIntent.putExtra("rcvd.MG", message);
@@ -489,28 +499,17 @@ public class XPushService extends Service {
             try {
                 if( "NOTIFICATION".equals( json.getString("event") ) ){
                     JSONObject data = json.getJSONObject("DT");
-                    JSONObject uo = data.getJSONObject("UO");
 
-                    if( uo.has("U") ){
-                        username = uo.getString("U");
-                    }
 
-                    if( uo.has("I") ) {
-                        image = uo.getString("I");
-                    }
-
-                    message = data.getString("MG");
-                    timestamp = data.getLong("TS");
-                    channel = data.getString("C");
+                    XPushMessage xpushMessage = new XPushMessage( data );
 
                     try {
                         ContentValues values = new ContentValues();
-                        values.put(ChannelTable.KEY_ID, channel);
+                        values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
 
-                        message = URLDecoder.decode(message, "UTF-8");
-                        values.put(ChannelTable.KEY_UPDATED, timestamp);
-                        values.put(ChannelTable.KEY_MESSAGE, message);
-                        values.put(ChannelTable.KEY_IMAGE, image);
+                        values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
+                        values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+                        values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
 
                         String[] projection = {
                             ChannelTable.KEY_ROWID,
@@ -523,7 +522,7 @@ public class XPushService extends Service {
                             ChannelTable.KEY_UPDATED
                         };
 
-                        Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + channel);
+                        Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
                         Cursor cursor = getContentResolver().query(singleUri, projection, null, null, null);
                         if (cursor != null && cursor.getCount() > 0) {
                             cursor.moveToFirst();
@@ -536,11 +535,20 @@ public class XPushService extends Service {
                             getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                         }
 
+                        if (mXpushSession.getId().equals(xpushMessage.getSender() ) ){
+                            xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                        } else {
+                            xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                        }
+
+                        mDataSource.insert(xpushMessage);
+
+
                     } catch (Exception e ){
                         e.printStackTrace();
                     }
 
-                    broadcastReceivedMessage( channel, message );
+                    broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getMessage() );
                 } else {
 
                 }
@@ -587,5 +595,15 @@ public class XPushService extends Service {
             this.heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
         }
         return this.heartbeatScheduler;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        mDbHelper.close();
+        mDatabase.close();
+        mDataSource = null;
+        mDbHelper = null;
+        mDatabase = null;
     }
 }

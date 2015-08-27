@@ -279,7 +279,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private void connect(){
         try {
             ;
-            String url = "http://stalk-front-l01.cloudapp.net:8880/channel";
+            String url = mSession.getServerUrl();
             mChannel = mXpushChannel.getId();
 
             IO.Options opts = new IO.Options();
@@ -425,21 +425,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
                 Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
                 getActivity().getContentResolver().update(singleUri, values, null, null);
-
-                /**
-                 values.put(ChannelTable.KEY_ID, xpushMessage.getChannel() + "_" + xpushMessage.getUpdated());
-                 values.put(MessageTable.KEY_CHANNEL, xpushMessage.getChannel());
-                 values.put(MessageTable.KEY_SENDER, xpushMessage.getSender());
-
-
-                 if(  mSession.getId().equals( xpushMessage.getSender() ) ){
-                 values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_SEND_MESSAGE);
-                 } else {
-                 values.put(MessageTable.KEY_TYPE, XPushMessage.TYPE_RECEIVE_MESSAGE);
-                 }
-
-                 getActivity().getContentResolver().insert(XpushContentProvider.MESSAGE_CONTENT_URI, values);
-                 */
 
                 if (mSession.getId().equals(xpushMessage.getSender() ) ){
                     xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);

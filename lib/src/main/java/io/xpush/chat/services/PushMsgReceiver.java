@@ -33,7 +33,7 @@ public class PushMsgReceiver extends BroadcastReceiver {
 
             Log.d(DEBUG_TAG, "onReceiver : " + action);
             if(action.isEmpty()){
-            }else if ("com.gsshop.pms.mqtt.MGRECVD".equals(action)) {  // mqtt msg receive
+            }else if ("io.xpush.chat.MGRECVD".equals(action)) {  // mqtt msg receive
 
                 String channel = intent.getStringExtra("rcvd.C");
                 String message = intent.getStringExtra("rcvd.MG");
