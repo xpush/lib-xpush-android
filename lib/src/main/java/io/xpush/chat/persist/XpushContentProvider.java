@@ -20,23 +20,31 @@ public class XpushContentProvider extends ContentProvider {
 
     public static final String TAG = XpushContentProvider.class.getSimpleName();
 
+    public static final String SQL_INSERT_OR_REPLACE = "SQL_INSERT_OR_REPLACE";
+
     private static final int ALL_CHANNELS = 1;
     private static final int SINGLE_CHANNEL = 2;
 
     private static final int ALL_MESSAGES = 3;
     private static final int SINGLE_MESSAGE = 4;
 
+    private static final int ALL_USERS = 5;
+    private static final int SINGLE_USER = 6;
+
     public static String CHANNEL_URI_STRING;
     public static String MESSAGE_URI_STRING;
+    public static String USER_URI_STRING;
 
     public static Uri CHANNEL_CONTENT_URI;
     public static Uri MESSAGE_CONTENT_URI;
+    public static Uri USER_CONTENT_URI;
 
     private static String AUTHORITY;
     private static UriMatcher uriMatcher;
 
     private static String CHANNEL_TABLE;
     private static String MESSAGE_TABLE;
+    private static String USER_TABLE;
 
     private DBHelper dbHelper;
 
@@ -47,12 +55,15 @@ public class XpushContentProvider extends ContentProvider {
         AUTHORITY = getContext().getString(R.string.content_provider_authority);
         CHANNEL_TABLE = getContext().getString(R.string.channel_table_name);
         MESSAGE_TABLE = getContext().getString(R.string.message_table_name);
+        USER_TABLE = getContext().getString(R.string.user_table_name);
 
         CHANNEL_URI_STRING = "content://" + AUTHORITY + "/channels";
         MESSAGE_URI_STRING = "content://" + AUTHORITY + "/messages";
+        USER_URI_STRING = "content://" + AUTHORITY + "/users";
 
         CHANNEL_CONTENT_URI = Uri.parse(CHANNEL_URI_STRING);
         MESSAGE_CONTENT_URI = Uri.parse(MESSAGE_URI_STRING);
+        USER_CONTENT_URI = Uri.parse(USER_URI_STRING);
 
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
@@ -61,6 +72,9 @@ public class XpushContentProvider extends ContentProvider {
 
         uriMatcher.addURI(AUTHORITY, "messages", ALL_MESSAGES);
         uriMatcher.addURI(AUTHORITY, "messages/*", SINGLE_MESSAGE);
+
+        uriMatcher.addURI(AUTHORITY, "users", ALL_USERS);
+        uriMatcher.addURI(AUTHORITY, "users/*", SINGLE_USER);
 
         dbHelper = new DBHelper(getContext());
         return false;
@@ -78,6 +92,10 @@ public class XpushContentProvider extends ContentProvider {
                 return "vnd.android.cursor.dir/vnd.contentprovider.messages";
             case SINGLE_MESSAGE:
                 return "vnd.android.cursor.item/vnd.contentprovider.messages";
+            case ALL_USERS:
+                return "vnd.android.cursor.dir/vnd.contentprovider.users";
+            case SINGLE_USER:
+                return "vnd.android.cursor.item/vnd.contentprovider.users";
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -100,14 +118,29 @@ public class XpushContentProvider extends ContentProvider {
                 contentUri = MESSAGE_CONTENT_URI;
                 tableName = MESSAGE_TABLE;
                 break;
+            case ALL_USERS:
+                contentUri = USER_CONTENT_URI;
+                tableName = USER_TABLE;
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
 
-        long id = db.insert(tableName, null, values);
+        boolean replace = false;
+        if ( values.containsKey( SQL_INSERT_OR_REPLACE ) ){
+            replace = values.getAsBoolean( SQL_INSERT_OR_REPLACE );
+            values.remove( SQL_INSERT_OR_REPLACE );
+        }
+
+        long rowId;
+        if ( replace ) {
+            rowId = db.replace(tableName, null, values);
+        } else {
+            rowId = db.insert(tableName, null, values);
+        }
 
         getContext().getContentResolver().notifyChange(uri, null);
-        return Uri.parse(contentUri + "/" + id);
+        return Uri.parse(contentUri + "/" + rowId);
     }
 
     @Override
@@ -149,6 +182,22 @@ public class XpushContentProvider extends ContentProvider {
 
                 String channel = uri.getPathSegments().get(1);
                 queryBuilder.appendWhere(MessageTable.KEY_CHANNEL + "='" + channel+"'");
+                break;
+            case ALL_USERS:
+                tableName = USER_TABLE;
+                if ( sortOrder == null ){
+                    sortOrder = UserTable.KEY_NAME + " ASC";
+                }
+
+                break;
+            case SINGLE_USER:
+                tableName = USER_TABLE;
+                if ( sortOrder == null ){
+                    sortOrder = UserTable.KEY_NAME + " ASC";
+                }
+
+                String userId = uri.getPathSegments().get(1);
+                queryBuilder.appendWhere(UserTable.KEY_ID + "='" + userId+"'");
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
@@ -192,6 +241,16 @@ public class XpushContentProvider extends ContentProvider {
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
+            case ALL_USERS:
+                tableName = USER_TABLE;
+                break;
+            case SINGLE_USER:
+                tableName = USER_TABLE;
+                id = uri.getPathSegments().get(1);
+                selection = MessageTable.KEY_ID + "=" + id
+                        + (!TextUtils.isEmpty(selection) ?
+                        " AND (" + selection + ')' : "");
+                break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
         }
@@ -228,6 +287,16 @@ public class XpushContentProvider extends ContentProvider {
                 tableName = MESSAGE_TABLE;
                 id = uri.getPathSegments().get(1);
                 selection = MessageTable.KEY_ROWID + "=" + id
+                        + (!TextUtils.isEmpty(selection) ?
+                        " AND (" + selection + ')' : "");
+                break;
+            case ALL_USERS:
+                tableName = USER_TABLE;
+                break;
+            case SINGLE_USER:
+                tableName = USER_TABLE;
+                id = uri.getPathSegments().get(1);
+                selection = MessageTable.KEY_ID + "=" + id
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;

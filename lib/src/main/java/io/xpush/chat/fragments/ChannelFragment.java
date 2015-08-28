@@ -107,7 +107,7 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
         mDataAdapter = new ChannelCursorAdapter(mActivity, null, 0);
 
 
-        final ListView listView = (ListView) getActivity().findViewById(R.id.list_bookmark);
+        final ListView listView = (ListView) getActivity().findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
 
         getLoaderManager().initLoader(0, null, this);

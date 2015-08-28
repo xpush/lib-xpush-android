@@ -18,13 +18,14 @@
     <string name="user_action_typing">is typing</string>
 
 
-    <string name="host_name">http://stalk-front-l01.cloudapp.net:8000</string>
-    <string name="app_id">zeroapp</string>
+    <string name="host_name">http://stalk-front-s01.cloudapp.net:8000</string>
+    <string name="app_id">messengerx</string>
     <string name="gcm_defaultSenderId">944977353393</string>
 
     <string name="content_provider_authority">io.xpush.chat.persist.xpushcontentprovider</string>
     <string name="channel_table_name">TB_CHANNEL</string>
     <string name="message_table_name">TB_MESSAGE</string>
+    <string name="user_table_name">TB_USER</string>
 
     <string name="no_channel_message">현재 채널이 없습니다.</string>
 

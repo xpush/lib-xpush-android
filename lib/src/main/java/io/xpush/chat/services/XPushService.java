@@ -59,9 +59,7 @@ public class XPushService extends Service {
     private static final String ACTION_KEEPALIVE = TAG + ".KEEPALIVE"; // Action to keep alive used by alarm manager
     private static final String ACTION_RECONNECT = TAG + ".RECONNECT"; // Action to
     private static final String ACTION_CHANGERECONNECT = TAG + ".CHANGERECONNECT";
-
     private static final String ACTION_RESTART = TAG + ".RESTART"; // Action to
-
 
     private static final String DEVICE_ID_FORMAT = "andr_%s"; // Device ID Format, add any prefix you'd like
 
@@ -305,6 +303,8 @@ public class XPushService extends Service {
             public void run() {
                 try {
                     mClient.connect();
+
+                    ApplicationController.getInstance().setClient( mClient );
 
                     mStarted = true; // Service is now connected
                     Log.i(TAG, "Successfully connected and subscribed starting keep alives");
@@ -606,4 +606,6 @@ public class XPushService extends Service {
         mDbHelper = null;
         mDatabase = null;
     }
+
+
 }

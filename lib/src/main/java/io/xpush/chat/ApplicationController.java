@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,8 @@ public class ApplicationController extends Application {
 
     private RequestQueue mRequestQueue;
     private XPushSession mXpushSession;
+
+    private Socket mClient;
 
     public static synchronized ApplicationController getInstance() {
         return mInstance;
@@ -82,5 +85,13 @@ public class ApplicationController extends Application {
         if (mRequestQueue != null) {
             mRequestQueue.cancelAll(tag);
         }
+    }
+
+    public void setClient( Socket socket ){
+        this.mClient = socket;
+    }
+
+    public Socket getClient(){
+        return mClient;
     }
 }

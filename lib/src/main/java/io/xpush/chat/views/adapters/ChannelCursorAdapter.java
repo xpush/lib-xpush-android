@@ -22,8 +22,6 @@ public class ChannelCursorAdapter extends CursorAdapter {
     private final LayoutInflater mInflater;
     private Context context;
     private List<XPushChannel> objects;
-    private String charset;
-    private String publisher;
 
     public ChannelCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);

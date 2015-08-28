@@ -3,7 +3,7 @@ package io.xpush.chat.models;
 import android.database.Cursor;
 import android.os.Bundle;
 
-import io.xpush.chat.persist.ChannelTable;
+import io.xpush.chat.persist.UserTable;
 
 public class XPushUser {
 
@@ -74,12 +74,12 @@ public class XPushUser {
     }
 
     public XPushUser(Cursor cursor){
-        this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_ROWID));
-        this.id= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_ID));
-        this.name= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_NAME));
-        this.image= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_IMAGE));
-        this.message= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE));
-        this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
+        this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_ROWID));
+        this.id= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_ID));
+        this.name= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_NAME));
+        this.image= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_IMAGE));
+        this.message= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_MESSAGE));
+        this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(UserTable.KEY_UPDATED));
     }
 
     public XPushUser(Bundle bundle){

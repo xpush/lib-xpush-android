@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChatFragment;
+import io.xpush.chat.fragments.FriendsFragment;
 
 public class ChatActivity extends AppCompatActivity{
 

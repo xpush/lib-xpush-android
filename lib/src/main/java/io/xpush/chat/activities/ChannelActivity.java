@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChannelFragment;
+import io.xpush.chat.fragments.FriendsFragment;
 
 public class ChannelActivity extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class ChannelActivity extends AppCompatActivity {
         setContentView(R.layout.activity_channel);
 
         ChannelFragment f = new ChannelFragment();
-
+        //FriendsFragment f = new FriendsFragment();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.list, f, TAG).commit();
