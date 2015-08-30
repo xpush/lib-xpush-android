@@ -5,4 +5,11 @@
     <string name="host_name">http://stalk-front-s01.cloudapp.net:8000</string>
     <string name="app_id">messengerx</string>
     <string name="gcm_defaultSenderId">944977353393</string>
+
+    <string-array name="tabs">
+        <item>Users</item>
+        <item>Channels</item>
+    </string-array>
+
+
 </resources>

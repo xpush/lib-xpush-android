@@ -2,6 +2,7 @@ package io.xpush.sampleChat.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -11,19 +12,32 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
+import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
+
+import org.apache.commons.logging.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import io.xpush.chat.R;
+import io.xpush.chat.view.SlidingTabLayout;
+import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.ChannelFragment;
 import io.xpush.chat.fragments.FriendsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = MainActivity.class.getSimpleName();
+
     private Context mContext;
+
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +55,21 @@ public class MainActivity extends AppCompatActivity {
         //ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        if (viewPager != null) {
-            setupViewPager(viewPager);
-        }
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        Adapter a = new Adapter(getSupportFragmentManager(), this);
+        mViewPager.setAdapter(a);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setHorizontalScrollBarEnabled(true);
-        tabLayout.setupWithViewPager(viewPager);
+        SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
+        tabLayout.setDistributeEvenly(true);
+        tabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return getResources().getColor(R.color.tabIndicator);
+            }
+        });
+        tabLayout.setCustomTabView(R.layout.custom_tab_view, R.id.tabText);
+        //tabLayout.setHorizontalScrollBarEnabled(true);
+        tabLayout.setViewPager(mViewPager);
     }
 
     @Override
@@ -61,62 +82,63 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(getSupportFragmentManager(), this);
-        viewPager.setAdapter(adapter);
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
     }
 
-    static class Adapter extends FragmentPagerAdapter {
-        int oldPosition = -1;
-        private HashMap<Integer, Fragment> mFragments = new HashMap<>();
-        private Map<Integer, String> mIdMap;
+    @Override
+    public View onCreateView(View parent, String name, Context context, AttributeSet attrs) {
+        return super.onCreateView(parent, name, context, attrs);
+    }
+
+    class Adapter extends FragmentPagerAdapter {
+
+        int icons[] = {R.drawable.ic_chat, R.drawable.ic_person};
+        String[] tabText = getResources().getStringArray(R.array.tabs);
 
         private Toolbar mToolbar;
-
         private Context mContext;
 
         public Adapter(FragmentManager fm, Activity activity) {
             super(fm);
-            mContext = activity;
+            tabText = getResources().getStringArray(R.array.tabs);
 
-            mIdMap = new HashMap<Integer, String>();
-
-            mIdMap.put( 0, "Users");
-            mIdMap.put( 1, "Channels");
+            android.util.Log.d(TAG, tabText.toString());
         }
 
         @Override
         public Fragment getItem(int position) {
-            String menuId = mIdMap.get(position);
 
             Fragment f = null;
 
-            if (mFragments.get(position) == null) {
+            android.util.Log.d(TAG, String.valueOf( position ));
 
-                if( position == 0 ) {
-                    f = new FriendsFragment();
-                } else if( position == 1 ){
-                    f = new ChannelFragment();
-                }
-            } else {
-                mFragments.get( position );
+            switch (position) {
+                case 0:
+                    f = FriendsFragment.newInstance(0, "Page # 1");
+                    break;
+                case 1:
+                    f = ChannelFragment.newInstance(1, "Page # 2");
+                    break;
             }
             return f;
+
         }
 
         @Override
         public int getCount() {
-            return mIdMap.size();
+            return tabText.length;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mIdMap.get(position );
+            Drawable drawable = getResources().getDrawable(icons[position]);
+            drawable.setBounds(0,0,64,64);
+            ImageSpan imageSpan = new ImageSpan(drawable);
+            SpannableString spannableString = new SpannableString(" ");
+            spannableString.setSpan(imageSpan,0,spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            return spannableString;
         }
     }
 }

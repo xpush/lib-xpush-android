@@ -34,7 +34,7 @@ import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.views.adapters.UserCursorAdapter;
+import io.xpush.chat.view.adapters.UserCursorAdapter;
 
 public class FriendsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -43,6 +43,11 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
     private UserCursorAdapter mDataAdapter;
     private Activity mActivity;
     private TextView mEmptyMsg;
+
+    public static FriendsFragment newInstance(int page, String title) {
+        FriendsFragment fragment = new FriendsFragment();
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,7 +59,7 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mEmptyMsg = (TextView) getActivity().findViewById(R.id.emptyMsg);
-        displayListView();
+        displayListView(view);
     }
 
     @Override
@@ -101,7 +106,7 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
         mDataAdapter.swapCursor(null);
     }
 
-    private void displayListView() {
+    private void displayListView(View view) {
 
         String[] columns = new String[]{
             UserTable.KEY_ROWID,
@@ -116,7 +121,7 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
         mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
 
 
-        final ListView listView = (ListView) getActivity().findViewById(R.id.listView);
+        final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
 
         getLoaderManager().initLoader(0, null, this);

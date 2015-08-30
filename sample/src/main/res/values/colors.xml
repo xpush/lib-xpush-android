@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#f05557</color>
+    <color name="primaryDark">#D04345</color>
+
+    <color name="tabIndicator">@color/dark</color>
+</resources>

@@ -1,4 +1,4 @@
-package io.xpush.chat.views.adapters;
+package io.xpush.chat.view.adapters;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -9,6 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.facebook.drawee.view.SimpleDraweeView;
+
 import java.util.List;
 
 import io.xpush.chat.R;
@@ -16,8 +18,6 @@ import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.util.DateUtils;
-
-import com.facebook.drawee.view.SimpleDraweeView;
 
 public class MessageCursorAdapter extends CursorAdapter {
 

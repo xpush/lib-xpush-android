@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +22,7 @@ import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.views.adapters.ChannelCursorAdapter;
+import io.xpush.chat.view.adapters.ChannelCursorAdapter;
 
 public class ChannelFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -30,6 +31,11 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
     private ChannelCursorAdapter mDataAdapter;
     private Activity mActivity;
     private TextView mEmptyMsg;
+
+    public static ChannelFragment newInstance(int page, String title) {
+        ChannelFragment fragment = new ChannelFragment();
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,7 +47,7 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mEmptyMsg = (TextView) getActivity().findViewById(R.id.emptyMsg);
-        displayListView();
+        displayListView(view);
     }
 
     @Override
@@ -90,7 +96,9 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
         mDataAdapter.swapCursor(null);
     }
 
-    private void displayListView() {
+    private void displayListView(View view) {
+
+        Log.d(TAG, "2222222222 : ");
 
         String[] columns = new String[]{
             ChannelTable.KEY_ROWID,
@@ -107,7 +115,7 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
         mDataAdapter = new ChannelCursorAdapter(mActivity, null, 0);
 
 
-        final ListView listView = (ListView) getActivity().findViewById(R.id.listView);
+        final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
 
         getLoaderManager().initLoader(0, null, this);

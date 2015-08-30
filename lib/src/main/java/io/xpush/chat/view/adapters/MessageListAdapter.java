@@ -1,4 +1,4 @@
-package io.xpush.chat.views.adapters;
+package io.xpush.chat.view.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

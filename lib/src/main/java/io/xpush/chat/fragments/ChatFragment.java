@@ -56,7 +56,7 @@ import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
-import io.xpush.chat.views.adapters.MessageListAdapter;
+import io.xpush.chat.view.adapters.MessageListAdapter;
 
 /**
  * A chat fragment containing messages view and input form.
