@@ -132,8 +132,8 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
 
                 XPushUser user = new XPushUser(cursor);
-                Bundle bundle = user.toBundle();
 
+                Bundle bundle = user.toBundle();
                 Intent intent = new Intent(mActivity, ChatActivity.class);
                 intent.putExtra(user.USER_BUNDLE, bundle);
                 startActivity(intent);
@@ -152,7 +152,6 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
-                Log.d(TAG, "11111111111111 : " + response.toString() );
                 if( response.has( "result" ) ){
                     try {
                         JSONArray result = (JSONArray) response.getJSONArray("result");

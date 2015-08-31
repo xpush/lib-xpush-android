@@ -26,6 +26,8 @@ public class ApplicationController extends Application {
 
     private Socket mClient;
 
+    private String mAppId;
+
     public static synchronized ApplicationController getInstance() {
         return mInstance;
     }
@@ -34,6 +36,8 @@ public class ApplicationController extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+
+        mAppId = getString(R.string.app_id);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         final String loginUserStr = pref.getString("XPUSH_SESSION", "");
@@ -93,5 +97,9 @@ public class ApplicationController extends Application {
 
     public Socket getClient(){
         return mClient;
+    }
+
+    public String getAppId(){
+        return this.mAppId;
     }
 }

@@ -2,7 +2,10 @@ package io.xpush.chat.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.TimeZone;
+
+import io.xpush.chat.models.XPushMessage;
 
 public class DateUtils {
 
