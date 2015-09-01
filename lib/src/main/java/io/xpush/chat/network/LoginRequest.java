@@ -56,9 +56,6 @@ public class LoginRequest extends StringRequest {
                 xpushSession.setServerName(server);
                 xpushSession.setServerUrl(serverUrl);
 
-                Log.d(TAG, "Save success ======================");
-                Log.d(TAG, xpushSession.toJSON().toString());
-
                 editor.putString("XPUSH_SESSION", xpushSession.toJSON().toString());
                 editor.commit();
 

@@ -111,9 +111,6 @@ public class MainActivity extends AppCompatActivity {
         public Fragment getItem(int position) {
 
             Fragment f = null;
-
-            android.util.Log.d(TAG, String.valueOf( position ));
-
             switch (position) {
                 case 0:
                     f = FriendsFragment.newInstance(0, "Page # 1");

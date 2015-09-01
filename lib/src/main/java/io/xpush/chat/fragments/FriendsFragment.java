@@ -31,9 +31,11 @@ import java.util.List;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.activities.ChatActivity;
+import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.util.XPushUtils;
 import io.xpush.chat.view.adapters.UserCursorAdapter;
 
 public class FriendsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -58,7 +60,7 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mEmptyMsg = (TextView) getActivity().findViewById(R.id.emptyMsg);
+        mEmptyMsg = (TextView) view.findViewById(R.id.emptyMsg);
         displayListView(view);
     }
 
@@ -133,9 +135,17 @@ public class FriendsFragment extends Fragment implements LoaderManager.LoaderCal
 
                 XPushUser user = new XPushUser(cursor);
 
-                Bundle bundle = user.toBundle();
+                ArrayList<String> userArray = new ArrayList<String>();
+                userArray.add( user.getId() );
+                userArray.add(ApplicationController.getInstance().getXpushSession().getId());
+
+                XPushChannel channel = new XPushChannel();
+                channel.setId(XPushUtils.generateChannelId( userArray ) );
+                channel.setUsers( userArray );
+
+                Bundle bundle = channel.toBundle();
                 Intent intent = new Intent(mActivity, ChatActivity.class);
-                intent.putExtra(user.USER_BUNDLE, bundle);
+                intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
                 startActivity(intent);
             }
         });

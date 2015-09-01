@@ -38,7 +38,6 @@ public class ChannelCursorAdapter extends CursorAdapter {
         TextView tvTitle = (TextView) view.findViewById(R.id.tvTitle);
         TextView tvDate = (TextView) view.findViewById(R.id.tvDate);
         TextView tvCount = (TextView) view.findViewById(R.id.tvCount);
-        TextView tvWriter = (TextView) view.findViewById(R.id.tvWriter);
         TextView tvMessage = (TextView) view.findViewById(R.id.tvMessage);
 
         SimpleDraweeView thumbNail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
@@ -52,7 +51,6 @@ public class ChannelCursorAdapter extends CursorAdapter {
             thumbNail.setImageURI(Uri.parse(xpushChannel.getImage()));
         }
 
-        tvWriter.setText(xpushChannel.getUsers());
         tvMessage.setText(xpushChannel.getMessage());
 
         if( xpushChannel.getCount() > 0 ) {

@@ -21,6 +21,15 @@ public class StringRequest extends Request<JSONObject> {
 
     private String mUrl;
 
+
+    public StringRequest(String url, Response.Listener<JSONObject> listener,
+                         Response.ErrorListener errorListener) {
+        super(Method.GET, url, errorListener);
+        this.mListener = listener;
+        this.params = null;
+
+    }
+
     public StringRequest(String url, Map<String,String> params, Response.Listener<JSONObject> listener,
                          Response.ErrorListener errorListener) {
         super(Method.POST, url, errorListener);

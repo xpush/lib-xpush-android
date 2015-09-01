@@ -46,7 +46,7 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mEmptyMsg = (TextView) getActivity().findViewById(R.id.emptyMsg);
+        mEmptyMsg = (TextView) view.findViewById(R.id.emptyMsg);
         displayListView(view);
     }
 
@@ -97,8 +97,6 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
     }
 
     private void displayListView(View view) {
-
-        Log.d(TAG, "2222222222 : ");
 
         String[] columns = new String[]{
             ChannelTable.KEY_ROWID,

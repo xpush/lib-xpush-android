@@ -3,6 +3,8 @@ package io.xpush.chat.models;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import java.util.ArrayList;
+
 import io.xpush.chat.persist.ChannelTable;
 
 public class XPushChannel {
@@ -20,7 +22,7 @@ public class XPushChannel {
     public String rowId;
     public String id;
     public String name;
-    public String users;
+    public ArrayList<String> users;
     public String image;
     public int count;
     public String message;
@@ -50,11 +52,11 @@ public class XPushChannel {
         this.name = name;
     }
 
-    public String getUsers() {
+    public ArrayList<String> getUsers() {
         return users;
     }
 
-    public void setUsers(String users) {
+    public void setUsers(ArrayList<String> users) {
         this.users = users;
     }
 
@@ -97,7 +99,6 @@ public class XPushChannel {
         this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_ROWID));
         this.id= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_ID));
         this.name= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_NAME));
-        this.users= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_USERS));
         this.image= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_IMAGE));
         this.count= cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE));
@@ -107,7 +108,7 @@ public class XPushChannel {
     public XPushChannel(Bundle bundle){
         this.id= bundle.getString(ID);
         this.name= bundle.getString(NAME);
-        this.users= bundle.getString(USERS);
+        this.users= bundle.getStringArrayList(USERS);
         this.image= bundle.getString(IMAGE);
         this.count= bundle.getInt(COUNT);
         this.message= bundle.getString(MESSAGE);
@@ -118,7 +119,7 @@ public class XPushChannel {
         Bundle b = new Bundle();
         b.putString(ID, this.id);
         b.putString(NAME, this.name);
-        b.putString(USERS, this.users);
+        b.putStringArrayList(USERS, this.users);
         b.putString(IMAGE, this.image);
         b.putInt(COUNT, this.count);
         b.putString(MESSAGE, this.message);

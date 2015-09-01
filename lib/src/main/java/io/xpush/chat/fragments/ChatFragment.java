@@ -31,14 +31,22 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,9 +58,11 @@ import io.xpush.chat.loaders.MessageDataLoader;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
+import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
@@ -94,6 +104,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private LinearLayoutManager mLayoutManager;
 
+    private ArrayList<String> mUsers;
+
+    private String mServerName;
+    private String mServerUrl;
+
     public ChatFragment() {
         super();
     }
@@ -121,6 +136,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mXpushChannel = new XPushChannel(bundle);
 
         mChannel = mXpushChannel.getId();
+        mUsers = mXpushChannel.getUsers();
 
         mUsername = ApplicationController.getInstance().getXpushSession().getId();
 
@@ -144,7 +160,15 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onResume(){
         super.onResume();
         if( mSocket == null || !mSocket.connected() ) {
-            connect();
+            if (mUsers != null) {
+                channelCreate();
+            } else {
+                if( mServerUrl != null && mServerName != null ){
+                    connect();
+                } else  {
+                    getServerUrl();
+                }
+            }
         }
     }
 
@@ -207,7 +231,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
 
                 // Keyboard Popup
-                if ( mInputMessageView.hasFocus() && oldBottom > bottom ) {
+                if (mInputMessageView.hasFocus() && oldBottom > bottom) {
                     mRecyclerView.scrollBy(0, oldBottom - bottom);
                 }
             }
@@ -275,11 +299,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }, 1);
     }
 
-
     private void connect(){
         try {
-            ;
-            String url = mSession.getServerUrl();
+
+
+            String url = mServerUrl + "/channel";
             mChannel = mXpushChannel.getId();
 
             IO.Options opts = new IO.Options();
@@ -287,7 +311,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             String appId = getString(R.string.app_id);
 
-            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+mSession.getServerName()+"&D=web&U="+mSession.getId();
+            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+mServerName+"&D=web&U="+mSession.getId();
 
             mSocket = IO.socket( url, opts );
 
@@ -386,6 +410,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         public void call(Object... args) {
 
+            Log.d(TAG, "success");
+
             ContentValues values = new ContentValues();
             values.put(ChannelTable.KEY_ID, mChannel );
             values.put(ChannelTable.KEY_COUNT, 0);
@@ -399,6 +425,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+
+            Log.d(TAG, "error");
+
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -630,10 +659,77 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-
     static class TimestampAscCompare implements Comparator<XPushMessage> {
         public int compare(XPushMessage arg0, XPushMessage arg1) {
             return arg0.getUpdated() < arg1.getUpdated() ? -1 : arg0.getUpdated() > arg1.getUpdated() ? 1:0;
         }
+    }
+
+    private void channelCreate(){
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("C", mChannel);
+            jsonObject.put("U", mUsers);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApplicationController.getInstance().getClient().emit("channel-create", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString());
+                if( response.has("status") ){
+                    try {
+                        Log.d(TAG, response.getString("status"));
+                        if( "ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals( response.getString("status") ) ){
+                            getServerUrl();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    private void getServerUrl(){
+        String url = null;
+        try {
+            url = getString(R.string.host_name) + "/node/"+ ApplicationController.getInstance().getAppId()+"/"+ URLEncoder.encode(mChannel, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG,url);
+        StringRequest request = new StringRequest(url,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject res) {
+
+                        try {
+                            if ("ok".equalsIgnoreCase(res.getString("status"))) {
+                                mServerName = res.getJSONObject("result").getJSONObject("server").getString("name");
+                                mServerUrl = res.getJSONObject("result").getJSONObject("server").getString("url");
+                                connect();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(mActivity);
+        queue.add(request);
     }
 }
