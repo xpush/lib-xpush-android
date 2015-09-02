@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -19,17 +18,12 @@ import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
-
-import org.apache.commons.logging.Log;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.ChannelFragment;
-import io.xpush.chat.fragments.FriendsFragment;
+import io.xpush.chat.fragments.UsersFragment;
+import io.xpush.sampleChat.fragments.FriendsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ActionBar ab = getSupportActionBar();
         //ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
+        //ab.setDisplayHomeAsUpEnabled(true);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter a = new Adapter(getSupportFragmentManager(), this);
@@ -113,10 +107,10 @@ public class MainActivity extends AppCompatActivity {
             Fragment f = null;
             switch (position) {
                 case 0:
-                    f = FriendsFragment.newInstance(0, "Page # 1");
+                    f = new FriendsFragment();
                     break;
                 case 1:
-                    f = ChannelFragment.newInstance(1, "Page # 2");
+                    f = new ChannelFragment();
                     break;
             }
             return f;

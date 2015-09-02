@@ -18,7 +18,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:padding="50dp"
-        android:text="@string/no_channel_message"
+        android:text="@string/no_friends_message"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#384452"
         android:visibility="invisible" />

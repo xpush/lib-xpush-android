@@ -19,7 +19,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import io.xpush.chat.ApplicationController;
-import io.xpush.chat.activities.ChannelActivity;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.services.RegistrationIntentService;
 import io.xpush.chat.services.XPushService;

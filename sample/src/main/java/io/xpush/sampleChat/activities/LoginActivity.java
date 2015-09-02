@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.xpush.chat.activities.ChannelActivity;
 import io.xpush.chat.network.LoginRequest;
 import io.xpush.sampleChat.R;
 
@@ -137,13 +136,12 @@ public class LoginActivity extends AppCompatActivity  {
 
     @Override
     public void onBackPressed() {
-        // disable going back to the MainActivity
         moveTaskToBack(true);
     }
 
     public void onLoginSuccess() {
         _loginButton.setEnabled(true);
-        Intent intent = new Intent(LoginActivity.this, ChannelActivity.class);
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }

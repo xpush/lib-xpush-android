@@ -7,11 +7,10 @@ import android.support.v7.widget.Toolbar;
 
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChatFragment;
-import io.xpush.chat.fragments.FriendsFragment;
 
 public class ChatActivity extends AppCompatActivity{
 
-    public static final String TAG = ChannelActivity.class.getSimpleName();
+    public static final String TAG = ChatActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +28,6 @@ public class ChatActivity extends AppCompatActivity{
 
         final ActionBar ab = getSupportActionBar();
         //ab.setHomeAsUpIndicator(R.drawable.ic_arrow_left);
-        ab.setDisplayHomeAsUpEnabled(true);
+        //ab.setDisplayHomeAsUpEnabled(true);
     }
 }

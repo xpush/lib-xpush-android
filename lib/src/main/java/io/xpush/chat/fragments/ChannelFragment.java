@@ -32,11 +32,6 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
     private Activity mActivity;
     private TextView mEmptyMsg;
 
-    public static ChannelFragment newInstance(int page, String title) {
-        ChannelFragment fragment = new ChannelFragment();
-        return fragment;
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

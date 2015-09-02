@@ -28,6 +28,7 @@
     <string name="user_table_name">TB_USER</string>
 
     <string name="no_channel_message">현재 채널이 없습니다.</string>
+    <string name="no_friends_message">현재 친구가 없습니다.</string>
 
     <string name="action_channel">채널</string>
 </resources>

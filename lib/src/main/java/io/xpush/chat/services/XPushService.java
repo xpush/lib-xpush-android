@@ -361,7 +361,7 @@ public class XPushService extends Service {
         Log.d(TAG, "reconnectIfNecessary");
         Log.d(TAG, "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
         if (mStarted ) {
-            if( !mConnecting  ){
+            if( !mClient.connected() && !mConnecting  ){
                 connect();
             }
         } else {
@@ -375,7 +375,7 @@ public class XPushService extends Service {
         return (info == null) ? false : info.isConnected();
     }
 
-    private boolean isConnected() {
+    public boolean isConnected() {
 
         if (mStarted && mClient != null && !mClient.connected()) {
             Log.i(TAG, "mClient.isConnected() : " + mClient.connected() );
@@ -384,6 +384,10 @@ public class XPushService extends Service {
 
         if (mClient != null) {
             return (mStarted && mClient.connected() && !mPingTimeout ) ? true : false;
+        }
+
+        if( !mConnecting ){
+            return false;
         }
 
         return false;
@@ -407,9 +411,6 @@ public class XPushService extends Service {
     private synchronized void sendKeepAlive() {
 
         Log.i(TAG, "Sending Keepalive to " + mXpushSession.getServerUrl());
-
-        // Send a keep alive, if there is a connection.
-        Log.i(TAG, "ping " + mClient.connected());
         if (mStarted == true && mClient != null && mClient.connected()  ) {
             Log.i(TAG, "ping " + mXpushSession.getServerUrl());
 
@@ -423,7 +424,6 @@ public class XPushService extends Service {
                         public void run() {
                             pingTimeoutTimer = null;
                             mPingTimeout = true;
-                            Log.i(TAG, "ping timeout : " + mPingTimeout );
                         }
                     });
                 }
