@@ -62,15 +62,6 @@ public class FriendsFragment extends UsersFragment {
             e.printStackTrace();
         }
 
-        int i = 0;
-        while( !ApplicationController.getInstance().getClient().connected() ){
-            i++;
-            Log.d( TAG, "connected : " + ApplicationController.getInstance().getClient().connected() );
-            if( i > 100 ){
-                break;
-            }
-        }
-
         ApplicationController.getInstance().getClient().emit("user-query", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {

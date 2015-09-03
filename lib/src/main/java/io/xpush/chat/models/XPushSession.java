@@ -5,9 +5,6 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/**
- * Created by 정진영 on 2015-08-22.
- */
 public class XPushSession {
 
     public static final String APP_ID = "A";

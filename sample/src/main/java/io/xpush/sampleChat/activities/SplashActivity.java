@@ -18,6 +18,9 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import io.xpush.chat.ApplicationController;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.services.RegistrationIntentService;
@@ -66,23 +69,34 @@ public class SplashActivity extends Activity {
 
         XPushService.actionStart(this);
 
-        new Handler().postDelayed(new Runnable() {
+        final long started = System.currentTimeMillis();
+        final AtomicInteger i = new AtomicInteger();
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
-                overridePendingTransition(0, android.R.anim.fade_in);
-
-
-                Intent intent = null;
-                if( null == ApplicationController.getInstance().getXpushSession() ){
-                    intent = new Intent(SplashActivity.this, LoginActivity.class);
+                if ((ApplicationController.getInstance().getClient() == null && System.currentTimeMillis() - started < SPLASH_TIME) || (ApplicationController.getInstance().getClient() != null && ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < SPLASH_TIME)
+                        || (ApplicationController.getInstance().getClient() != null && !ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
+                    Log.d(TAG, "waiting : " + ApplicationController.getInstance().getClient() + ", " +i.incrementAndGet() );
+                    handler.postDelayed(this, 150);
                 } else {
-                    intent = new Intent(SplashActivity.this, MainActivity.class);
+
+                    findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+                    overridePendingTransition(0, android.R.anim.fade_in);
+
+
+                    Intent intent = null;
+                    if (null == ApplicationController.getInstance().getXpushSession()) {
+                        intent = new Intent(SplashActivity.this, LoginActivity.class);
+                    } else {
+                        intent = new Intent(SplashActivity.this, MainActivity.class);
+                    }
+                    startActivity(intent);
+                    finish();
                 }
-                startActivity(intent);
-                finish();
             }
-        }, SPLASH_TIME);
+        }, 150);
     }
 
     /**

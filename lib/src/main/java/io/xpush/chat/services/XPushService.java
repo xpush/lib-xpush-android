@@ -211,8 +211,14 @@ public class XPushService extends Service {
         }
 
         if (mStarted) {
-            Log.i(TAG, "Attempt to start while already started and connected");
-            return;
+            if( !isConnected() ) {
+                Log.i(TAG, "not connected 1");
+                connect();
+            } else {
+                ApplicationController.getInstance().setClient(mClient);
+                Log.i(TAG, "Attempt to start while already started and connected");
+                return;
+            }
         }
 
         if (hasScheduledKeepAlives()) {
@@ -220,6 +226,7 @@ public class XPushService extends Service {
         }
 
         if( !isConnected() ) {
+            Log.i(TAG, "not connected 2");
             connect();
         }
 
@@ -386,7 +393,7 @@ public class XPushService extends Service {
             return (mStarted && mClient.connected() && !mPingTimeout ) ? true : false;
         }
 
-        if( !mConnecting ){
+        if( mConnecting ){
             return false;
         }
 

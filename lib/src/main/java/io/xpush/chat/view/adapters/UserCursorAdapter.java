@@ -7,6 +7,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -34,6 +35,7 @@ public class UserCursorAdapter extends CursorAdapter {
         ViewHolder holder = new ViewHolder();
         holder.tvTitle = (TextView) view.findViewById(R.id.tvTitle);
         holder.tvMessage = (TextView) view.findViewById(R.id.tvMessage);
+        holder.llMessage= (LinearLayout) view.findViewById(R.id.ll_message);
         holder.thumbNail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
         view.setTag(holder);
         return view;
@@ -49,14 +51,16 @@ public class UserCursorAdapter extends CursorAdapter {
         }
 
         holder.tvTitle.setText(user.getName());
-        if( user.getMessage() != null && user.getMessage().length() > 0 ) {
+        if( user.getMessage() != null ) {
             holder.tvMessage.setText(user.getMessage());
+            holder.llMessage.setVisibility(View.VISIBLE);
         }
     }
 
     public static class ViewHolder {
         private TextView tvTitle;
         private TextView tvMessage;
-        public SimpleDraweeView thumbNail;
+        private SimpleDraweeView thumbNail;
+        private LinearLayout llMessage;
     }
 }
