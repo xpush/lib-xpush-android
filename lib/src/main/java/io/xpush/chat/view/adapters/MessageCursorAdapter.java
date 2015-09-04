@@ -91,8 +91,6 @@ public class MessageCursorAdapter extends CursorAdapter {
 
         holder.tvMessage.setText(xpushMessage.getMessage());
         holder.tvTime.setText(DateUtils.getDate(timestamp, "a h:mm"));
-        //holder.tvTime.setText( String.valueOf( timestamp ) );
-
 
         if( holder.tvUser != null ) {
             holder.tvUser.setText(userId);

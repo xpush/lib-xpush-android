@@ -10,7 +10,6 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="10dp">
-    >
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/thumbnail"
@@ -90,7 +89,7 @@
             android:textColor="#6d84b4"
             android:maxLines="2"
             android:textSize="12dip" />
-        \
+
         <TextView
             android:id="@+id/tvCount"
             android:layout_width="wrap_content"

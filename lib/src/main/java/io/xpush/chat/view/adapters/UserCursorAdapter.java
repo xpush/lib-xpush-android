@@ -51,7 +51,7 @@ public class UserCursorAdapter extends CursorAdapter {
         }
 
         holder.tvTitle.setText(user.getName());
-        if( user.getMessage() != null ) {
+        if( user.getMessage() != null && !"".equals( user.getMessage().trim() ) ) {
             holder.tvMessage.setText(user.getMessage());
             holder.llMessage.setVisibility(View.VISIBLE);
         }

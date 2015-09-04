@@ -60,7 +60,6 @@ public class SplashActivity extends Activity {
         });
 
         if (checkPlayServices()) {
-            // Start IntentService to register this application with GCM.
             if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null ) ){
                 Intent intent = new Intent(this, RegistrationIntentService.class);
                 startService(intent);

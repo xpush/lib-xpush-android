@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         final ActionBar ab = getSupportActionBar();
-        //ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        //ab.setDisplayHomeAsUpEnabled(true);
 
         ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
         Adapter a = new Adapter(getSupportFragmentManager(), this);
@@ -62,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         tabLayout.setCustomTabView(R.layout.custom_tab_view, R.id.tabText);
-        //tabLayout.setHorizontalScrollBarEnabled(true);
         tabLayout.setViewPager(mViewPager);
     }
 

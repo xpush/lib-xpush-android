@@ -10,7 +10,6 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="10dp">
-    >
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/thumbnail"

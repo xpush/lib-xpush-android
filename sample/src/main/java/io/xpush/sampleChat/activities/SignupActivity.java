@@ -57,7 +57,6 @@ public class SignupActivity extends AppCompatActivity {
         _loginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Finish the registration screen and return to the Login activity
                 finish();
             }
         });
@@ -81,9 +80,6 @@ public class SignupActivity extends AppCompatActivity {
         String name = _nameText.getText().toString();
         String id = _idText.getText().toString();
         String password = _passwordText.getText().toString();
-
-        // TODO: Implement your own signup logic here.
-
         final Map<String,String> params = new HashMap<String, String>();
 
         params.put("A", getString(R.string.app_id));
@@ -96,9 +92,6 @@ public class SignupActivity extends AppCompatActivity {
         }
         String url = getString(R.string.host_name)+"/user/register";
 
-
-
-        Log.d(TAG, "====================== : " + url );
         StringRequest request = new StringRequest(url, params,
             new Response.Listener<JSONObject>() {
                 @Override
