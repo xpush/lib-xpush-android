@@ -15,6 +15,7 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewPager mViewPager;
 
+    private Toolbar mToolbar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -42,14 +45,15 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar.setTitle( getResources().getStringArray(R.array.tabs)[0] );
+        setSupportActionBar(mToolbar);
 
         final ActionBar ab = getSupportActionBar();
 
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        Adapter a = new Adapter(getSupportFragmentManager(), this);
-        mViewPager.setAdapter(a);
+        final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
+        final Adapter apater = new Adapter(getSupportFragmentManager(), this);
+        mViewPager.setAdapter(apater);
 
         SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         tabLayout.setDistributeEvenly(true);
@@ -61,6 +65,21 @@ public class MainActivity extends AppCompatActivity {
         });
         tabLayout.setCustomTabView(R.layout.custom_tab_view, R.id.tabText);
         tabLayout.setViewPager(mViewPager);
+
+        tabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels){
+            }
+
+            @Override
+            public void onPageSelected(int position){
+                mToolbar.setTitle(apater.getTitle(position) );
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state){
+            }
+        });
     }
 
     @Override
@@ -127,6 +146,10 @@ public class MainActivity extends AppCompatActivity {
             SpannableString spannableString = new SpannableString(" ");
             spannableString.setSpan(imageSpan,0,spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             return spannableString;
+        }
+
+        public String getTitle(int position){
+            return tabText[position];
         }
     }
 }

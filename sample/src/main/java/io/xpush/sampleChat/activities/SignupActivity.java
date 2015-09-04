@@ -82,8 +82,16 @@ public class SignupActivity extends AppCompatActivity {
         String password = _passwordText.getText().toString();
         final Map<String,String> params = new HashMap<String, String>();
 
+        JSONObject data = new JSONObject();
+        try {
+            data.put("NM", name);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
         params.put("A", getString(R.string.app_id));
         params.put("U", id);
+        params.put("DT", data.toString());
         params.put("PW", password);
         params.put("D", "web");
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());

@@ -3,7 +3,7 @@
     <string name="app_name">SampleChat</string>
 
     <string name="host_name">http://stalk-front-s01.cloudapp.net:8000</string>
-    <string name="app_id">messengerx</string>
+    <string name="app_id">sample-chat</string>
     <string name="gcm_defaultSenderId">944977353393</string>
 
     <string-array name="tabs">
