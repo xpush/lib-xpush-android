@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="Sub Screens">
+
+        <PreferenceScreen
+            android:key="voicemail_category"
+            android:title="Voicemail"
+            android:persistent="false">
+
+            <Preference
+                android:title="Provider"
+                android:summary="Airtel"
+                android:key="provider" />
+
+            <!-- and other preference objects ... -->
+
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -72,6 +72,7 @@ public class SplashActivity extends Activity {
         final AtomicInteger i = new AtomicInteger();
 
         final Handler handler = new Handler();
+        PreferenceManager.setDefaultValues(this, R.xml.user_settings, false);
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -87,9 +88,9 @@ public class SplashActivity extends Activity {
 
                     Intent intent = null;
                     if (null == ApplicationController.getInstance().getXpushSession()) {
-                        intent = new Intent(SplashActivity.this, LoginActivity.class);
+                        intent = new Intent(SplashActivity.this, SettingsActivity.class);
                     } else {
-                        intent = new Intent(SplashActivity.this, MainActivity.class);
+                        intent = new Intent(SplashActivity.this, SettingsActivity.class);
                     }
                     startActivity(intent);
                     finish();
