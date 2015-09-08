@@ -5,6 +5,7 @@ import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,27 +18,20 @@ import io.xpush.sampleChat.R;
  */
 public class SettingsFragment extends PreferenceFragment {
 
+    private String TAG = SettingsFragment.class.getSimpleName();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         //getActivity().setTheme(R.style...);
-
-        if (getArguments() != null) {
-            String page = getArguments().getString("page");
-            if (page != null)
-                switch (page) {
-                    case "page1":
-                        addPreferencesFromResource(R.xml.settings_page1);
-                        break;
-                    case "page2":
-                        addPreferencesFromResource(R.xml.settings_page2);
-                        break;
-                }
-        }
+        addPreferencesFromResource(R.xml.settings);
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
+
         View layout = inflater.inflate(R.layout.activity_settings, container, false);
         if (layout != null) {
             AppCompatPreferenceActivity activity = (AppCompatPreferenceActivity) getActivity();
