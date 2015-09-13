@@ -4,7 +4,7 @@
     <PreferenceCategory
         android:title="My Account">
 
-        <Preference
+        <EditTextPreference
             android:title="Username"
             android:summary="rishabhp"
             android:key="username" />

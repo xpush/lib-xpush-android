@@ -45,7 +45,7 @@
             android:layout_height="32dp"
             android:layout_below="@id/imageView"
             android:layout_centerHorizontal="true"
-            app:cpv_color="@color/write"
+            app:cpv_color="@color/white"
             app:cpv_animAutostart="true"
             app:cpv_indeterminate="true" />
 

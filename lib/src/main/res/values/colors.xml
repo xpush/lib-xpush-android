@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="write">#FFFFFF</color>
+    <color name="white">#FFFFFF</color>
     <color name="dark">#384452</color>
 
     <color name="primary">#f05557</color>
@@ -23,6 +23,5 @@
     <color name="aluminum">#999999</color>
     <color name="base">#AAAAAA</color>
     <color name="iron">#CCCCCC</color>
-    <color name="white">#FFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
 </resources>
