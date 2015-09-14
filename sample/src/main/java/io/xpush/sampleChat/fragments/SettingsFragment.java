@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
@@ -32,6 +33,32 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
         //getActivity().setTheme(R.style...);
         mActivity = getActivity();
         addPreferencesFromResource(R.xml.settings);
+
+        // show the current value in the settings screen
+        for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); i++) {
+            pickPreferenceObject(getPreferenceScreen().getPreference(i));
+        }
+    }
+
+    private void pickPreferenceObject(Preference p) {
+        if (p instanceof PreferenceCategory) {
+            PreferenceCategory cat = (PreferenceCategory) p;
+            for (int i = 0; i < cat.getPreferenceCount(); i++) {
+                pickPreferenceObject(cat.getPreference(i));
+            }
+        } else {
+            initSummary(p);
+        }
+    }
+
+    private void initSummary(Preference p) {
+
+        if (p instanceof EditTextPreference) {
+            EditTextPreference editTextPref = (EditTextPreference) p;
+            p.setSummary(editTextPref.getText());
+        }
+
+        // More logic for ListPreference, etc...
     }
 
     @Override
@@ -48,11 +75,10 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             bar.setHomeButtonEnabled(true);
             bar.setDisplayHomeAsUpEnabled(true);
             bar.setDisplayShowTitleEnabled(true);
-            //bar.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-            //bar.setTitle(getPreferenceScreen().getTitle());
         }
         return layout;
     }
+
 
     @Override
     public void onResume() {
@@ -64,7 +90,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
                 frame.setPadding(0, 0, 0, 0);
         }
 
-        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -77,9 +103,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-
-        Log.d(TAG,"=====================");
-        Log.d(TAG,key);
 
         if (key.equals("username")) {
             Preference pref = findPreference(key);

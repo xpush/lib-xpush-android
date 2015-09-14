@@ -3,5 +3,5 @@
     <color name="primary">#f05557</color>
     <color name="primaryDark">#D04345</color>
 
-    <color name="tabIndicator">@color/white</color>
+    <color name="tabIndicator">@color/dark</color>
 </resources>

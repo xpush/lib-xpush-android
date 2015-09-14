@@ -81,7 +81,13 @@ public class FriendsFragment extends UsersFragment {
                             contentValues.put( UserTable.KEY_ID, json.getString("U"));
 
                             if( json.has("DT") && !json.isNull("DT")  ){
-                                JSONObject data = json.getJSONObject("DT");
+                                Object obj = json.get("DT");
+                                JSONObject data = null;
+                                if( obj instanceof JSONObject ){
+                                    data = (JSONObject) obj;
+                                } else if ( obj instanceof String){
+                                    data = new JSONObject( (String)obj );
+                                }
 
                                 if( data.has("NM")) {
                                     contentValues.put(UserTable.KEY_NAME, data.getString("NM"));
