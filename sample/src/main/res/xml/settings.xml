@@ -5,11 +5,6 @@
         android:title="My Account">
 
         <EditTextPreference
-            android:title="Username"
-            android:summary="rishabhp"
-            android:key="username" />
-
-        <EditTextPreference
             android:title="Email"
             android:summary="rishabh.pugalia@gmail.com"
             android:key="email" />

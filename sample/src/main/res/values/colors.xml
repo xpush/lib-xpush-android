@@ -4,4 +4,9 @@
     <color name="primaryDark">#D04345</color>
 
     <color name="tabIndicator">@color/dark</color>
+
+    <color name="font_point1">#ff3cafa7</color>
+    <color name="font_point2">#ff543f3f</color>
+    <color name="font_point3">#ffe54e25</color>
+    <color name="font_point5">#ff00c2b9</color>
 </resources>
