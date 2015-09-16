@@ -3,9 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_setting"
+        android:id="@+id/action_profile"
         android:orderInCategory="100"
-        android:title="Setting"
+        android:title="@string/action_profile"
+        app:showAsAction="collapseActionView"></item>
+
+    <item
+        android:id="@+id/action_setting"
+        android:orderInCategory="200"
+        android:title="@string/action_setting"
         app:showAsAction="collapseActionView"></item>
 
 </menu>

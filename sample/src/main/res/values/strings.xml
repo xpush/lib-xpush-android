@@ -12,4 +12,6 @@
     </string-array>
 
 
+    <string name="action_profile">profile</string>
+    <string name="action_setting">setting</string>
 </resources>

@@ -166,6 +166,10 @@ public class MainActivity extends AppCompatActivity {
 
             Intent intent = intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
+        } else if( item.getItemId() == R.id.action_profile ){
+
+            Intent intent = intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
