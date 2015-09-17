@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="10.0dip" >
         <LinearLayout android:orientation="horizontal" android:id="@+id/nicknameButton" style="@style/D4.Layout.SettingItemLayout">
-            <TextView android:id="@+id/nickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/text_for_nickname" android:singleLine="false" android:layout_weight="1.0" android:paddingEnd="10.0dip" style="@style/D4.Widget.SettingItemTextView" />
+            <TextView android:id="@+id/nickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/text_for_nickname" android:singleLine="false" android:layout_weight="1.0" android:paddingEnd="10.0dip" style="@style/D4.Widget.SettingItemTextView"  />
             <ImageView android:id="@+id/nickname_arrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/more_list_arrow" android:layout_weight="0.0" android:contentDescription="@string/title_for_edit_nickname" />
         </LinearLayout>
         <LinearLayout android:orientation="horizontal" android:id="@+id/status_message_button" style="@style/D4.Layout.SettingItemLayout">

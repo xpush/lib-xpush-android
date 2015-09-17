@@ -33,6 +33,15 @@
 
     <style name="Layout" />
 
+    <style name="D4" />
+
+    <style name="D4.Widget" parent="@style/D4" />
+
+    <style name="D4.Widget.SettingItemTextView" parent="@style/D4.Widget">
+        <item name="android:textSize">@dimen/font_level_4</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
     <style name="D4.Layout.SettingItemLayout" parent="@style/Layout">
         <item name="android:gravity">center_vertical</item>
         <item name="android:background">@drawable/settings_list_item_bg</item>

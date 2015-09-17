@@ -14,4 +14,11 @@
 
     <string name="action_profile">profile</string>
     <string name="action_setting">setting</string>
+
+    <string name="text_for_nickname">Nickname</string>
+    <string name="text_for_status_message">Status message</string>
+    <string name="title_for_edit_nickname">Edit nickname</string>
+    <string name="title_for_change_status_message">Edit Status message</string>
+
+
 </resources>
