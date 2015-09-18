@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="profile_image_in_my_profile">104.0dip</dimen>
+    <dimen name="drawer_margin_top">0dp</dimen>
 
     <dimen name="font_level_0">11.0sp</dimen>
     <dimen name="font_level_1">12.0sp</dimen>

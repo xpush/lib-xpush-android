@@ -21,4 +21,9 @@
     <string name="title_for_change_status_message">Edit Status message</string>
 
 
+    <string name="action_home">Home</string>
+    <string name="action_switch">Switch</string>
+    <string name="action_review">Review</string>
+
+    <string name="drawer_menu">Menu</string>
 </resources>

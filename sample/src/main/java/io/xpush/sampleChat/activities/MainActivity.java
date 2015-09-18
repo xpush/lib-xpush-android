@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu mMenu;
 
+    private DrawerLayout mDrawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -55,11 +60,23 @@ public class MainActivity extends AppCompatActivity {
         mToolbar.setTitle( getResources().getStringArray(R.array.tabs)[0] );
         setSupportActionBar(mToolbar);
 
-        final ActionBar ab = getSupportActionBar();
-
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
         final Adapter apater = new Adapter(getSupportFragmentManager(), this);
         mViewPager.setAdapter(apater);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        final ActionBar ab = getSupportActionBar();
+        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+        ab.setDisplayHomeAsUpEnabled(true);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            setupDrawerContent(navigationView);
+        }
 
         SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         tabLayout.setDistributeEvenly(true);
@@ -160,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            this.finish();
+            mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
         } else if( item.getItemId() == R.id.action_setting ){
 
@@ -173,5 +190,25 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+
+                        menuItem.setChecked(true);
+
+                        if (menuItem.getItemId() == R.id.nav_swap) {
+
+                        } else if (menuItem.getItemId() == R.id.nav_review) {
+
+                        }
+
+                        mDrawerLayout.closeDrawers();
+                        return true;
+                    }
+                });
     }
 }
