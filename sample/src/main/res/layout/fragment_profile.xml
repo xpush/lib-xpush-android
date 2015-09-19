@@ -20,7 +20,6 @@
         <TextView android:textSize="@dimen/font_level_4" android:textColor="@color/font_point1" android:id="@+id/phone_number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" android:text="phone_number" />
     </LinearLayout>
 
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"

@@ -15,4 +15,6 @@
     <dimen name="font_level_6">22.0sp</dimen>
     <dimen name="font_level_7">24.0sp</dimen>
     <dimen name="font_level_9">28.0sp</dimen>
+
+    <dimen name="padding_normal">14.0dip</dimen>
 </resources>

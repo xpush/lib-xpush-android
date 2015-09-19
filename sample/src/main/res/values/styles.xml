@@ -64,4 +64,36 @@
         <item name="android:paddingRight">25.0dip</item>
         <item name="android:layout_height">50.0dip</item>
     </style>
+
+    <style name="D4.Layout.SettingSimpleTextInputLayout" parent="@style/Layout">
+        <item name="android:background">@color/background_4</item>
+        <item name="android:paddingTop">26.0dip</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:paddingStart">22.0dip</item>
+        <item name="android:paddingEnd">22.0dip</item>
+    </style>
+
+    <style name="Layout.WindowLayout" parent="@style/Layout">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">fill_parent</item>
+        <item name="android:paddingStart">@dimen/padding_normal</item>
+        <item name="android:paddingEnd">@dimen/padding_normal</item>
+    </style>
+
+    <style name="D4.Widget.EditTextWithClearButton" parent="@style/D4.Widget">
+        <item name="android:background">@drawable/sign_inputbox</item>
+        <item name="android:paddingTop">8.0dip</item>
+        <item name="android:paddingBottom">8.0dip</item>
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">46.0dip</item>
+        <item name="android:paddingStart">8.0dip</item>
+        <item name="android:paddingEnd">8.0dip</item>
+    </style>
+
+    <style name="Widget.FormSmallLabelView" parent="@android:style/Widget.TextView">
+        <item name="android:textSize">@dimen/font_level_2</item>
+        <item name="android:textColor">@color/font_khaki</item>
+    </style>
 </resources>
