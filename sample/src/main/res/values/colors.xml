@@ -12,4 +12,9 @@
 
     <color name="default_list_selected_background">#fffdf01b</color>
     <color name="background_1">#ffffffff</color>
+
+    <color name="orange">#ffee7912</color>
+    <color name="orange1">#ffd26e0c</color>
+    <color name="orange2">#ffed7812</color>
+    <color name="orange3">#fff18113</color>
 </resources>

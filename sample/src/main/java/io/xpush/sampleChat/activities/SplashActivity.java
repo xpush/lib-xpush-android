@@ -80,12 +80,15 @@ public class SplashActivity extends Activity {
                     findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
                     overridePendingTransition(0, android.R.anim.fade_in);
 
-
                     Intent intent = null;
-                    if (null == ApplicationController.getInstance().getXpushSession()) {
-                        intent = new Intent(SplashActivity.this, LoginActivity.class);
+                    if( pref.getBoolean("SHOW_INTRO", false) ){
+                        if (null == ApplicationController.getInstance().getXpushSession()) {
+                            intent = new Intent(SplashActivity.this, LoginActivity.class);
+                        } else {
+                            intent = new Intent(SplashActivity.this, MainActivity.class);
+                        }
                     } else {
-                        intent = new Intent(SplashActivity.this, MainActivity.class);
+                        intent = new Intent(SplashActivity.this, IntroActivity.class);
                     }
                     startActivity(intent);
                     finish();

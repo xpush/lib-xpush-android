@@ -53,4 +53,15 @@
         <item name="android:paddingEnd">14.0dip</item>
     </style>
 
+    <style name="OrangeButton">
+        <item name="android:textSize">@dimen/text_xlarge</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">@drawable/btn_big_orange</item>
+        <item name="android:paddingLeft">25.0dip</item>
+        <item name="android:paddingRight">25.0dip</item>
+        <item name="android:layout_height">50.0dip</item>
+    </style>
 </resources>
