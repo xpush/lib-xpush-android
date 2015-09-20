@@ -44,6 +44,6 @@ public class ProfileFragment extends Fragment {
 
     public void editUserName() {
         Intent localIntent = new Intent(mActivity, EditProfileNameActivity.class);
-        startActivityForResult(localIntent, 103);
+        getActivity().startActivityForResult(localIntent, 103);
     }
 }

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
@@ -36,5 +37,12 @@ public class XPushUtils {
         public int compare(String arg0, String arg1) {
             return arg0.compareTo( arg1 );
         }
+    }
+
+    public static String getInputStringLength(String paramString, int paramInt){
+        if (paramString == null) {
+            return null;
+        }
+        return String.format(Locale.US, "%1$d/%2$d", new Object[] { Integer.valueOf(paramString.length()), Integer.valueOf(paramInt) });
     }
 }
