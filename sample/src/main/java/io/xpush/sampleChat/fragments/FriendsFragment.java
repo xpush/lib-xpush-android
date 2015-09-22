@@ -33,6 +33,7 @@ import io.xpush.chat.R;
 import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.fragments.UsersFragment;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
@@ -46,23 +47,16 @@ public class FriendsFragment extends UsersFragment {
     @Override
     public void getUsers(){
         JSONObject jsonObject = new JSONObject();
-        JSONObject column = new JSONObject();
-
+        JSONArray array = new JSONArray();
         try {
-            column.put( "U", true );
-            column.put( "DT", true );
-            column.put( "A", true );
-            column.put( "_id", false );
-
-            jsonObject.put("query", new JSONObject().put("A", getString(R.string.app_id)) );
-            jsonObject.put("options", new JSONObject() );
-            jsonObject.put("column", column );
+            array.put(ApplicationController.getInstance().getXpushSession().getId() );
+            jsonObject.put("GR", array );
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ApplicationController.getInstance().getClient().emit("user-query", jsonObject, new Ack() {
+        ApplicationController.getInstance().getClient().emit("group-list", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
@@ -70,7 +64,8 @@ public class FriendsFragment extends UsersFragment {
                 Log.d( TAG, response.toString() );
                 if( response.has( "result" ) ){
                     try {
-                        JSONArray result = (JSONArray) response.getJSONObject("result").getJSONArray("users");
+
+                        JSONArray result = (JSONArray) response.getJSONArray("result");
                         List<ContentValues> valuesToInsert = new ArrayList<ContentValues>();
 
                         for( int inx = 0 ; inx < result.length() ; inx++ ){

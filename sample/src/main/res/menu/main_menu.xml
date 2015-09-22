@@ -3,14 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_profile"
+        android:id="@+id/action_search_user"
         android:orderInCategory="100"
+        android:title="@string/action_search_user"
+        app:showAsAction="collapseActionView"></item>
+
+    <item
+        android:id="@+id/action_profile"
+        android:orderInCategory="200"
         android:title="@string/action_profile"
         app:showAsAction="collapseActionView"></item>
 
     <item
         android:id="@+id/action_setting"
-        android:orderInCategory="200"
+        android:orderInCategory="300"
         android:title="@string/action_setting"
         app:showAsAction="collapseActionView"></item>
 

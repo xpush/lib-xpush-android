@@ -179,6 +179,9 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
+        } else if( item.getItemId() == R.id.action_search_user ){
+            Intent intent = intent = new Intent(MainActivity.this, SearchUserActivity.class);
+            startActivity(intent);
         } else if( item.getItemId() == R.id.action_setting ){
 
             Intent intent = intent = new Intent(MainActivity.this, SettingsActivity.class);

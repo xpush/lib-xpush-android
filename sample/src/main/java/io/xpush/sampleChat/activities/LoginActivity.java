@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity  {
         params.put("A", getString(R.string.app_id));
         params.put("U", id);
         params.put("PW", password);
-        params.put("D", "web");
+        params.put("D", "ionic");
 
         String url = getString(R.string.host_name)+"/auth";
 

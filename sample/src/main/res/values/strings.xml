@@ -3,7 +3,10 @@
     <string name="app_name">SampleChat</string>
 
     <string name="host_name">http://stalk-front-s01.cloudapp.net:8000</string>
+    <!--
     <string name="app_id">sample-chat</string>
+    -->
+    <string name="app_id">messengerx</string>
     <string name="gcm_defaultSenderId">944977353393</string>
 
     <string-array name="tabs">
@@ -11,9 +14,9 @@
         <item>Channels</item>
     </string-array>
 
-
-    <string name="action_profile">profile</string>
-    <string name="action_setting">setting</string>
+    <string name="action_profile">Profile</string>
+    <string name="action_setting">Setting</string>
+    <string name="action_search_user">Search User</string>
 
     <string name="text_for_nickname">Nickname</string>
     <string name="text_for_status_message">Status message</string>
@@ -24,6 +27,7 @@
     <string name="action_home">Home</string>
     <string name="action_switch">Switch</string>
     <string name="action_review">Review</string>
+
 
     <string name="drawer_menu">Menu</string>
 </resources>
