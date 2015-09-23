@@ -1,8 +1,11 @@
 package io.xpush.sampleChat.fragments;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,28 +20,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.sampleChat.adapters.UserListAdapter;
 
-public class SearchUserFragment extends Fragment {
+public class SearchUserFragment extends Fragment  {
 
     private static final String TAG = SearchUserFragment.class.getSimpleName();
 
     private List<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
-
     private RecyclerView.Adapter mAdapter;
 
     private Activity mActivity;
-
     private String mUsername;
 
     private RecyclerView mRecyclerView;
-
     private LinearLayoutManager mLayoutManager;
+
+    private int mViewPage;
 
     @Override
     public void onAttach(Activity activity) {
@@ -49,37 +54,44 @@ public class SearchUserFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
         mActivity = getActivity();
         mUsername = ApplicationController.getInstance().getXpushSession().getId();
+
+        View view = inflater.inflate(R.layout.fragment_search_users, container, false);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.listView);
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        displayListView(view);
-    }
 
+        mViewPage = 1;
+        displayListView();
+    }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_search_users, container, false);
+    public void onResume() {
+        super.onResume();
     }
 
-    private void displayListView(View view) {
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.listView);
+    private void displayListView() {
         mRecyclerView.setAdapter(mAdapter);
-
         mLayoutManager = new LinearLayoutManager(getActivity());
-
         mRecyclerView.setLayoutManager(mLayoutManager);
-
         getUsers();
     }
 
     public void getUsers(){
         JSONObject jsonObject = new JSONObject();
         JSONObject column = new JSONObject();
+        JSONObject options = new JSONObject();
 
         try {
             column.put( "U", true );
@@ -88,7 +100,10 @@ public class SearchUserFragment extends Fragment {
             column.put( "_id", false );
 
             jsonObject.put("query", new JSONObject().put("A", getString(R.string.app_id)) );
-            jsonObject.put("options", new JSONObject() );
+            options.put( "pageNum", mViewPage );
+            options.put( "pageSize", 50 );
+
+            jsonObject.put("options", options );
             jsonObject.put("column", column );
 
         } catch (JSONException e) {
@@ -104,6 +119,8 @@ public class SearchUserFragment extends Fragment {
                 if (response.has("result")) {
                     try {
                         JSONArray result = (JSONArray) response.getJSONObject("result").getJSONArray("users");
+
+                        ArrayList<XPushUser> users = new ArrayList<XPushUser>();
 
                         for (int inx = 0; inx < result.length(); inx++) {
                             JSONObject json = (JSONObject) result.get(inx);
@@ -135,8 +152,11 @@ public class SearchUserFragment extends Fragment {
                                 xpushUser.setName(json.getString("U"));
                             }
 
-                            mXpushUsers.add(xpushUser);
+                            users.add(xpushUser);
                         }
+
+                        Collections.sort(users, new NameAscCompare());
+                        mXpushUsers.addAll( users );
 
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
@@ -151,5 +171,18 @@ public class SearchUserFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void scrollToBottom() {
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+    }
+
+    static class NameAscCompare implements Comparator<XPushUser> {
+        public int compare(XPushUser arg0, XPushUser arg1) {
+            System.out.println( arg0.getName() + " : " + arg1.getName() );
+
+
+            return arg0.getName().compareTo( arg1.getName() );
+        }
     }
 }

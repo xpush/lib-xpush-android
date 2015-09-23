@@ -7,25 +7,12 @@
         android:id="@+id/listView"
         android:divider="@null"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll"
         android:scrollbarStyle="outsideOverlay"/>
-
-    <TextView
-        android:id="@+id/emptyMsg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:padding="50dp"
-        android:text="@string/no_friends_message"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#384452"
-        android:visibility="invisible" />
 
 </RelativeLayout>
 
