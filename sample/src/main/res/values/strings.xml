@@ -30,4 +30,6 @@
 
 
     <string name="drawer_menu">Menu</string>
+
+    <string name="label.text.search.user">ID or Name</string>
 </resources>

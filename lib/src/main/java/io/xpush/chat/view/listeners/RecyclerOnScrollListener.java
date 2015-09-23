@@ -12,11 +12,17 @@ public abstract class RecyclerOnScrollListener extends RecyclerView.OnScrollList
     private int visibleThreshold = 5; // The minimum amount of items to have below your current scroll position before loading more.
     int firstVisibleItem, visibleItemCount, totalItemCount;
 
+    public enum RecylclerDirection{
+        UP, DOWN
+    }
+
     private int current_page = 1;
+    private RecylclerDirection mDirection;
 
     private LinearLayoutManager mLinearLayoutManager;
 
-    public RecyclerOnScrollListener(LinearLayoutManager linearLayoutManager) {
+    public RecyclerOnScrollListener(LinearLayoutManager linearLayoutManager, RecylclerDirection direction) {
+        this.mDirection = direction;
         this.mLinearLayoutManager = linearLayoutManager;
     }
 
@@ -24,9 +30,17 @@ public abstract class RecyclerOnScrollListener extends RecyclerView.OnScrollList
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
 
-        // if scroll to bottom
-        if( dy > 0 ){
-            return;
+        if( RecylclerDirection.UP == mDirection ) {
+            // if scroll to bottom
+            if (dy > 0) {
+                return;
+            }
+
+        } else {
+            // if scroll to up
+            if (dy < 0) {
+                return;
+            }
         }
 
         visibleItemCount = recyclerView.getChildCount();
@@ -40,12 +54,26 @@ public abstract class RecyclerOnScrollListener extends RecyclerView.OnScrollList
             }
         }
 
-        // Thread Hold reached
-        if (!loading && firstVisibleItem <= visibleThreshold) {
-            // Do something
-            current_page++;
-            onLoadMore(current_page);
-            loading = true;
+        if( RecylclerDirection.UP == mDirection ) {
+
+            // Thread Hold reached
+            if (!loading && firstVisibleItem <= visibleThreshold) {
+                // Do something
+                current_page++;
+                onLoadMore(current_page);
+                loading = true;
+            }
+
+        } else {
+
+            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+
+                // End has been reached
+                // Do something
+                current_page++;
+                onLoadMore(current_page);
+                loading = true;
+            }
         }
     }
 
@@ -56,3 +84,4 @@ public abstract class RecyclerOnScrollListener extends RecyclerView.OnScrollList
         this.loading = loading;
     }
 }
+

@@ -1,15 +1,32 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/activatedBackgroundIndicator">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <FrameLayout
+        android:id="@+id/layoutText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/font_gray4">
+
+        <EditText
+            android:layout_gravity="center"
+            android:layout_margin="4dp"
+            android:id="@+id/search"
+            android:background="@color/white"
+            android:layout_width="fill_parent"
+            android:layout_height="40dp"
+            android:hint="@string/label.text.search.user" >
+        </EditText>
+
+    </FrameLayout>
 
     <android.support.v7.widget.RecyclerView
+        android:layout_below="@id/layoutText"
         android:id="@+id/listView"
-        android:divider="@null"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll"
         android:scrollbarStyle="outsideOverlay"/>

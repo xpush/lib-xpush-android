@@ -12,7 +12,9 @@ import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import io.xpush.sampleChat.R;
 import io.xpush.chat.models.XPushMessage;
@@ -23,9 +25,13 @@ import io.xpush.chat.util.DateUtils;
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
     private List<XPushUser> mXpushUsers;
+    private ArrayList<XPushUser> userList;
 
     public UserListAdapter(Context context, List<XPushUser> xpushUsers) {
         mXpushUsers = xpushUsers;
+
+        this.userList = new ArrayList<XPushUser>();
+        this.userList.addAll(xpushUsers);
     }
 
     @Override
@@ -75,5 +81,27 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         public void onClick(View view) {
             Toast.makeText(view.getContext(), "position = " + getPosition(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    // Filter Class
+    public void filter(String charText) {
+        charText = charText.toLowerCase(Locale.getDefault());
+        mXpushUsers.clear();
+
+        if (charText.length() == 0) {
+            mXpushUsers.addAll(userList);
+        } else {
+            for (XPushUser u : userList) {
+                if (u.getName().toLowerCase(Locale.getDefault()).contains(charText) || u.getId().toLowerCase(Locale.getDefault()).contains(charText) ) {
+                    mXpushUsers.add(u);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void resetUsers(){
+        this.userList = new ArrayList<XPushUser>();
+        this.userList.addAll(mXpushUsers);
     }
 }

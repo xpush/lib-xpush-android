@@ -1,17 +1,19 @@
 package io.xpush.sampleChat.fragments;
 
 import android.app.Activity;
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.github.nkzawa.socketio.client.Ack;
 
@@ -23,19 +25,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.sampleChat.R;
-import io.xpush.chat.models.XPushUser;
 import io.xpush.sampleChat.adapters.UserListAdapter;
 
 public class SearchUserFragment extends Fragment  {
 
     private static final String TAG = SearchUserFragment.class.getSimpleName();
+    private static final int PAGE_SIZE = 50;
 
     private List<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
-    private RecyclerView.Adapter mAdapter;
+    private UserListAdapter mAdapter;
 
     private Activity mActivity;
     private String mUsername;
@@ -44,6 +48,10 @@ public class SearchUserFragment extends Fragment  {
     private LinearLayoutManager mLayoutManager;
 
     private int mViewPage;
+    private RecyclerOnScrollListener mOnScrollListener;
+    private LoadMoreHandler mHandler;
+    private EditText mEditSearch;
+
 
     @Override
     public void onAttach(Activity activity) {
@@ -65,6 +73,32 @@ public class SearchUserFragment extends Fragment  {
 
         View view = inflater.inflate(R.layout.fragment_search_users, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.listView);
+
+
+
+        // Locate the EditText in listview_main.xml
+        mEditSearch = (EditText) view.findViewById(R.id.search);
+
+        // Capture Text in EditText
+        mEditSearch.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+                // TODO Auto-generated method stub
+                String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
+                mAdapter.filter(text);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+            }
+        });
+
+        mHandler = new LoadMoreHandler();
         return view;
     }
 
@@ -85,10 +119,20 @@ public class SearchUserFragment extends Fragment  {
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        getUsers();
+
+        mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager, RecyclerOnScrollListener.RecylclerDirection.DOWN) {
+            @Override
+            public void onLoadMore(int current_page) {
+                Log.d(TAG, " onLoadMore : " + current_page);
+                getUsers(++mViewPage);
+            }
+        };
+
+        mRecyclerView.addOnScrollListener(mOnScrollListener);
+        getUsers(mViewPage);
     }
 
-    public void getUsers(){
+    public void getUsers(int page){
         JSONObject jsonObject = new JSONObject();
         JSONObject column = new JSONObject();
         JSONObject options = new JSONObject();
@@ -101,7 +145,9 @@ public class SearchUserFragment extends Fragment  {
 
             jsonObject.put("query", new JSONObject().put("A", getString(R.string.app_id)) );
             options.put( "pageNum", mViewPage );
-            options.put( "pageSize", 50 );
+            options.put( "pageSize", PAGE_SIZE );
+            options.put( "skipCount", true );
+            options.put( "sortBy", "DT.NM" );
 
             jsonObject.put("options", options );
             jsonObject.put("column", column );
@@ -141,6 +187,8 @@ public class SearchUserFragment extends Fragment  {
 
                                 if (data.has("NM")) {
                                     xpushUser.setName(data.getString("NM"));
+                                } else {
+                                    xpushUser.setName(json.getString("U"));
                                 }
                                 if (data.has("MG")) {
                                     xpushUser.setMessage(data.getString("MG"));
@@ -155,15 +203,11 @@ public class SearchUserFragment extends Fragment  {
                             users.add(xpushUser);
                         }
 
-                        Collections.sort(users, new NameAscCompare());
-                        mXpushUsers.addAll( users );
-
-                        mActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
+                        if( users.size() >0  ) {
+                            //Collections.sort(users, new NameAscCompare());
+                            mXpushUsers.addAll(users);
+                            mHandler.sendEmptyMessage(0);
+                        }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -173,16 +217,25 @@ public class SearchUserFragment extends Fragment  {
         });
     }
 
-    private void scrollToBottom() {
-        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
-    }
-
     static class NameAscCompare implements Comparator<XPushUser> {
         public int compare(XPushUser arg0, XPushUser arg1) {
-            System.out.println( arg0.getName() + " : " + arg1.getName() );
-
-
             return arg0.getName().compareTo( arg1.getName() );
         }
     }
+
+    // Handler 클래스
+    class LoadMoreHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case 0:
+                    mAdapter.resetUsers();
+                    mAdapter.notifyDataSetChanged();
+                    break;
+            }
+        }
+    };
 }

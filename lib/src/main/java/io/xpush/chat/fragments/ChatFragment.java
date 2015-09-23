@@ -608,7 +608,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mAdapter.notifyDataSetChanged();
 
         if( onStarting ) {
-            mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager) {
+            mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager, RecyclerOnScrollListener.RecylclerDirection.UP) {
                 @Override
                 public void onLoadMore(int current_page) {
                     Log.d(TAG, " onLoadMore : "+  current_page);
