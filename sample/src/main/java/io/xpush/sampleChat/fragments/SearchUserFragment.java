@@ -56,7 +56,7 @@ public class SearchUserFragment extends Fragment  {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new UserListAdapter(activity, mXpushUsers);
+        mAdapter = new UserListAdapter(activity, mXpushUsers, new AddFriendHandler());
     }
 
     @Override
@@ -160,7 +160,6 @@ public class SearchUserFragment extends Fragment  {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
-
                 Log.d(TAG, response.toString());
                 if (response.has("result")) {
                     try {
@@ -204,7 +203,6 @@ public class SearchUserFragment extends Fragment  {
                         }
 
                         if( users.size() >0  ) {
-                            //Collections.sort(users, new NameAscCompare());
                             mXpushUsers.addAll(users);
                             mHandler.sendEmptyMessage(0);
                         }
@@ -234,6 +232,21 @@ public class SearchUserFragment extends Fragment  {
                 case 0:
                     mAdapter.resetUsers();
                     mAdapter.notifyDataSetChanged();
+                    break;
+            }
+        }
+    };
+
+    // Handler 클래스
+    class AddFriendHandler extends Handler {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            switch (msg.what) {
+                case 0:
+                    mActivity.finish();
                     break;
             }
         }

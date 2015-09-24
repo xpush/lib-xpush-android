@@ -4,6 +4,7 @@
     <color name="dark">#384452</color>
 
     <color name="primary">#f05557</color>
+    <color name="primaryLight">#ccf05557</color>
     <color name="primaryDark">#D04345</color>
 
     <color name="tabIndicator">@color/dark</color>

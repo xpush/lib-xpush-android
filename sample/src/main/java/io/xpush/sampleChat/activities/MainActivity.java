@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     class Adapter extends FragmentPagerAdapter {
 
-        int icons[] = {R.drawable.ic_chat, R.drawable.ic_person};
+        int icons[] = {R.drawable.ic_person, R.drawable.ic_chat};
         String[] tabText = getResources().getStringArray(R.array.tabs);
 
         private Toolbar mToolbar;

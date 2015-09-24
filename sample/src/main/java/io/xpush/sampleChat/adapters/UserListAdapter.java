@@ -2,7 +2,10 @@ package io.xpush.sampleChat.adapters;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +14,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.github.nkzawa.socketio.client.Ack;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import io.xpush.chat.ApplicationController;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushUser;
@@ -24,11 +33,15 @@ import io.xpush.chat.util.DateUtils;
 
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
 
+    private static final String TAG = UserListAdapter.class.getSimpleName();
+
     private List<XPushUser> mXpushUsers;
     private ArrayList<XPushUser> userList;
+    private Handler mHandler;
 
-    public UserListAdapter(Context context, List<XPushUser> xpushUsers) {
+    public UserListAdapter(Context context, List<XPushUser> xpushUsers, Handler handler) {
         mXpushUsers = xpushUsers;
+        mHandler = handler;
 
         this.userList = new ArrayList<XPushUser>();
         this.userList.addAll(xpushUsers);
@@ -41,7 +54,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(ViewHolder viewHolder, final int position) {
         XPushUser xpushUser = mXpushUsers.get(position);
 
         if( xpushUser.getImage() != null && !"".equals(xpushUser.getImage()) ) {
@@ -53,6 +66,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             viewHolder.tvMessage.setText(xpushUser.getMessage());
             viewHolder.llMessage.setVisibility(View.VISIBLE);
         }
+
+        viewHolder.addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFriend( mXpushUsers.get( position ).getId() );
+            }
+        });
     }
 
     @Override
@@ -60,10 +80,11 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         return mXpushUsers.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView tvTitle;
         private TextView tvMessage;
         private SimpleDraweeView thumbNail;
+        private SimpleDraweeView addButton;
         private LinearLayout llMessage;
 
         private ViewHolder(View itemView) {
@@ -73,13 +94,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             tvMessage = (TextView) itemView.findViewById(R.id.tvMessage);
             llMessage= (LinearLayout) itemView.findViewById(R.id.ll_message);
             thumbNail = (SimpleDraweeView) itemView.findViewById(R.id.thumbnail);
-
-            itemView.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-            Toast.makeText(view.getContext(), "position = " + getPosition(), Toast.LENGTH_SHORT).show();
+            addButton  = (SimpleDraweeView) itemView.findViewById(R.id.btnAdd);
         }
     }
 
@@ -103,5 +118,32 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public void resetUsers(){
         this.userList = new ArrayList<XPushUser>();
         this.userList.addAll(mXpushUsers);
+    }
+
+    public void addFriend(String userId){
+        JSONObject jsonObject = new JSONObject();
+        JSONArray array = new JSONArray();
+
+        try {
+            array.put( userId );
+
+            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId()  );
+            jsonObject.put("U", array);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, jsonObject.toString() );
+
+        ApplicationController.getInstance().getClient().emit("group-add", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+                Log.d(TAG, response.toString());
+
+                mHandler.sendEmptyMessage(0);
+            }
+        });
     }
 }

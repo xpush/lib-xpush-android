@@ -9,4 +9,6 @@
     <dimen name="splash_width">220dp</dimen>
 
     <dimen name="divider_height">1dip</dimen>
+
+    <dimen name="fab_margin">16dp</dimen>
 </resources>

@@ -4,12 +4,13 @@
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/divider_height"
     android:background="@drawable/list_selector"
     android:orientation="horizontal"
-    android:paddingBottom="10dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="10dp">
+    android:paddingBottom="5dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="5dp">
 
     <com.facebook.drawee.view.SimpleDraweeView
         android:id="@+id/thumbnail"
@@ -21,25 +22,41 @@
         fresco:roundAsCircle="true"
         fresco:placeholderImage="@drawable/default_user"/>
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="..."
-        android:textColor="#040404"
-        android:singleLine="true"
-        android:layout_toEndOf="@id/thumbnail"
-        android:layout_toRightOf="@id/thumbnail"
-        android:textSize="16dip"
-        android:textStyle="bold"
-        android:typeface="sans" />
-
     <LinearLayout
         android:gravity="center_vertical"
-        android:layout_alignParentRight="true"
-        android:visibility="invisible"
-        android:orientation="vertical" android:id="@+id/ll_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" android:background="@drawable/chatroom_message_bubble">
-        <TextView android:gravity="center_vertical" android:maxWidth="360dip" android:id="@+id/tvMessage" android:autoLink="none" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="fill_parent" android:includeFontPadding="false"/>
+        android:layout_toEndOf="@id/thumbnail"
+        android:layout_toRightOf="@id/thumbnail"
+        android:orientation="vertical" android:id="@+id/ll_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" >
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:textColor="#040404"
+            android:singleLine="true"
+            android:textSize="16dip"
+            android:textStyle="bold"
+            android:typeface="sans" />
+
+        <TextView
+            android:gravity="center_vertical"
+            android:maxWidth="360dip"
+            android:id="@+id/tvMessage"
+            android:autoLink="none"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:includeFontPadding="false"/>
     </LinearLayout>
 
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/btnAdd"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_width="30dp" android:layout_height="30dp"
+        fresco:actualImageScaleType="center"
+        fresco:placeholderImage="@drawable/ic_person_add_black"
+        fresco:placeholderImageScaleType="center"/>
 </RelativeLayout>
