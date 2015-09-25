@@ -1,6 +1,7 @@
 package io.xpush.sampleChat.fragments;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,16 +23,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.models.XPushUser;
+import io.xpush.chat.persist.UserTable;
+import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.sampleChat.R;
-import io.xpush.sampleChat.adapters.UserListAdapter;
+import io.xpush.sampleChat.adapters.SearchUserListAdapter;
 
 public class SearchUserFragment extends Fragment  {
 
@@ -39,7 +40,7 @@ public class SearchUserFragment extends Fragment  {
     private static final int PAGE_SIZE = 50;
 
     private List<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
-    private UserListAdapter mAdapter;
+    private SearchUserListAdapter mAdapter;
 
     private Activity mActivity;
     private String mUsername;
@@ -56,7 +57,7 @@ public class SearchUserFragment extends Fragment  {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new UserListAdapter(activity, mXpushUsers, new AddFriendHandler());
+        mAdapter = new SearchUserListAdapter(this, mXpushUsers);
     }
 
     @Override
@@ -202,7 +203,7 @@ public class SearchUserFragment extends Fragment  {
                             users.add(xpushUser);
                         }
 
-                        if( users.size() >0  ) {
+                        if (users.size() > 0) {
                             mXpushUsers.addAll(users);
                             mHandler.sendEmptyMessage(0);
                         }
@@ -215,10 +216,46 @@ public class SearchUserFragment extends Fragment  {
         });
     }
 
-    static class NameAscCompare implements Comparator<XPushUser> {
-        public int compare(XPushUser arg0, XPushUser arg1) {
-            return arg0.getName().compareTo( arg1.getName() );
+    public void addFriend(final XPushUser user){
+        JSONObject jsonObject = new JSONObject();
+        JSONArray array = new JSONArray();
+
+        try {
+            array.put( user.getId() );
+
+            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId()  );
+            jsonObject.put("U", array );
+
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
+
+        Log.d(TAG, jsonObject.toString());
+
+        ApplicationController.getInstance().getClient().emit("group-add", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+                Log.d(TAG, response.toString());
+                try {
+                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
+
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(UserTable.KEY_ID, user.getId());
+                        contentValues.put(UserTable.KEY_NAME, user.getName());
+                        contentValues.put(UserTable.KEY_MESSAGE, user.getMessage());
+                        contentValues.put(UserTable.KEY_IMAGE, user.getImage());
+
+                        contentValues.put( XpushContentProvider.SQL_INSERT_OR_REPLACE, true );
+                        getActivity( ).getContentResolver().insert(XpushContentProvider.USER_CONTENT_URI, contentValues);
+
+                        mActivity.finish();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     // Handler 클래스
@@ -232,21 +269,6 @@ public class SearchUserFragment extends Fragment  {
                 case 0:
                     mAdapter.resetUsers();
                     mAdapter.notifyDataSetChanged();
-                    break;
-            }
-        }
-    };
-
-    // Handler 클래스
-    class AddFriendHandler extends Handler {
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-
-            switch (msg.what) {
-                case 0:
-                    mActivity.finish();
                     break;
             }
         }

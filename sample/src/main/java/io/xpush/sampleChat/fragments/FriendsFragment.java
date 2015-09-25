@@ -47,10 +47,9 @@ public class FriendsFragment extends UsersFragment {
     @Override
     public void getUsers(){
         JSONObject jsonObject = new JSONObject();
-        JSONArray array = new JSONArray();
+
         try {
-            array.put(ApplicationController.getInstance().getXpushSession().getId() );
-            jsonObject.put("GR", array );
+            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId() );
 
         } catch (JSONException e) {
             e.printStackTrace();
