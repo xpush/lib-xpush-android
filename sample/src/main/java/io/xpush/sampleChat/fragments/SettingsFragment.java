@@ -58,8 +58,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             EditTextPreference editTextPref = (EditTextPreference) p;
             p.setSummary(editTextPref.getText());
         }
-
-        // More logic for ListPreference, etc...
     }
 
     @Override

@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 
 import io.xpush.chat.R;
 import io.xpush.chat.fragments.ChatFragment;
+import io.xpush.chat.models.XPushChannel;
 
 public class ChatActivity extends AppCompatActivity{
 
@@ -26,8 +27,8 @@ public class ChatActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ActionBar ab = getSupportActionBar();
-        //ab.setHomeAsUpIndicator(R.drawable.ic_arrow_left);
-        //ab.setDisplayHomeAsUpEnabled(true);
+        Bundle bundle = getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+        XPushChannel xpushChannel = new XPushChannel(bundle);
+        toolbar.setTitle(xpushChannel.getName()) ;
     }
 }

@@ -5,8 +5,16 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.TextView;
 
+import com.github.nkzawa.socketio.client.Ack;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.xpush.chat.ApplicationController;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ProfileFragment;
 import io.xpush.sampleChat.fragments.SearchUserFragment;
@@ -39,4 +47,5 @@ public class SearchUserActivity extends AppCompatActivity {
         //ab.setHomeAsUpIndicator(R.drawable.ic_arrow_left);
         //ab.setDisplayHomeAsUpEnabled(true);
     }
+
 }

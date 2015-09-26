@@ -1,47 +1,36 @@
 package io.xpush.sampleChat.adapters;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.github.nkzawa.socketio.client.Ack;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import io.xpush.chat.ApplicationController;
 import io.xpush.sampleChat.R;
-import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushUser;
-import io.xpush.chat.util.DateUtils;
+import io.xpush.sampleChat.fragments.SearchUserFragment;
 
 
-public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHolder> {
+public class SearchUserListAdapter extends RecyclerView.Adapter<SearchUserListAdapter.ViewHolder> {
 
-    private static final String TAG = UserListAdapter.class.getSimpleName();
+    private static final String TAG = SearchUserListAdapter.class.getSimpleName();
 
+    private SearchUserFragment mFragment;
     private List<XPushUser> mXpushUsers;
     private ArrayList<XPushUser> userList;
     private Handler mHandler;
 
-    public UserListAdapter(Context context, List<XPushUser> xpushUsers, Handler handler) {
+    public SearchUserListAdapter(SearchUserFragment fragment, List<XPushUser> xpushUsers) {
         mXpushUsers = xpushUsers;
-        mHandler = handler;
+        mFragment = fragment;
 
         this.userList = new ArrayList<XPushUser>();
         this.userList.addAll(xpushUsers);
@@ -61,7 +50,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
             viewHolder.thumbNail.setImageURI(Uri.parse(xpushUser.getImage()));
         }
 
-        viewHolder.tvTitle.setText(xpushUser.getName());
+        viewHolder.tvName.setText(xpushUser.getName());
         if( xpushUser.getMessage() != null && !"".equals( xpushUser.getMessage().trim() ) ) {
             viewHolder.tvMessage.setText(xpushUser.getMessage());
         } else {
@@ -71,7 +60,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         viewHolder.addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addFriend(mXpushUsers.get( position ).getId() );
+                mFragment.addFriend(mXpushUsers.get(position));
             }
         });
     }
@@ -82,18 +71,16 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView tvTitle;
+        private TextView tvName;
         private TextView tvMessage;
         private SimpleDraweeView thumbNail;
         private SimpleDraweeView addButton;
-        private LinearLayout llMessage;
 
         private ViewHolder(View itemView) {
             super(itemView);
 
-            tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
+            tvName = (TextView) itemView.findViewById(R.id.tvName);
             tvMessage = (TextView) itemView.findViewById(R.id.tvMessage);
-            llMessage= (LinearLayout) itemView.findViewById(R.id.ll_message);
             thumbNail = (SimpleDraweeView) itemView.findViewById(R.id.thumbnail);
             addButton  = (SimpleDraweeView) itemView.findViewById(R.id.btnAdd);
         }
@@ -119,32 +106,5 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
     public void resetUsers(){
         this.userList = new ArrayList<XPushUser>();
         this.userList.addAll(mXpushUsers);
-    }
-
-    public void addFriend(String userId){
-        JSONObject jsonObject = new JSONObject();
-        JSONArray array = new JSONArray();
-
-        try {
-            array.put( userId );
-
-            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId()  );
-            jsonObject.put("U", array);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Log.d(TAG, jsonObject.toString() );
-
-        ApplicationController.getInstance().getClient().emit("group-add", jsonObject, new Ack() {
-            @Override
-            public void call(Object... args) {
-                JSONObject response = (JSONObject) args[0];
-                Log.d(TAG, response.toString());
-
-                mHandler.sendEmptyMessage(0);
-            }
-        });
     }
 }

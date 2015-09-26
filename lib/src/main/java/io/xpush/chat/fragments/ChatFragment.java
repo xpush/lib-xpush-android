@@ -7,12 +7,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -40,7 +41,6 @@ import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,15 +62,11 @@ import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
-import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 
-/**
- * A chat fragment containing messages view and input form.
- */
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
     public static final String TAG = ChatFragment.class.getSimpleName();
@@ -123,7 +119,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onCreate(Bundle savedInstanceState) {
 
         mViewCount = 16;
-
         mActivity = getActivity();
 
         mDbHelper = new DBHelper(mActivity);
@@ -137,15 +132,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         mChannel = mXpushChannel.getId();
         mUsers = mXpushChannel.getUsers();
-
         mUsername = ApplicationController.getInstance().getXpushSession().getId();
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
         mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
-
         getLoaderManager().initLoader(0, null, this);
     }
 
@@ -210,7 +202,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (null == mUsername) return;
-                if (!mSocket.connected()) return;
+                if (mSocket != null && !mSocket.connected()) return;
 
                 if (!mTyping) {
                     mTyping = true;
@@ -237,7 +229,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             }
         });
 
-        ImageButton sendButton = (ImageButton) view.findViewById(R.id.send_button);
+        Button sendButton = (Button) view.findViewById(R.id.send_button);
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

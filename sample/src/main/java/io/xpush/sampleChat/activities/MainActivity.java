@@ -1,36 +1,31 @@
 package io.xpush.sampleChat.activities;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import io.xpush.chat.ApplicationController;
+import io.xpush.chat.fragments.ChannelFragment;
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
-import io.xpush.chat.fragments.ChannelFragment;
-import io.xpush.chat.fragments.UsersFragment;
 import io.xpush.sampleChat.fragments.FriendsFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,14 +33,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private Context mContext;
-
     private ViewPager mViewPager;
-
     private Toolbar mToolbar;
-
     private Menu mMenu;
-
     private DrawerLayout mDrawerLayout;
+    private Adapter mApdater;
+    private FloatingActionButton fab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +50,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                searchUser();
+            }
+        });
+
         mToolbar.setTitle( getResources().getStringArray(R.array.tabs)[0] );
         setSupportActionBar(mToolbar);
 
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        final Adapter apater = new Adapter(getSupportFragmentManager(), this);
-        mViewPager.setAdapter(apater);
+        mApdater = new Adapter(getSupportFragmentManager());
+        mViewPager.setAdapter(mApdater);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,7 +99,12 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position){
-                mToolbar.setTitle(apater.getTitle(position) );
+                mToolbar.setTitle(mApdater.getTitle(position));
+                if( position == 0 ){
+                    fab.setVisibility(View.VISIBLE);
+                } else {
+                    fab.setVisibility(View.INVISIBLE);
+                }
             }
 
             @Override
@@ -120,10 +128,7 @@ public class MainActivity extends AppCompatActivity {
         int icons[] = {R.drawable.ic_person, R.drawable.ic_chat};
         String[] tabText = getResources().getStringArray(R.array.tabs);
 
-        private Toolbar mToolbar;
-        private Context mContext;
-
-        public Adapter(FragmentManager fm, Activity activity) {
+        public Adapter(FragmentManager fm) {
             super(fm);
             tabText = getResources().getStringArray(R.array.tabs);
 
@@ -180,15 +185,12 @@ public class MainActivity extends AppCompatActivity {
             mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
         } else if( item.getItemId() == R.id.action_search_user ){
-            Intent intent = intent = new Intent(MainActivity.this, SearchUserActivity.class);
-            startActivity(intent);
+            searchUser();
         } else if( item.getItemId() == R.id.action_setting ){
-
-            Intent intent = intent = new Intent(MainActivity.this, SettingsActivity.class);
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
         } else if( item.getItemId() == R.id.action_profile ){
-
-            Intent intent = intent = new Intent(MainActivity.this, ProfileActivity.class);
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
         }
 
@@ -213,5 +215,21 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // 수행을 제대로 한 경우
+        if(requestCode == 110 && resultCode == RESULT_OK && data != null) {
+            ( (FriendsFragment) mApdater.getItem(0) ).getUsers();
+        }  else if(resultCode == RESULT_CANCELED){
+
+        }
+    }
+
+    public void searchUser(){
+        Intent intent = new Intent(MainActivity.this, SearchUserActivity.class);
+        startActivityForResult(intent, 110);
     }
 }

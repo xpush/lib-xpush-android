@@ -29,7 +29,7 @@
         android:orientation="vertical" android:id="@+id/ll_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" >
 
         <TextView
-            android:id="@+id/tvTitle"
+            android:id="@+id/tvName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="..."

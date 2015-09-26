@@ -21,25 +21,31 @@
         fresco:roundAsCircle="true"
         fresco:placeholderImage="@drawable/default_user"/>
 
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="..."
-        android:textColor="#040404"
-        android:singleLine="true"
-        android:layout_toEndOf="@id/thumbnail"
-        android:layout_toRightOf="@id/thumbnail"
-        android:textSize="16dip"
-        android:textStyle="bold"
-        android:typeface="sans" />
-
     <LinearLayout
         android:gravity="center_vertical"
-        android:layout_alignParentRight="true"
-        android:visibility="invisible"
-        android:orientation="vertical" android:id="@+id/ll_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" android:background="@drawable/chatroom_message_bubble">
-        <TextView android:gravity="center_vertical" android:maxWidth="360dip" android:id="@+id/tvMessage" android:autoLink="none" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="fill_parent" android:includeFontPadding="false"/>
-    </LinearLayout>
+        android:layout_toEndOf="@id/thumbnail"
+        android:layout_toRightOf="@id/thumbnail"
+        android:orientation="vertical" android:id="@+id/ll_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" >
 
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="..."
+            android:textColor="#040404"
+            android:singleLine="true"
+            android:textSize="16dip"
+            android:textStyle="bold"
+            android:typeface="sans" />
+
+        <TextView
+            android:gravity="center_vertical"
+            android:maxWidth="360dip"
+            android:id="@+id/tvMessage"
+            android:autoLink="none"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:includeFontPadding="false"/>
+    </LinearLayout>
 </RelativeLayout>

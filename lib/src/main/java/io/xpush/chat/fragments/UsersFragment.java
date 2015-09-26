@@ -134,6 +134,7 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
 
                 XPushChannel channel = new XPushChannel();
                 channel.setId(XPushUtils.generateChannelId( userArray ) );
+                channel.setName( user.getName() );
                 channel.setUsers( userArray );
 
                 Bundle bundle = channel.toBundle();

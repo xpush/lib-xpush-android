@@ -7,7 +7,6 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -33,9 +32,8 @@ public class UserCursorAdapter extends CursorAdapter {
         View view = mInflater.inflate(R.layout.fragment_friends_item, null);
 
         ViewHolder holder = new ViewHolder();
-        holder.tvTitle = (TextView) view.findViewById(R.id.tvTitle);
+        holder.tvName = (TextView) view.findViewById(R.id.tvName);
         holder.tvMessage = (TextView) view.findViewById(R.id.tvMessage);
-        holder.llMessage= (LinearLayout) view.findViewById(R.id.ll_message);
         holder.thumbNail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
         view.setTag(holder);
         return view;
@@ -50,17 +48,17 @@ public class UserCursorAdapter extends CursorAdapter {
             holder.thumbNail.setImageURI(Uri.parse(user.getImage()));
         }
 
-        holder.tvTitle.setText(user.getName());
+        holder.tvName.setText(user.getName());
         if( user.getMessage() != null && !"".equals( user.getMessage().trim() ) ) {
             holder.tvMessage.setText(user.getMessage());
-            holder.llMessage.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvMessage.setText("");
         }
     }
 
     public static class ViewHolder {
-        private TextView tvTitle;
+        private TextView tvName;
         private TextView tvMessage;
         private SimpleDraweeView thumbNail;
-        private LinearLayout llMessage;
     }
 }

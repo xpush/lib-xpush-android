@@ -15,6 +15,7 @@
     <color name="progress_endColor">#ff385452</color>
 
     <color name="divider_color">#e7e7e8</color>
+    <color name="activity_chat_background">#e0e0e0</color>
 
     <color name="black">#000000</color>
     <color name="jet">#222222</color>
