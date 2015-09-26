@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#f05557</color>
-    <color name="primaryDark">#D04345</color>
+    <color name="primary">#149487</color>
+    <color name="primaryDark">#249497</color>
 
-    <color name="tabIndicator">@color/dark</color>
+    <color name="tabIndicator">@color/white</color>
 
     <color name="font_point1">#ff3cafa7</color>
     <color name="font_point2">#ff543f3f</color>

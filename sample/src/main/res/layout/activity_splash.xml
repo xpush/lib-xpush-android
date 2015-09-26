@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
-    android:background="#D04345"
+    android:background="@color/primary"
     tools:context=".SplashActivity">
 
     <RelativeLayout

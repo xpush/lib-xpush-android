@@ -64,13 +64,14 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.ViewHo
         viewHolder.tvTitle.setText(xpushUser.getName());
         if( xpushUser.getMessage() != null && !"".equals( xpushUser.getMessage().trim() ) ) {
             viewHolder.tvMessage.setText(xpushUser.getMessage());
-            viewHolder.llMessage.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.tvMessage.setText("");
         }
 
         viewHolder.addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addFriend( mXpushUsers.get( position ).getId() );
+                addFriend(mXpushUsers.get( position ).getId() );
             }
         });
     }

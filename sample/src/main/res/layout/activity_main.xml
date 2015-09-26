@@ -13,7 +13,6 @@
 
         <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/main_content"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -36,6 +35,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
+                <View
+                    android:layout_width="fill_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/divider_color" />
+
             </android.support.design.widget.AppBarLayout>
 
             <android.support.v4.view.ViewPager
@@ -45,18 +49,6 @@
                 android:layout_below="@id/app_bar"
                 android:layout_weight="1"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-            <TextView
-                android:id="@+id/emptyMsg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:padding="50dp"
-                android:text="@string/no_channel_message"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#384452"
-                android:visibility="invisible" />
 
         </android.support.design.widget.CoordinatorLayout>
 
