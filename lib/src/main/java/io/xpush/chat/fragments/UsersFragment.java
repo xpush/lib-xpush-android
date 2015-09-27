@@ -9,11 +9,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -25,6 +29,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
@@ -47,6 +52,9 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mActivity = getActivity();
+        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         return inflater.inflate(R.layout.fragment_friends, container, false);
     }
 
@@ -112,7 +120,7 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
             UserTable.KEY_UPDATED
         };
 
-        mActivity = getActivity();
+
         mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
 
 

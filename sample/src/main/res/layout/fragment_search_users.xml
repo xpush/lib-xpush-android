@@ -2,18 +2,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-
-    <FrameLayout
+    <RelativeLayout
         android:id="@+id/layoutText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:focusableInTouchMode="true"
-        android:background="@color/font_gray4">
+        android:background="@color/iron">
 
         <EditText
             android:layout_gravity="center"
+            android:padding="4dp"
             android:layout_margin="4dp"
-            android:id="@+id/search"
+            android:id="@+id/editSearch"
             android:background="@color/white"
             android:layout_width="fill_parent"
             android:layout_height="40dp"
@@ -21,7 +21,17 @@
             android:hint="@string/label.text.search.user" >
         </EditText>
 
-    </FrameLayout>
+        <ImageView
+            android:id="@+id/iconSearch"
+            android:padding="4dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/editSearch"
+            android:layout_alignBottom="@+id/editSearch"
+            android:layout_alignRight="@+id/editSearch"
+            android:src="@drawable/ic_search_black" />
+
+    </RelativeLayout >
 
     <android.support.v7.widget.RecyclerView
         android:layout_below="@id/layoutText"
@@ -33,6 +43,17 @@
         android:transcriptMode="alwaysScroll"
         android:scrollbarStyle="outsideOverlay"/>
 
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_below="@id/layoutText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:padding="50dp"
+        android:text="@string/ready_for_search"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#384452" />
 </RelativeLayout>
 
 

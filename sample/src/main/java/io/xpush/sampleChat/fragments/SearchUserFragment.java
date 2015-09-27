@@ -11,10 +11,14 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.github.nkzawa.socketio.client.Ack;
 
@@ -44,6 +48,7 @@ public class SearchUserFragment extends Fragment  {
 
     private Activity mActivity;
     private String mUsername;
+    private TextView mTvMessage;
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
@@ -52,7 +57,9 @@ public class SearchUserFragment extends Fragment  {
     private RecyclerOnScrollListener mOnScrollListener;
     private LoadMoreHandler mHandler;
     private EditText mEditSearch;
+    private String mSearchKey = "";
 
+    private ImageView mIconSearch;
 
     @Override
     public void onAttach(Activity activity) {
@@ -75,19 +82,12 @@ public class SearchUserFragment extends Fragment  {
         View view = inflater.inflate(R.layout.fragment_search_users, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.listView);
 
-
-
-        // Locate the EditText in listview_main.xml
-        mEditSearch = (EditText) view.findViewById(R.id.search);
-
-        // Capture Text in EditText
+        mEditSearch = (EditText) view.findViewById(R.id.editSearch);
         mEditSearch.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void afterTextChanged(Editable arg0) {
-                // TODO Auto-generated method stub
-                String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
-                mAdapter.filter(text);
+                //String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
             }
 
             @Override
@@ -98,6 +98,19 @@ public class SearchUserFragment extends Fragment  {
             public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
             }
         });
+
+        mIconSearch = (ImageView) view.findViewById(R.id.iconSearch);
+
+        mIconSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mViewPage = 1;
+                mSearchKey = "%"+mEditSearch.getText().toString()+"%";
+                getUsers(mViewPage);
+            }
+        });
+        
+        mTvMessage = ( TextView ) view.findViewById(R.id.tvMessage);
 
         mHandler = new LoadMoreHandler();
         return view;
@@ -130,21 +143,28 @@ public class SearchUserFragment extends Fragment  {
         };
 
         mRecyclerView.addOnScrollListener(mOnScrollListener);
-        getUsers(mViewPage);
     }
 
     public void getUsers(int page){
         JSONObject jsonObject = new JSONObject();
         JSONObject column = new JSONObject();
         JSONObject options = new JSONObject();
+        JSONObject query = new JSONObject();
+        JSONArray innerQuerys = new JSONArray();
 
         try {
+            innerQuerys.put( new JSONObject().put("DT.NM", mSearchKey) );
+            innerQuerys.put( new JSONObject().put("U", mSearchKey) );
+
+            if( !"".equals( mSearchKey.trim() ) ) {
+                query.put("$or", innerQuerys);
+            }
+
             column.put( "U", true );
             column.put( "DT", true );
             column.put( "A", true );
             column.put( "_id", false );
 
-            jsonObject.put("query", new JSONObject().put("A", getString(R.string.app_id)) );
             options.put( "pageNum", mViewPage );
             options.put( "pageSize", PAGE_SIZE );
             options.put( "skipCount", true );
@@ -152,6 +172,7 @@ public class SearchUserFragment extends Fragment  {
 
             jsonObject.put("options", options );
             jsonObject.put("column", column );
+            jsonObject.put("query", query);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -267,7 +288,9 @@ public class SearchUserFragment extends Fragment  {
 
             switch (msg.what) {
                 case 0:
-                    mAdapter.resetUsers();
+
+                    mTvMessage.setVisibility(View.INVISIBLE);
+
                     mAdapter.notifyDataSetChanged();
                     break;
             }

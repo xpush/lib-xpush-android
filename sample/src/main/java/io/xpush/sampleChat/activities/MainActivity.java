@@ -15,13 +15,18 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+
+import java.util.Locale;
 
 import io.xpush.chat.fragments.ChannelFragment;
 import io.xpush.chat.view.SlidingTabLayout;
@@ -39,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mDrawerLayout;
     private Adapter mApdater;
     private FloatingActionButton fab;
+    private EditText mEditSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,13 +100,13 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels){
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
             }
 
             @Override
-            public void onPageSelected(int position){
+            public void onPageSelected(int position) {
                 mToolbar.setTitle(mApdater.getTitle(position));
-                if( position == 0 ){
+                if (position == 0) {
                     fab.setVisibility(View.VISIBLE);
                 } else {
                     fab.setVisibility(View.INVISIBLE);
@@ -108,9 +114,28 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state){
+            public void onPageScrollStateChanged(int state) {
             }
         });
+
+        /**
+        mEditSearch = (EditText) findViewById(io.xpush.chat.R.id.editSearch);
+        mEditSearch.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+                String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+            }
+        });
+         */
     }
 
     @Override

@@ -25,15 +25,10 @@ public class SearchUserListAdapter extends RecyclerView.Adapter<SearchUserListAd
 
     private SearchUserFragment mFragment;
     private List<XPushUser> mXpushUsers;
-    private ArrayList<XPushUser> userList;
-    private Handler mHandler;
 
     public SearchUserListAdapter(SearchUserFragment fragment, List<XPushUser> xpushUsers) {
         mXpushUsers = xpushUsers;
         mFragment = fragment;
-
-        this.userList = new ArrayList<XPushUser>();
-        this.userList.addAll(xpushUsers);
     }
 
     @Override
@@ -84,27 +79,5 @@ public class SearchUserListAdapter extends RecyclerView.Adapter<SearchUserListAd
             thumbNail = (SimpleDraweeView) itemView.findViewById(R.id.thumbnail);
             addButton  = (SimpleDraweeView) itemView.findViewById(R.id.btnAdd);
         }
-    }
-
-    // Filter Class
-    public void filter(String charText) {
-        charText = charText.toLowerCase(Locale.getDefault());
-        mXpushUsers.clear();
-
-        if (charText.length() == 0) {
-            mXpushUsers.addAll(userList);
-        } else {
-            for (XPushUser u : userList) {
-                if (u.getName().toLowerCase(Locale.getDefault()).contains(charText) || u.getId().toLowerCase(Locale.getDefault()).contains(charText) ) {
-                    mXpushUsers.add(u);
-                }
-            }
-        }
-        notifyDataSetChanged();
-    }
-
-    public void resetUsers(){
-        this.userList = new ArrayList<XPushUser>();
-        this.userList.addAll(mXpushUsers);
     }
 }

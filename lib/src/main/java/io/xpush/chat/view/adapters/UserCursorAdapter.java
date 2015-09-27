@@ -19,8 +19,6 @@ import io.xpush.chat.models.XPushUser;
 public class UserCursorAdapter extends CursorAdapter {
 
     private final LayoutInflater mInflater;
-    private Context context;
-    private List<XPushUser> objects;
 
     public UserCursorAdapter(Context context, Cursor cursor, int flags) {
         super(context, cursor, flags);

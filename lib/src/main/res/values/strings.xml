@@ -32,4 +32,6 @@
     <string name="no_friends_message">현재 친구가 없습니다.</string>
 
     <string name="action_channel">채널</string>
+
+    <string name="label.text.search.user">ID or Name</string>
 </resources>
