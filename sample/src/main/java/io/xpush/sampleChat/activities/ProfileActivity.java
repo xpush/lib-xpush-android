@@ -1,23 +1,15 @@
 package io.xpush.sampleChat.activities;
 
-import android.app.Fragment;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.MenuItem;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.util.List;
-
-import io.xpush.chat.fragments.ChatFragment;
-import io.xpush.chat.view.activities.AppCompatPreferenceActivity;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ProfileFragment;
-import io.xpush.sampleChat.fragments.SettingsFragment;
 
 /**
  * Created by James on 2015-09-05.
@@ -51,11 +43,22 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        System.out.println("requestCode : " + requestCode);
+        System.out.println("resultCode : " + resultCode);
+
         // 수행을 제대로 한 경우
         if(resultCode == RESULT_OK && data != null) {
-            mTextView = (TextView) f.getView().findViewById( R.id.nickname );
-            String result = data.getStringExtra("profileName");
-            mTextView.setText( result );
+
+            if( requestCode == 103 ) {
+                mTextView = (TextView) f.getView().findViewById(R.id.nickname);
+                String result = data.getStringExtra("profileName");
+                mTextView.setText(result);
+            } else if ( requestCode == 110 ){
+                Uri selectedImageUri = data.getData();
+                f.setImage( selectedImageUri );
+            }
+
         }  else if(resultCode == RESULT_CANCELED){
         }
     }

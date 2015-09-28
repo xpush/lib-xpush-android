@@ -4,12 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout android:gravity="center_horizontal"
-        android:orientation="vertical"
+    <LinearLayout
         android:id="@+id/box"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
         <FrameLayout
+            android:id="@+id/imageBox"
             android:padding="0.0dip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
