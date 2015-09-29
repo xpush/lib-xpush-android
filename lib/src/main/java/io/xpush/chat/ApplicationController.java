@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.persist.XpushContentProvider;
 
 public class ApplicationController extends Application {
 
@@ -38,16 +39,7 @@ public class ApplicationController extends Application {
         mInstance = this;
 
         mAppId = getString(R.string.app_id);
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-        final String loginUserStr = pref.getString("XPUSH_SESSION", "");
-        if( !"".equals( loginUserStr ) ){
-            try {
-                mXpushSession = new XPushSession( new JSONObject( loginUserStr ) );
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
+        getXpushSession();
     }
 
     public XPushSession getXpushSession(){
@@ -64,6 +56,14 @@ public class ApplicationController extends Application {
         }
 
         return mXpushSession;
+    }
+
+    public void setXpushSession(XPushSession session){
+        mXpushSession = session;
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ApplicationController.getInstance());
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putString("XPUSH_SESSION", mXpushSession.toJSON().toString());
+        editor.commit();
     }
 
     public RequestQueue getRequestQueue() {

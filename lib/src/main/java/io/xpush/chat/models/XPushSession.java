@@ -5,6 +5,10 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+
 public class XPushSession {
 
     public static final String APP_ID = "A";
@@ -15,6 +19,8 @@ public class XPushSession {
     public static final String NOTI_ID = "N";
     public static final String SERVER_NAME = "SERVER_NAME";
     public static final String SERVER_URL = "SERVER_URL";
+    public static final String IMAGE = "I";
+    public static final String NAME = "NM";
 
     private String appId;
     private String id;
@@ -23,7 +29,9 @@ public class XPushSession {
     private String token;
     private String notiId;
     private String serverName;
+    private String image;
     private String serverUrl;
+    private String name;
 
     public String getAppId() {
         return appId;
@@ -89,8 +97,23 @@ public class XPushSession {
         this.serverUrl = serverUrl;
     }
 
-    public XPushSession(){
+    public String getImage() {
+        return image;
+    }
 
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public XPushSession(){
     }
 
     public XPushSession(Bundle bundle){
@@ -101,6 +124,8 @@ public class XPushSession {
         this.notiId= bundle.getString(NOTI_ID);
         this.serverName= bundle.getString(SERVER_NAME);
         this.serverUrl= bundle.getString(SERVER_URL);
+        this.image = bundle.getString(IMAGE);
+        this.name = bundle.getString(NAME);
     }
 
     public XPushSession(JSONObject object){
@@ -126,6 +151,10 @@ public class XPushSession {
             if( object.has(SERVER_URL)) {
                 this.serverUrl = object.getString(SERVER_URL);
             }
+
+            if( object.has(NAME)) {
+                this.name = object.getString(name);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -141,10 +170,28 @@ public class XPushSession {
             j.put(NOTI_ID, this.notiId);
             j.put(SERVER_NAME, this.serverName);
             j.put(SERVER_URL, this.serverUrl);
+            j.put(IMAGE, this.image);
+            j.put(NAME, this.name);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
         return j;
+    }
+
+    public JSONObject getUserData(){
+        JSONObject userData = new JSONObject();
+        try {
+            userData.put("NM", name);
+
+            if( image != null ){
+                userData.put("I", image);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return userData;
     }
 }

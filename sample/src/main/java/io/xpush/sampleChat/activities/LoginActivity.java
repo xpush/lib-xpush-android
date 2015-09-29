@@ -93,8 +93,6 @@ public class LoginActivity extends AppCompatActivity  {
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    Log.d(TAG, "Login success ======================");
-                    Log.d(TAG, response.toString());
                     try {
                         if( "ok".equalsIgnoreCase(response.getString("status")) ){
                             progressDialog.dismiss();

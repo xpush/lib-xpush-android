@@ -37,11 +37,13 @@ public class LoginRequest extends StringRequest {
         JSONObject parsed;
         try {
             parsed = new JSONObject( new String(response.data) );
-            if ("ok".equalsIgnoreCase(parsed.getString("status"))) {
 
-                String token = parsed.getJSONObject("result").getString("token");
-                String server = parsed.getJSONObject("result").getString("server");
-                String serverUrl = parsed.getJSONObject("result").getString("serverUrl");
+            if ("ok".equalsIgnoreCase(parsed.getString("status"))) {
+                JSONObject result = parsed.getJSONObject("result");
+
+                String token = result.getString("token");
+                String server = result.getString("server");
+                String serverUrl = result.getString("serverUrl");
 
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ApplicationController.getInstance());
                 SharedPreferences.Editor editor = pref.edit();
@@ -49,9 +51,13 @@ public class LoginRequest extends StringRequest {
                 XPushSession xpushSession = new XPushSession();
 
                 xpushSession.setAppId(getParams().get("A"));
+
                 xpushSession.setId(getParams().get("U"));
                 xpushSession.setPassword(getParams().get("PW"));
                 xpushSession.setDeviceId(getParams().get("D"));
+                xpushSession.setImage(result.getJSONObject("user").getJSONObject("DT").getString("I"));
+                xpushSession.setName(result.getJSONObject("user").getJSONObject("DT").getString("NM"));
+
                 xpushSession.setToken(token);
                 xpushSession.setServerName(server);
                 xpushSession.setServerUrl(serverUrl);
@@ -62,6 +68,7 @@ public class LoginRequest extends StringRequest {
                 XPushService.actionStart(ApplicationController.getInstance());
             }
         } catch (JSONException e) {
+            e.printStackTrace();
             parsed = null;
         }
 

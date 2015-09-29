@@ -2,16 +2,23 @@ package io.xpush.sampleChat.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.github.nkzawa.socketio.client.Ack;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -23,9 +30,12 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.activities.EditProfileNameActivity;
@@ -36,13 +46,15 @@ public class ProfileFragment extends Fragment {
     private Context mActivity;
     private View nicknameButton;
     private View mImageBox;
-    private SimpleDraweeView thumbnail;
+    private SimpleDraweeView mThumbnail;
+    private XPushSession mSession;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
+        mSession = ApplicationController.getInstance().getXpushSession();
     }
 
     @Override
@@ -66,8 +78,10 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        thumbnail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
-
+        mThumbnail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
+        if( mSession.getImage() != null ) {
+            mThumbnail.setImageURI(Uri.parse(mSession.getImage()));
+        }
         return view;
     }
 
@@ -91,16 +105,17 @@ public class ProfileFragment extends Fragment {
 
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
 
-    public void uploadImage(Uri uri){
+    public String uploadImage(Uri uri){
 
-        XPushSession session = ApplicationController.getInstance().getXpushSession();
-        String url = session.getServerUrl()+"/upload";
+        String downloadUrl = null;
+
+        String url = mSession.getServerUrl()+"/upload";
 
         JSONObject userData = new JSONObject();
 
         try {
-            userData.put( "U", session.getId() );
-            userData.put( "D", session.getDeviceId() );
+            userData.put( "U", mSession.getId() );
+            userData.put( "D", mSession.getDeviceId() );
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -113,10 +128,13 @@ public class ProfileFragment extends Fragment {
                 .type(MultipartBuilder.FORM)
                 .addFormDataPart("file", aFile.getName(), RequestBody.create(MEDIA_TYPE_PNG, aFile)).build();
 
+
+        String appId = ApplicationController.getInstance().getAppId();
+
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("XP-A", ApplicationController.getInstance().getAppId() )
-                .addHeader("XP-C", session.getId())
+                .addHeader("XP-A", appId )
+                .addHeader("XP-C", mSession.getId() +"^"+ appId)
                 .addHeader("XP-U", userData.toString() )
                 .addHeader("XP-FU-org",  aFile.getName())
                 .addHeader("XP-FU-nm", aFile.getName().substring(0, aFile.getName().lastIndexOf(".") ) )
@@ -129,15 +147,29 @@ public class ProfileFragment extends Fragment {
         com.squareup.okhttp.Response response = null;
         try {
             response = client.newCall(request).execute();
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            System.out.println(response.body().string());
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            JSONObject res = new JSONObject( response.body().string() );
+            JSONObject result = res.getJSONObject("result");
+
+            String channel = result.getString("channel");
+            String tname = result.getString("tname");
+
+            downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/"+ApplicationController.getInstance().getClient().id() +"/"+tname;
+
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
+        return downloadUrl;
+
     }
 
-    private class UploadImageTask extends AsyncTask<Void, Void, Void> {
+    private class UploadImageTask extends AsyncTask<Void, Void, String> {
         Uri mUri;
 
         public UploadImageTask( Uri uri ){
@@ -145,14 +177,65 @@ public class ProfileFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            uploadImage(mUri );
-            return null;
+        protected String doInBackground(Void... voids) {
+            String uploadImageUrl = uploadImage(mUri);
+            return uploadImageUrl;
         }
 
         @Override
-        protected  void onPostExecute(Void aVoid){
-            super.onPostExecute(aVoid);
+        protected  void onPostExecute(final String imageUrl){
+            super.onPostExecute(imageUrl);
+            if( imageUrl != null ){
+
+                mThumbnail.setImageURI(Uri.parse(imageUrl));
+
+                final Map<String,String> params = new HashMap<String, String>();
+
+                JSONObject data = mSession.getUserData();
+                try {
+                    data.put("I", imageUrl);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                params.put("A", getString(R.string.app_id));
+                params.put("U", mSession.getId());
+                params.put("DT", data.toString());
+                params.put("PW", mSession.getPassword());
+                params.put("D", mSession.getDeviceId());
+
+                String url = getString(R.string.host_name)+"/user/update";
+
+                StringRequest request = new StringRequest(url, params,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d(TAG, "Update user success ======================");
+                                Log.d(TAG, response.toString());
+                                try {
+                                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                        Log.d(TAG, response.getString("status"));
+
+                                        mSession.setImage(imageUrl);
+                                        ApplicationController.getInstance().setXpushSession( mSession );
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d(TAG, "Update user error ======================");
+                                error.printStackTrace();
+                            }
+                        }
+                );
+
+                RequestQueue queue = Volley.newRequestQueue(mActivity);
+                queue.add(request);
+            }
         }
     }
 }
