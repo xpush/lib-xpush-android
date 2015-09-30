@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
@@ -42,6 +43,8 @@ public class RealPathUtil {
         String[] proj = { MediaStore.Images.Media.DATA };
         String result = null;
 
+        Looper.prepare();
+
         CursorLoader cursorLoader = new CursorLoader(
                 context,
                 contentUri, proj, null, null, null);
@@ -57,6 +60,9 @@ public class RealPathUtil {
     }
 
     public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri){
+
+        Looper.prepare();
+
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
         int column_index
@@ -78,7 +84,11 @@ public class RealPathUtil {
 
             // SDK > 19 (Android 4.4)
         } else {
-            realPath = RealPathUtil.getRealPathFromURI_API19(context, uri);
+            if (String.valueOf(uri).contains("documents")) {
+                realPath = RealPathUtil.getRealPathFromURI_API19(context, uri);
+            } else {
+                realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
+            }
         }
 
         return realPath;

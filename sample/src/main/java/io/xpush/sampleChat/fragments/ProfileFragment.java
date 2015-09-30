@@ -2,23 +2,21 @@ package io.xpush.sampleChat.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.github.nkzawa.socketio.client.Ack;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -38,16 +36,23 @@ import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.sampleChat.R;
-import io.xpush.sampleChat.activities.EditProfileNameActivity;
+import io.xpush.sampleChat.activities.EditNickNameActivity;
+import io.xpush.sampleChat.activities.EditStatusMessageActivity;
 
 public class ProfileFragment extends Fragment {
 
     private String TAG = ProfileFragment.class.getSimpleName();
     private Context mActivity;
-    private View nicknameButton;
+    private View mNicknameButton;
+    private View mStatusMessageButton;
+
     private View mImageBox;
     private SimpleDraweeView mThumbnail;
     private XPushSession mSession;
+    private TextView mTvNickname;
+    private TextView mTvStatusMessage;
+
+    private JSONObject mJsonUserData;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,17 +60,26 @@ public class ProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         mSession = ApplicationController.getInstance().getXpushSession();
+        mJsonUserData = mSession.getUserData();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        nicknameButton = view.findViewById(R.id.nicknameButton);
-        nicknameButton.setOnClickListener(new View.OnClickListener() {
+        mNicknameButton = view.findViewById(R.id.nickname_button);
+        mNicknameButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 editUserName();
+            }
+        });
+
+        mStatusMessageButton = view.findViewById(R.id.status_message_button);
+        mStatusMessageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                editStatusMessage();
             }
         });
 
@@ -82,12 +96,28 @@ public class ProfileFragment extends Fragment {
         if( mSession.getImage() != null ) {
             mThumbnail.setImageURI(Uri.parse(mSession.getImage()));
         }
+
+        mTvNickname = (TextView) view.findViewById(R.id.nickname);
+        if( null != mSession.getName() ) {
+            mTvNickname.setText(mSession.getName());
+        }
+
+        mTvStatusMessage = (TextView) view.findViewById(R.id.status_message);
+        if( null != mSession.getMessage() ) {
+            mTvStatusMessage.setText(mSession.getMessage());
+        }
+
         return view;
     }
 
     public void editUserName() {
-        Intent localIntent = new Intent(mActivity, EditProfileNameActivity.class);
+        Intent localIntent = new Intent(mActivity, EditNickNameActivity.class);
         getActivity().startActivityForResult(localIntent, 103);
+    }
+
+    public void editStatusMessage() {
+        Intent localIntent = new Intent(mActivity, EditStatusMessageActivity.class);
+        getActivity().startActivityForResult(localIntent, 104);
     }
 
     public void openGallery(int req_code){
@@ -98,9 +128,30 @@ public class ProfileFragment extends Fragment {
     }
 
     public void setImage(Uri uri){
-        //thumbnail.setImageURI(uri);
         UploadImageTask imageUpload = new UploadImageTask(uri);
         imageUpload.execute();
+    }
+
+    public void setNickName(String name){
+        try {
+            if( mJsonUserData != null ) {
+                mJsonUserData.put("NM", name);
+                updateProfile();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setStatusMessage(String message){
+        try {
+            if( mJsonUserData != null ) {
+                mJsonUserData.put("MG", message);
+                updateProfile();
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
@@ -108,9 +159,7 @@ public class ProfileFragment extends Fragment {
     public String uploadImage(Uri uri){
 
         String downloadUrl = null;
-
         String url = mSession.getServerUrl()+"/upload";
-
         JSONObject userData = new JSONObject();
 
         try {
@@ -158,6 +207,7 @@ public class ProfileFragment extends Fragment {
             String tname = result.getString("tname");
 
             downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/"+ApplicationController.getInstance().getClient().id() +"/"+tname;
+            mJsonUserData.put("I", downloadUrl);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -167,6 +217,59 @@ public class ProfileFragment extends Fragment {
 
         return downloadUrl;
 
+    }
+
+    private void updateProfile(){
+
+        final Map<String,String> params = new HashMap<String, String>();
+
+        params.put("A", getString(R.string.app_id));
+        params.put("U", mSession.getId());
+        params.put("DT", mJsonUserData.toString());
+        params.put("PW", mSession.getPassword());
+        params.put("D", mSession.getDeviceId());
+
+        String url = getString(R.string.host_name)+"/user/update";
+
+        StringRequest request = new StringRequest(url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Update user success ======================");
+                        Log.d(TAG, response.toString());
+                        try {
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                Log.d(TAG, response.getString("status"));
+
+                                if( mJsonUserData.has("I") ) {
+                                    mThumbnail.setImageURI(Uri.parse(mJsonUserData.getString("I")));
+                                    mSession.setImage(mJsonUserData.getString("I"));
+                                }
+                                if( mJsonUserData.has("NM") ) {
+                                    mSession.setName(mJsonUserData.getString("NM"));
+                                }
+
+                                if( mJsonUserData.has("MG") ) {
+                                    mSession.setMessage(mJsonUserData.getString("MG"));
+                                }
+                                ApplicationController.getInstance().setXpushSession( mSession );
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Update user error ======================");
+                        error.printStackTrace();
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(mActivity);
+        queue.add(request);
     }
 
     private class UploadImageTask extends AsyncTask<Void, Void, String> {
@@ -186,55 +289,7 @@ public class ProfileFragment extends Fragment {
         protected  void onPostExecute(final String imageUrl){
             super.onPostExecute(imageUrl);
             if( imageUrl != null ){
-
-                mThumbnail.setImageURI(Uri.parse(imageUrl));
-
-                final Map<String,String> params = new HashMap<String, String>();
-
-                JSONObject data = mSession.getUserData();
-                try {
-                    data.put("I", imageUrl);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                params.put("A", getString(R.string.app_id));
-                params.put("U", mSession.getId());
-                params.put("DT", data.toString());
-                params.put("PW", mSession.getPassword());
-                params.put("D", mSession.getDeviceId());
-
-                String url = getString(R.string.host_name)+"/user/update";
-
-                StringRequest request = new StringRequest(url, params,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d(TAG, "Update user success ======================");
-                                Log.d(TAG, response.toString());
-                                try {
-                                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
-                                        Log.d(TAG, response.getString("status"));
-
-                                        mSession.setImage(imageUrl);
-                                        ApplicationController.getInstance().setXpushSession( mSession );
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.d(TAG, "Update user error ======================");
-                                error.printStackTrace();
-                            }
-                        }
-                );
-
-                RequestQueue queue = Volley.newRequestQueue(mActivity);
-                queue.add(request);
+                updateProfile();
             }
         }
     }

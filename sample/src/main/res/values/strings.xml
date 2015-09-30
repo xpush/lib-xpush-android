@@ -20,8 +20,11 @@
     <string name="action_search_user">Search User</string>
 
     <string name="text_for_nickname">Nickname</string>
-    <string name="text_for_status_message">Status message</string>
+    <string name="message_for_input_nickname">Input nickname</string>
     <string name="title_for_edit_nickname">Edit nickname</string>
+
+    <string name="text_for_status_message">Status message</string>
+    <string name="message_for_input_status_message">Input status message</string>
     <string name="title_for_change_status_message">Edit Status message</string>
 
 

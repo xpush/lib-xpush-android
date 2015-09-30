@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -26,7 +27,6 @@ public class ApplicationController extends Application {
     private XPushSession mXpushSession;
 
     private Socket mClient;
-
     private String mAppId;
 
     public static synchronized ApplicationController getInstance() {
@@ -48,6 +48,8 @@ public class ApplicationController extends Application {
             final String loginUserStr = pref.getString("XPUSH_SESSION", "");
             if( !"".equals( loginUserStr ) ){
                 try {
+                    Log.d(TAG, "===== XPUSH_SESSION =====");
+                    Log.d(TAG, loginUserStr);
                     mXpushSession = new XPushSession( new JSONObject( loginUserStr ) );
                 } catch (JSONException e) {
                     e.printStackTrace();

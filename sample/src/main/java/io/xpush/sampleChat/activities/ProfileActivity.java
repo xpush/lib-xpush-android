@@ -18,7 +18,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     public static final String TAG = ProfileActivity.class.getSimpleName();
 
-    private TextView mTextView;
+    private TextView mTvNickname;
+    private TextView mTvStatusMessage;
     private ProfileFragment f;
 
     @Override
@@ -44,16 +45,21 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        System.out.println("requestCode : " + requestCode);
-        System.out.println("resultCode : " + resultCode);
-
         // 수행을 제대로 한 경우
         if(resultCode == RESULT_OK && data != null) {
 
             if( requestCode == 103 ) {
-                mTextView = (TextView) f.getView().findViewById(R.id.nickname);
-                String result = data.getStringExtra("profileName");
-                mTextView.setText(result);
+                mTvNickname = (TextView) f.getView().findViewById(R.id.nickname);
+                String nickname = data.getStringExtra("nickname");
+                mTvNickname.setText(nickname);
+
+                f.setNickName(nickname);
+            } else if( requestCode == 104 ) {
+                mTvStatusMessage = (TextView) f.getView().findViewById(R.id.status_message);
+                String statusMessage = data.getStringExtra("statusMessage");
+                mTvStatusMessage.setText(statusMessage);
+
+                f.setStatusMessage(statusMessage);
             } else if ( requestCode == 110 ){
                 Uri selectedImageUri = data.getData();
                 f.setImage( selectedImageUri );

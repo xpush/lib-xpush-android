@@ -21,6 +21,7 @@ public class XPushSession {
     public static final String SERVER_URL = "SERVER_URL";
     public static final String IMAGE = "I";
     public static final String NAME = "NM";
+    public static final String MESSAGE = "MG";
 
     private String appId;
     private String id;
@@ -32,6 +33,7 @@ public class XPushSession {
     private String image;
     private String serverUrl;
     private String name;
+    private String message;
 
     public String getAppId() {
         return appId;
@@ -113,6 +115,14 @@ public class XPushSession {
         this.name = name;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public XPushSession(){
     }
 
@@ -126,6 +136,7 @@ public class XPushSession {
         this.serverUrl= bundle.getString(SERVER_URL);
         this.image = bundle.getString(IMAGE);
         this.name = bundle.getString(NAME);
+        this.message = bundle.getString(MESSAGE);
     }
 
     public XPushSession(JSONObject object){
@@ -152,9 +163,18 @@ public class XPushSession {
                 this.serverUrl = object.getString(SERVER_URL);
             }
 
-            if( object.has(NAME)) {
-                this.name = object.getString(name);
+            if( object.has(IMAGE)) {
+                this.image = object.getString(IMAGE);
             }
+
+            if( object.has(NAME)) {
+                this.name = object.getString(NAME);
+            }
+
+            if( object.has(MESSAGE)) {
+                this.message = object.getString(MESSAGE);
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -172,6 +192,7 @@ public class XPushSession {
             j.put(SERVER_URL, this.serverUrl);
             j.put(IMAGE, this.image);
             j.put(NAME, this.name);
+            j.put(MESSAGE, this.message);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -183,11 +204,8 @@ public class XPushSession {
         JSONObject userData = new JSONObject();
         try {
             userData.put("NM", name);
-
-            if( image != null ){
-                userData.put("I", image);
-            }
-
+            userData.put("I", image);
+            userData.put("MG", message);
         } catch (JSONException e) {
             e.printStackTrace();
         }

@@ -40,6 +40,7 @@
     <style name="D4.Widget.SettingItemTextView" parent="@style/D4.Widget">
         <item name="android:textSize">@dimen/font_level_4</item>
         <item name="android:textColor">@color/black</item>
+        <item name="android:textColorHint">@color/font_gray4</item>
     </style>
 
     <style name="D4.Layout.SettingItemLayout" parent="@style/Layout">

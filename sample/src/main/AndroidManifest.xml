@@ -78,9 +78,13 @@
         </activity>
 
         <activity
-            android:name="io.xpush.sampleChat.activities.EditProfileNameActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/app_name">
+            android:name=".activities.EditNickNameActivity"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <activity
+            android:name=".activities.EditStatusMessageActivity"
+            android:windowSoftInputMode="adjustResize">
         </activity>
 
 

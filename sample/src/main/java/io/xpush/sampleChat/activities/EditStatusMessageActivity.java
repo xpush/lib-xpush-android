@@ -3,7 +3,6 @@ package io.xpush.sampleChat.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,30 +14,30 @@ import android.widget.TextView;
 import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
 
-public class EditProfileNameActivity extends FragmentActivity implements TextWatcher{
+public class EditStatusMessageActivity extends FragmentActivity implements TextWatcher{
 
-    private TextView mUserName = null;
+    private TextView mStatusMessage = null;
     private TextView mTextCount;
 
     private Context mActivity;
 
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
-        setContentView(R.layout.edit_profile_name);
+        setContentView(R.layout.edit_status_message);
 
         mActivity = this;
 
-        mUserName = ((EditText)findViewById(R.id.user_name));
+        mStatusMessage = ((EditText)findViewById(R.id.status_message));
         mTextCount = ((TextView)findViewById(R.id.text_count));
 
-        mUserName.addTextChangedListener(this);
-        mUserName.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mStatusMessage.addTextChangedListener(this);
+        mStatusMessage.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int paramInt, KeyEvent paramKeyEvent) {
 
                 if ((paramInt == EditorInfo.IME_ACTION_DONE ) || ((paramKeyEvent != null) && (paramKeyEvent.getKeyCode() == 66))) {
                     Intent intent = new Intent();
-                    intent.putExtra("profileName", mUserName.getText().toString());
+                    intent.putExtra("statusMessage", mStatusMessage.getText().toString());
                     setResult(RESULT_OK, intent);
                     finish();
                     return true;
