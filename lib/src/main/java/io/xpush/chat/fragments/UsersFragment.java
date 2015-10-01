@@ -128,7 +128,6 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
 
         mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
 
-
         final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
 

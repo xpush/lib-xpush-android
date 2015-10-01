@@ -1,32 +1,16 @@
 package io.xpush.sampleChat.fragments;
 
-import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Filter;
 import android.widget.FilterQueryProvider;
-import android.widget.Filterable;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import com.github.nkzawa.engineio.client.EngineIOException;
 import com.github.nkzawa.socketio.client.Ack;
 
 import org.json.JSONArray;
@@ -37,16 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
-import io.xpush.sampleChat.R;
-import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.fragments.UsersFragment;
-import io.xpush.chat.models.XPushChannel;
-import io.xpush.chat.models.XPushSession;
-import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.util.XPushUtils;
-import io.xpush.chat.view.adapters.UserCursorAdapter;
+import io.xpush.sampleChat.R;
 
 public class FriendsFragment extends UsersFragment {
 
@@ -68,7 +46,7 @@ public class FriendsFragment extends UsersFragment {
 
             @Override
             public Cursor runQuery(CharSequence constraint) {
-                Log.d(TAG, "runQuery constraint:" + constraint);
+
                 String[] projection = {
                         UserTable.KEY_ROWID,
                         UserTable.KEY_ID,
@@ -78,13 +56,14 @@ public class FriendsFragment extends UsersFragment {
                         UserTable.KEY_UPDATED
                 };
 
-                String selection = UserTable.KEY_NAME + "=?";
-                String[] selectionArgs = new String[]{constraint.toString()};
+                if( constraint == null ){
+                    constraint = "";
+                }
 
-                Cursor cur = getActivity().getContentResolver().query(XpushContentProvider.USER_CONTENT_URI, projection, selection, selectionArgs, null);
+                String selection = UserTable.KEY_NAME + " LIKE '%"+constraint.toString() +"%'";
+                Cursor cur = mActivity.getContentResolver().query(XpushContentProvider.USER_CONTENT_URI, projection, selection, null, null);
                 return cur;
             }
-
         });
 
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -92,20 +71,16 @@ public class FriendsFragment extends UsersFragment {
             public boolean onQueryTextSubmit(String s) {
 
                 Log.d(TAG, s);
-                if (s.length() > 2) {
-                    mDataAdapter.getFilter().filter(s);
-                    mDataAdapter.notifyDataSetChanged();
-                }
+                mDataAdapter.getFilter().filter(s);
+                mDataAdapter.notifyDataSetChanged();
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
                 Log.d( TAG, s );
-                if (s.length() > 2) {
-                    mDataAdapter.getFilter().filter(s);
-                    mDataAdapter.notifyDataSetChanged();
-                }
+                mDataAdapter.getFilter().filter(s);
+                mDataAdapter.notifyDataSetChanged();
                 return false;
             }
         });

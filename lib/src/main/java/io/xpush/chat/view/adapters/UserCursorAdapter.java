@@ -7,6 +7,8 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FilterQueryProvider;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -16,7 +18,7 @@ import java.util.List;
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushUser;
 
-public class UserCursorAdapter extends CursorAdapter {
+public class UserCursorAdapter extends CursorAdapter implements Filterable {
 
     private final LayoutInflater mInflater;
 
