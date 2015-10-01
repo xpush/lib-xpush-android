@@ -17,6 +17,7 @@
 
     <string name="action_profile">Profile</string>
     <string name="action_setting">Setting</string>
+    <string name="action_search">Search</string>
     <string name="action_search_user">Search User</string>
 
     <string name="text_for_nickname">Nickname</string>

@@ -9,15 +9,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -45,8 +49,8 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
 
     private static final String TAG = UsersFragment.class.getSimpleName();
 
-    private UserCursorAdapter mDataAdapter;
-    private Activity mActivity;
+    protected UserCursorAdapter mDataAdapter;
+    protected Activity mActivity;
     private TextView mEmptyMsg;
 
     @Override
@@ -55,6 +59,7 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
 
         mActivity = getActivity();
         mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_friends, container, false);
     }
 

@@ -19,7 +19,7 @@
         fresco:fadeDuration="300"
         fresco:actualImageScaleType="focusCrop"
         fresco:roundAsCircle="true"
-        fresco:placeholderImage="@drawable/default_user"/>
+        fresco:failureImage="@drawable/default_user"/>
 
     <LinearLayout
         android:gravity="center_vertical"

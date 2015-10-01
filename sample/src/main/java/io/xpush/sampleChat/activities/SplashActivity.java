@@ -96,7 +96,7 @@ public class SplashActivity extends Activity {
             }
         }, 150);
     }
-    
+
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {

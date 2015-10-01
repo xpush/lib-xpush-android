@@ -9,12 +9,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Filter;
+import android.widget.FilterQueryProvider;
+import android.widget.Filterable;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -29,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
-import io.xpush.chat.R;
+import io.xpush.sampleChat.R;
 import io.xpush.chat.activities.ChatActivity;
 import io.xpush.chat.fragments.UsersFragment;
 import io.xpush.chat.models.XPushChannel;
@@ -43,6 +51,83 @@ import io.xpush.chat.view.adapters.UserCursorAdapter;
 public class FriendsFragment extends UsersFragment {
 
     private static final String TAG = FriendsFragment.class.getSimpleName();
+
+    private String mTitle = "";
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
+        final Toolbar mToolbar = ((Toolbar) mActivity.findViewById(R.id.toolbar));
+
+        final MenuItem searchViewItem = mToolbar.getMenu().findItem(R.id.action_search);
+        final SearchView mSearchView = (SearchView) searchViewItem.getActionView();
+
+        mDataAdapter.setFilterQueryProvider(new FilterQueryProvider() {
+
+            @Override
+            public Cursor runQuery(CharSequence constraint) {
+                Log.d(TAG, "runQuery constraint:" + constraint);
+                String[] projection = {
+                        UserTable.KEY_ROWID,
+                        UserTable.KEY_ID,
+                        UserTable.KEY_NAME,
+                        UserTable.KEY_IMAGE,
+                        UserTable.KEY_MESSAGE,
+                        UserTable.KEY_UPDATED
+                };
+
+                String selection = UserTable.KEY_NAME + "=?";
+                String[] selectionArgs = new String[]{constraint.toString()};
+
+                Cursor cur = getActivity().getContentResolver().query(XpushContentProvider.USER_CONTENT_URI, projection, selection, selectionArgs, null);
+                return cur;
+            }
+
+        });
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+
+                Log.d(TAG, s);
+                if (s.length() > 2) {
+                    mDataAdapter.getFilter().filter(s);
+                    mDataAdapter.notifyDataSetChanged();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                Log.d( TAG, s );
+                if (s.length() > 2) {
+                    mDataAdapter.getFilter().filter(s);
+                    mDataAdapter.notifyDataSetChanged();
+                }
+                return false;
+            }
+        });
+
+        mSearchView.setOnSearchClickListener(new SearchView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mTitle = mToolbar.getTitle().toString();
+                mToolbar.setTitle("");
+                mSearchView.setMaxWidth(10000);
+            }
+        });
+
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                mToolbar.setTitle(mTitle);
+                return false;
+            }
+        });
+
+    }
 
     @Override
     public void getUsers(){

@@ -1,5 +1,6 @@
 package io.xpush.sampleChat.activities;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -10,10 +11,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -25,7 +28,10 @@ import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import java.util.Locale;
 
@@ -46,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
     private Adapter mApdater;
     private FloatingActionButton fab;
     private EditText mEditSearch;
+
+    private SearchView mSearchView;
+    private int mPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
+                mPosition = position;
                 mToolbar.setTitle(mApdater.getTitle(position));
                 if (position == 0) {
                     fab.setVisibility(View.VISIBLE);
@@ -118,25 +128,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageScrollStateChanged(int state) {
             }
         });
-
-        /**
-        mEditSearch = (EditText) findViewById(io.xpush.chat.R.id.editSearch);
-        mEditSearch.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-            }
-        });
-         */
     }
 
     @Override
@@ -200,8 +191,46 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        mMenu = menu;
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        //mMenu = menu;
+        //getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        /**
+        final MenuItem searchViewItem = mMenu.findItem(R.id.action_search);
+        mSearchView = (SearchView) searchViewItem.getActionView();
+
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                if (s.length() > 2) {
+                    filterData(s);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                return false;
+            }
+        });
+
+        mSearchView.setOnSearchClickListener(new SearchView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mToolbar.setTitle("");
+                mSearchView.setMaxWidth(10000);
+            }
+        });
+
+        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                mToolbar.setTitle(mApdater.getTitle(mPosition));
+                return false;
+            }
+        });
+
+         */
+
         return true;
     }
 
