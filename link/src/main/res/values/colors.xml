@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#149487</color>
+    <color name="primaryDark">#249497</color>
+
+    <color name="tabIndicator">@color/white</color>
+
+    <color name="font_point1">#ff3cafa7</color>
+    <color name="font_point2">#ff543f3f</color>
+    <color name="font_point3">#ffe54e25</color>
+    <color name="font_point5">#ff00c2b9</color>
+
+    <color name="default_list_selected_background">#fffdf01b</color>
+
+    <color name="gray">#ff666666</color>
+    <color name="gray1">#ff777777</color>
+    <color name="gray2">#ff888888</color>
+    <color name="gray3">#ff999999</color>
+
+    <color name="background_1">#ffffffff</color>
+    <color name="background_4">#fff2f2f2</color>
+
+    <color name="font_khaki">#ff71712a</color>
+    <color name="font_gray4">#ff999999</color>
+</resources>
