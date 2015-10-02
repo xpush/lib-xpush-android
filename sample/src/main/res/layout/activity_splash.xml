@@ -2,7 +2,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:background="@color/primary"
     tools:context=".SplashActivity">
 
@@ -14,11 +13,6 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/helloImage"
-            android:layout_width="fill_parent" android:layout_height="fill_parent"  fresco:fadeDuration="300" fresco:actualImageScaleType="focusCrop"
-            />
-
         <ImageView
             android:id="@+id/imageView"
             android:layout_width="350dp"
@@ -26,18 +20,6 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:background="@drawable/splash" />
-
-        <!-- TextViewsplash.png
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/imageView"
-            android:layout_centerHorizontal="true"
-            android:padding="50dp"
-            android:text="��븳誘쇨뎅 二쇱슂 �좊Ц �ъ꽕 蹂닿린"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#fff2f2f2" / -->
-
 
         <com.github.rahatarmanahmed.cpv.CircularProgressView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/progressBar"

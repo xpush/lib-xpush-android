@@ -129,7 +129,7 @@ public class IntroActivity extends AppCompatActivity {
             Bundle bundle = getArguments();
             int position = bundle.getInt("position");
             String imageFileName = IMAGE_NAME[position];
-            int imgResId = getResources().getIdentifier(imageFileName, "drawable", "io.xpush.sampleChat");
+            int imgResId = getResources().getIdentifier(imageFileName, "drawable", getActivity().getPackageName() );
             imageView.setImageResource(imgResId);
             return swipeView;
         }

@@ -38,6 +38,8 @@ public class LoginRequest extends StringRequest {
         try {
             parsed = new JSONObject( new String(response.data) );
 
+            Log.d(TAG, parsed.toString());
+
             if ("ok".equalsIgnoreCase(parsed.getString("status"))) {
                 JSONObject result = parsed.getJSONObject("result");
 
@@ -55,8 +57,22 @@ public class LoginRequest extends StringRequest {
                 xpushSession.setId(getParams().get("U"));
                 xpushSession.setPassword(getParams().get("PW"));
                 xpushSession.setDeviceId(getParams().get("D"));
-                xpushSession.setImage(result.getJSONObject("user").getJSONObject("DT").getString("I"));
-                xpushSession.setName(result.getJSONObject("user").getJSONObject("DT").getString("NM"));
+                if( result.getJSONObject("user").has("DT") ){
+                    JSONObject data = null;
+                    try {
+                        data = result.getJSONObject("user").getJSONObject("DT");
+                    } catch( JSONException je ){
+                        je.printStackTrace();
+                        data =  new JSONObject( result.getJSONObject("user").getString("DT") );
+                    }
+                    if( data.has("I") ){
+                        xpushSession.setImage(data.getString("I"));
+                    }
+
+                    if( data.has("NM") ) {
+                        xpushSession.setName(data.getString("NM"));
+                    }
+                }
 
                 xpushSession.setToken(token);
                 xpushSession.setServerName(server);
