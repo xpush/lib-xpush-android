@@ -50,19 +50,13 @@
         <activity
             android:name="io.xpush.link.activities.MainActivity"
             android:windowSoftInputMode="adjustResize"
-            android:label="">
+            android:label="Chat">
         </activity>
 
         <activity
             android:name="io.xpush.link.activities.ProfileActivity"
             android:windowSoftInputMode="adjustResize"
             android:label="@string/action_profile">
-        </activity>
-
-        <activity
-            android:name="io.xpush.link.activities.SearchUserActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/action_search_user">
         </activity>
 
         <activity
@@ -109,14 +103,6 @@
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.intent.action.ACTION_PACKAGE_RESTARTED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-
-                <!--
-                <action android:name="android.intent.action.PACKAGE_ADDED"/>
-                <action android:name="android.intent.action.PACKAGE_REMOVED"/>
-                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
-                <data android:scheme="package"/>
-                -->
-
             </intent-filter>
         </receiver>
 

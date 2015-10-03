@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,17 +23,29 @@ import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.adapters.ChannelCursorAdapter;
 
-public class ChannelFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ChannelsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = ChannelFragment.class.getSimpleName();
+    private static final String TAG = ChannelsFragment.class.getSimpleName();
 
-    private ChannelCursorAdapter mDataAdapter;
-    private Activity mActivity;
+    protected Activity mActivity;
+    protected ChannelCursorAdapter mDataAdapter;
     private TextView mEmptyMsg;
+
+    protected String[] mProjection = {
+        ChannelTable.KEY_ROWID,
+                ChannelTable.KEY_ID,
+                ChannelTable.KEY_NAME,
+                ChannelTable.KEY_USERS,
+                ChannelTable.KEY_IMAGE,
+                ChannelTable.KEY_COUNT,
+                ChannelTable.KEY_MESSAGE,
+                ChannelTable.KEY_UPDATED
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_channel, container, false);
     }
 
@@ -58,19 +69,8 @@ public class ChannelFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] projection = {
-            ChannelTable.KEY_ROWID,
-            ChannelTable.KEY_ID,
-            ChannelTable.KEY_NAME,
-            ChannelTable.KEY_USERS,
-            ChannelTable.KEY_IMAGE,
-            ChannelTable.KEY_COUNT,
-            ChannelTable.KEY_MESSAGE,
-            ChannelTable.KEY_UPDATED
-        };
-
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                XpushContentProvider.CHANNEL_CONTENT_URI, projection, null, null, null);
+                XpushContentProvider.CHANNEL_CONTENT_URI, mProjection, null, null, null);
         return cursorLoader;
     }
 

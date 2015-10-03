@@ -23,12 +23,8 @@ import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-
-import io.xpush.chat.fragments.ChannelFragment;
-import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.link.R;
-import io.xpush.link.fragments.FriendsFragment;
+import io.xpush.link.fragments.ChannelFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,10 +35,6 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private Menu mMenu;
     private DrawerLayout mDrawerLayout;
-    private Adapter mApdater;
-    private FloatingActionButton fab;
-    private EditText mEditSearch;
-
     private SearchView mSearchView;
     private int mPosition = 0;
 
@@ -52,29 +44,13 @@ public class MainActivity extends AppCompatActivity {
         mContext = this;
 
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                searchUser();
-            }
-        });
-
-        mToolbar.setTitle( getResources().getStringArray(R.array.tabs)[0] );
         setSupportActionBar(mToolbar);
 
-        final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
-        mApdater = new Adapter(getSupportFragmentManager());
-        mViewPager.setAdapter(mApdater);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().add(R.id.content, new ChannelFragment(), TAG).commit();
+        }
 
         final ActionBar ab = getSupportActionBar();
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
@@ -86,38 +62,6 @@ public class MainActivity extends AppCompatActivity {
         if (navigationView != null) {
             setupDrawerContent(navigationView);
         }
-
-        SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
-        tabLayout.setDistributeEvenly(true);
-        tabLayout.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
-            @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.tabIndicator);
-            }
-        });
-        tabLayout.setCustomTabView(R.layout.custom_tab_view, R.id.tabText);
-        tabLayout.setViewPager(mViewPager);
-
-        tabLayout.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                mPosition = position;
-                mToolbar.setTitle(mApdater.getTitle(position));
-                if (position == 0) {
-                    fab.setVisibility(View.VISIBLE);
-                } else {
-                    fab.setVisibility(View.INVISIBLE);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-            }
-        });
     }
 
     @Override
@@ -130,97 +74,9 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateView(parent, name, context, attrs);
     }
 
-    class Adapter extends FragmentPagerAdapter {
-
-        int icons[] = {R.drawable.ic_person, R.drawable.ic_chat};
-        String[] tabText = getResources().getStringArray(R.array.tabs);
-
-        public Adapter(FragmentManager fm) {
-            super(fm);
-            tabText = getResources().getStringArray(R.array.tabs);
-
-            android.util.Log.d(TAG, tabText.toString());
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-
-            Fragment f = null;
-            switch (position) {
-                case 0:
-                    f = new FriendsFragment();
-                    break;
-                case 1:
-                    f = new ChannelFragment();
-                    break;
-            }
-            return f;
-
-        }
-
-        @Override
-        public int getCount() {
-            return tabText.length;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            Drawable drawable = getResources().getDrawable(icons[position]);
-            drawable.setBounds(0,0,64,64);
-            ImageSpan imageSpan = new ImageSpan(drawable);
-            SpannableString spannableString = new SpannableString(" ");
-            spannableString.setSpan(imageSpan,0,spannableString.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            return spannableString;
-        }
-
-        public String getTitle(int position){
-            return tabText[position];
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-        //mMenu = menu;
-        //getMenuInflater().inflate(R.menu.main_menu, menu);
-
-        /**
-        final MenuItem searchViewItem = mMenu.findItem(R.id.action_search);
-        mSearchView = (SearchView) searchViewItem.getActionView();
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                if (s.length() > 2) {
-                    filterData(s);
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-
-        mSearchView.setOnSearchClickListener(new SearchView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mToolbar.setTitle("");
-                mSearchView.setMaxWidth(10000);
-            }
-        });
-
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                mToolbar.setTitle(mApdater.getTitle(mPosition));
-                return false;
-            }
-        });
-
-         */
-
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 
@@ -229,8 +85,6 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == android.R.id.home) {
             mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
-        } else if( item.getItemId() == R.id.action_search_user ){
-            searchUser();
         } else if( item.getItemId() == R.id.action_setting ){
             Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
             startActivity(intent);
@@ -244,37 +98,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupDrawerContent(NavigationView navigationView) {
         navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+            new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(MenuItem menuItem) {
 
-                        menuItem.setChecked(true);
+                    menuItem.setChecked(true);
 
-                        if (menuItem.getItemId() == R.id.nav_swap) {
+                    if (menuItem.getItemId() == R.id.nav_swap) {
 
-                        } else if (menuItem.getItemId() == R.id.nav_review) {
+                    } else if (menuItem.getItemId() == R.id.nav_review) {
 
-                        }
-
-                        mDrawerLayout.closeDrawers();
-                        return true;
                     }
-                });
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // 수행을 제대로 한 경우
-        if(requestCode == 110 && resultCode == RESULT_OK && data != null) {
-            ( (FriendsFragment) mApdater.getItem(0) ).getUsers();
-        }  else if(resultCode == RESULT_CANCELED){
-
-        }
-    }
-
-    public void searchUser(){
-        Intent intent = new Intent(MainActivity.this, SearchUserActivity.class);
-        startActivityForResult(intent, 110);
+                    mDrawerLayout.closeDrawers();
+                    return true;
+                }
+            }
+        );
     }
 }

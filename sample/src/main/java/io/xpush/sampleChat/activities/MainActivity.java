@@ -1,6 +1,5 @@
 package io.xpush.sampleChat.activities;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -11,31 +10,22 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ActionMenuView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
-import java.util.Locale;
-
-import io.xpush.chat.fragments.ChannelFragment;
+import io.xpush.chat.fragments.ChannelsFragment;
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.FriendsFragment;
@@ -161,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                     f = new FriendsFragment();
                     break;
                 case 1:
-                    f = new ChannelFragment();
+                    f = new ChannelsFragment();
                     break;
             }
             return f;

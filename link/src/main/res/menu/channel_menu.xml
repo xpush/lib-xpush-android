@@ -9,12 +9,6 @@
         app:showAsAction="always" />
 
     <item
-        android:id="@+id/action_search_user"
-        android:orderInCategory="200"
-        android:title="@string/action_search_user"
-        app:showAsAction="collapseActionView"></item>
-
-    <item
         android:id="@+id/action_profile"
         android:orderInCategory="300"
         android:title="@string/action_profile"
