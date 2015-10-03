@@ -85,7 +85,11 @@ public class SplashActivity extends Activity {
                         if (null == ApplicationController.getInstance().getXpushSession()) {
                             intent = new Intent(SplashActivity.this, LoginActivity.class);
                         } else {
-                            intent = new Intent(SplashActivity.this, MainActivity.class);
+                            if( pref.getBoolean("SITE_READY", false) ) {
+                                intent = new Intent(SplashActivity.this, MainActivity.class);
+                            } else {
+                                intent = new Intent(SplashActivity.this, UnreadyActivity.class);
+                            }
                         }
                     } else {
                         intent = new Intent(SplashActivity.this, IntroActivity.class);

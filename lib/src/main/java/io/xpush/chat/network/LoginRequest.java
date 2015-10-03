@@ -57,14 +57,21 @@ public class LoginRequest extends StringRequest {
                 xpushSession.setId(getParams().get("U"));
                 xpushSession.setPassword(getParams().get("PW"));
                 xpushSession.setDeviceId(getParams().get("D"));
+
                 if( result.getJSONObject("user").has("DT") ){
                     JSONObject data = null;
                     try {
-                        data = result.getJSONObject("user").getJSONObject("DT");
+                        Object dt = result.getJSONObject("user").get("DT");
+                        if( dt instanceof String ){
+                            data =  new JSONObject( (String)dt );
+                        } else if ( dt instanceof JSONObject ){
+                            data = (JSONObject) dt;
+                        }
+
                     } catch( JSONException je ){
                         je.printStackTrace();
-                        data =  new JSONObject( result.getJSONObject("user").getString("DT") );
                     }
+
                     if( data.has("I") ){
                         xpushSession.setImage(data.getString("I"));
                     }

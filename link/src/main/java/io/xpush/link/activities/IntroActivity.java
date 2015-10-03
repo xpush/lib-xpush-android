@@ -90,7 +90,11 @@ public class IntroActivity extends AppCompatActivity {
                 if (null == ApplicationController.getInstance().getXpushSession()) {
                     intent = new Intent(IntroActivity.this, LoginActivity.class);
                 } else {
-                    intent = new Intent(IntroActivity.this, MainActivity.class);
+                    if( pref.getBoolean("SITE_READY", false) ) {
+                        intent = new Intent(IntroActivity.this, MainActivity.class);
+                    } else {
+                        intent = new Intent(IntroActivity.this, UnreadyActivity.class);
+                    }
                 }
                 startActivity(intent);
                 finish();

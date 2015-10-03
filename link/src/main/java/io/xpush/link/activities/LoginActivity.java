@@ -27,7 +27,7 @@ import io.xpush.link.R;
 
 public class LoginActivity extends AppCompatActivity  {
     private static final String TAG = LoginActivity.class.getSimpleName();
-    private static final int REQUEST_SIGNUP = 0;
+    private static final int REQUEST_SIGNUP = 100;
 
     EditText _idText;
     EditText _passwordText;
