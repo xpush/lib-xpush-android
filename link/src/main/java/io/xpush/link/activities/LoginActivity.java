@@ -2,7 +2,9 @@ package io.xpush.link.activities;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -139,7 +141,15 @@ public class LoginActivity extends AppCompatActivity  {
 
     public void onLoginSuccess() {
         _loginButton.setEnabled(true);
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        Intent intent = null;
+        if( pref.getBoolean("SITE_READY", false) ) {
+            intent = new Intent(LoginActivity.this, MainActivity.class);
+        } else {
+            intent = new Intent(LoginActivity.this, UnreadyActivity.class);
+        }
         startActivity(intent);
         finish();
     }

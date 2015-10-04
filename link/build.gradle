@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "io.xpush.link"
-        minSdkVersion 21
-        targetSdkVersion 23
+        minSdkVersion 17
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }

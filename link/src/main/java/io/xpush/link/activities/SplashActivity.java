@@ -88,7 +88,8 @@ public class SplashActivity extends Activity {
                             if( pref.getBoolean("SITE_READY", false) ) {
                                 intent = new Intent(SplashActivity.this, MainActivity.class);
                             } else {
-                                intent = new Intent(SplashActivity.this, UnreadyActivity.class);
+                                intent = new Intent(SplashActivity.this, MainActivity.class);
+                                //intent = new Intent(SplashActivity.this, UnreadyActivity.class);
                             }
                         }
                     } else {

@@ -22,7 +22,14 @@ import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListView;
+
 import io.xpush.link.R;
 import io.xpush.link.fragments.ChannelFragment;
 
@@ -33,10 +40,11 @@ public class MainActivity extends AppCompatActivity {
     private Context mContext;
     private ViewPager mViewPager;
     private Toolbar mToolbar;
-    private Menu mMenu;
     private DrawerLayout mDrawerLayout;
-    private SearchView mSearchView;
-    private int mPosition = 0;
+
+    private String[] mPlanetTitles = new String[]{"Mercury", "Venus"};
+    private ListView mDrawerList;
+    private View mDrawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,11 +65,7 @@ public class MainActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
-        }
+        setupDrawerContent();
     }
 
     @Override
@@ -82,38 +86,35 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
-            return true;
-        } else if( item.getItemId() == R.id.action_setting ){
-            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-            startActivity(intent);
-        } else if( item.getItemId() == R.id.action_profile ){
-            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-            startActivity(intent);
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-            new NavigationView.OnNavigationItemSelectedListener() {
-                @Override
-                public boolean onNavigationItemSelected(MenuItem menuItem) {
+    private void setupDrawerContent() {
+        mDrawer = findViewById(R.id.left_drawer);
 
-                    menuItem.setChecked(true);
+        mDrawerList = (ListView) findViewById(R.id.list_drawer);
+        mDrawerList.setAdapter(new ArrayAdapter<String>(this,
+                R.layout.drawer_list_item, mPlanetTitles));
 
-                    if (menuItem.getItemId() == R.id.nav_swap) {
+        mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+    }
 
-                    } else if (menuItem.getItemId() == R.id.nav_review) {
+    private class DrawerItemClickListener implements ListView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectItem(position);
+        }
+    }
 
-                    }
+    private void selectItem(int position) {
+        mDrawerList.setItemChecked(position, true);
+        //setTitle(mPlanetTitles[position]);
+        mDrawerLayout.closeDrawer(mDrawer);
+    }
 
-                    mDrawerLayout.closeDrawers();
-                    return true;
-                }
-            }
-        );
+    @Override
+    public void setTitle(CharSequence title) {
+        //mTitle = title;
+        //getActionBar().setTitle(mTitle);
     }
 }
