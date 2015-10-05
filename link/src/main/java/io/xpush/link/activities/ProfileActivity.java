@@ -48,24 +48,13 @@ public class ProfileActivity extends AppCompatActivity {
         // 수행을 제대로 한 경우
         if(resultCode == RESULT_OK && data != null) {
 
-            if( requestCode == 103 ) {
-                mTvNickname = (TextView) f.getView().findViewById(R.id.nickname);
-                String nickname = data.getStringExtra("nickname");
-                mTvNickname.setText(nickname);
-
-                f.setNickName(nickname);
-            } else if( requestCode == 104 ) {
-                mTvStatusMessage = (TextView) f.getView().findViewById(R.id.status_message);
-                String statusMessage = data.getStringExtra("statusMessage");
-                mTvStatusMessage.setText(statusMessage);
-
-                f.setStatusMessage(statusMessage);
-            } else if ( requestCode == 110 ){
+           if ( requestCode == 110 ){
                 Uri selectedImageUri = data.getData();
                 f.setImage( selectedImageUri );
             }
 
         }  else if(resultCode == RESULT_CANCELED){
+
         }
     }
 }

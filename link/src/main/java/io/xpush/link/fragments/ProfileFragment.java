@@ -10,7 +10,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.EditText;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -43,16 +45,18 @@ public class ProfileFragment extends Fragment {
 
     private String TAG = ProfileFragment.class.getSimpleName();
     private Context mActivity;
-    private View mNicknameButton;
-    private View mStatusMessageButton;
 
     private View mImageBox;
     private SimpleDraweeView mThumbnail;
     private XPushSession mSession;
-    private TextView mTvNickname;
-    private TextView mTvStatusMessage;
+
+    private EditText mUserName;
+    private EditText mStatusMessage;
+    private EditText mEmail;
 
     private JSONObject mJsonUserData;
+
+    private Button mSaveButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,22 +70,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
-
-        mNicknameButton = view.findViewById(R.id.nickname_button);
-        mNicknameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editUserName();
-            }
-        });
-
-        mStatusMessageButton = view.findViewById(R.id.status_message_button);
-        mStatusMessageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editStatusMessage();
-            }
-        });
 
         mImageBox = view.findViewById(R.id.imageBox);
         mImageBox.setOnClickListener(new View.OnClickListener() {
@@ -97,27 +85,31 @@ public class ProfileFragment extends Fragment {
             mThumbnail.setImageURI(Uri.parse(mSession.getImage()));
         }
 
-        mTvNickname = (TextView) view.findViewById(R.id.nickname);
+        mUserName = (EditText) view.findViewById(R.id.userName);
         if( null != mSession.getName() ) {
-            mTvNickname.setText(mSession.getName());
+            mUserName.setText(mSession.getName());
         }
 
-        mTvStatusMessage = (TextView) view.findViewById(R.id.status_message);
-        if( null != mSession.getMessage() ) {
-            mTvStatusMessage.setText(mSession.getMessage());
+        mStatusMessage = (EditText) view.findViewById(R.id.statusMessage);
+        if( null != mSession.getName() ) {
+            mStatusMessage.setText(mSession.getMessage());
         }
+
+        mEmail = (EditText) view.findViewById(R.id.email);
+        if( null != mSession.getEmail() ) {
+            mEmail.setText(mSession.getEmail());
+        }
+
+        mSaveButton = (Button) view.findViewById(R.id.btn_save);
+
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateProfile();
+            }
+        });
 
         return view;
-    }
-
-    public void editUserName() {
-        Intent localIntent = new Intent(mActivity, EditNickNameActivity.class);
-        getActivity().startActivityForResult(localIntent, 103);
-    }
-
-    public void editStatusMessage() {
-        Intent localIntent = new Intent(mActivity, EditStatusMessageActivity.class);
-        getActivity().startActivityForResult(localIntent, 104);
     }
 
     public void openGallery(int req_code){
@@ -130,28 +122,6 @@ public class ProfileFragment extends Fragment {
     public void setImage(Uri uri){
         UploadImageTask imageUpload = new UploadImageTask(uri);
         imageUpload.execute();
-    }
-
-    public void setNickName(String name){
-        try {
-            if( mJsonUserData != null ) {
-                mJsonUserData.put("NM", name);
-                updateProfile();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setStatusMessage(String message){
-        try {
-            if( mJsonUserData != null ) {
-                mJsonUserData.put("MG", message);
-                updateProfile();
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
     private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
@@ -216,10 +186,19 @@ public class ProfileFragment extends Fragment {
         }
 
         return downloadUrl;
-
     }
 
     private void updateProfile(){
+
+        try {
+            if( mJsonUserData != null ) {
+                mJsonUserData.put("NM", mUserName.getText());
+                mJsonUserData.put("MG", mStatusMessage.getText());
+                mJsonUserData.put("EM", mEmail.getText());
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -242,7 +221,6 @@ public class ProfileFragment extends Fragment {
                                 Log.d(TAG, response.getString("status"));
 
                                 if( mJsonUserData.has("I") ) {
-                                    mThumbnail.setImageURI(Uri.parse(mJsonUserData.getString("I")));
                                     mSession.setImage(mJsonUserData.getString("I"));
                                 }
                                 if( mJsonUserData.has("NM") ) {
@@ -251,6 +229,10 @@ public class ProfileFragment extends Fragment {
 
                                 if( mJsonUserData.has("MG") ) {
                                     mSession.setMessage(mJsonUserData.getString("MG"));
+                                }
+
+                                if( mJsonUserData.has("EM") ) {
+                                    mSession.setEmail(mJsonUserData.getString("EM"));
                                 }
                                 ApplicationController.getInstance().setXpushSession( mSession );
                             }
@@ -287,10 +269,8 @@ public class ProfileFragment extends Fragment {
 
         @Override
         protected  void onPostExecute(final String imageUrl){
+            mThumbnail.setImageURI(Uri.parse(imageUrl));
             super.onPostExecute(imageUrl);
-            if( imageUrl != null ){
-                updateProfile();
-            }
         }
     }
 }

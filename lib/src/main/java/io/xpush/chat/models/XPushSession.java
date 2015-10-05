@@ -22,6 +22,7 @@ public class XPushSession {
     public static final String IMAGE = "I";
     public static final String NAME = "NM";
     public static final String MESSAGE = "MG";
+    public static final String EMAIL = "EM";
 
     private String appId;
     private String id;
@@ -34,6 +35,7 @@ public class XPushSession {
     private String serverUrl;
     private String name;
     private String message;
+    private String email;
 
     public String getAppId() {
         return appId;
@@ -123,6 +125,14 @@ public class XPushSession {
         this.message = message;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public XPushSession(){
     }
 
@@ -137,6 +147,7 @@ public class XPushSession {
         this.image = bundle.getString(IMAGE);
         this.name = bundle.getString(NAME);
         this.message = bundle.getString(MESSAGE);
+        this.email = bundle.getString(EMAIL);
     }
 
     public XPushSession(JSONObject object){
@@ -175,6 +186,10 @@ public class XPushSession {
                 this.message = object.getString(MESSAGE);
             }
 
+            if( object.has(EMAIL)) {
+                this.email = object.getString(EMAIL);
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -193,6 +208,7 @@ public class XPushSession {
             j.put(IMAGE, this.image);
             j.put(NAME, this.name);
             j.put(MESSAGE, this.message);
+            j.put(EMAIL, this.email);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -206,6 +222,7 @@ public class XPushSession {
             userData.put("NM", name);
             userData.put("I", image);
             userData.put("MG", message);
+            userData.put("EM", email);
         } catch (JSONException e) {
             e.printStackTrace();
         }
