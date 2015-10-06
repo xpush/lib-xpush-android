@@ -1,14 +1,12 @@
 package io.xpush.sampleChat.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
-import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -19,9 +17,6 @@ import android.view.ViewGroup;
 import io.xpush.chat.view.activities.AppCompatPreferenceActivity;
 import io.xpush.sampleChat.R;
 
-/**
- * Created by James on 2015-09-05.
- */
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener  {
 
     private String TAG = SettingsFragment.class.getSimpleName();
@@ -31,11 +26,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        //getActivity().setTheme(R.style...);
         mActivity = getActivity();
         addPreferencesFromResource(R.xml.settings);
 
-        // show the current value in the settings screen
         for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); i++) {
             pickPreferenceObject(getPreferenceScreen().getPreference(i));
         }
@@ -61,7 +54,7 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
 
         View layout = inflater.inflate(R.layout.activity_settings, container, false);
@@ -95,7 +88,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
     @Override
     public void onPause() {
         super.onPause();
-        // Set up a listener whenever a key changes
         getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 

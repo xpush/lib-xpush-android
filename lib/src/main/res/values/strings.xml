@@ -7,7 +7,6 @@
 
     <string name="error_connect">Failed to connect</string>
 
-    <!-- xpushMessages -->
     <string name="message_welcome">Welcome to Socket.IO Chat –</string>
     <plurals name="message_participants">
         <item quantity="one">there\'s %d participant</item>
@@ -33,5 +32,8 @@
 
     <string name="action_channel">채널</string>
 
-    <string name="label.text.search.user">ID or Name</string>
+    <string name="label_search_user">ID or Name</string>
+
+    <string name="action_leave_dialog_title">Confirm</string>
+    <string name="action_leave_dialog_description">Do you want to leave</string>
 </resources>

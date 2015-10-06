@@ -36,6 +36,6 @@
 
     <string name="drawer_menu">Menu</string>
 
-    <string name="label.text.search.user">ID or Name</string>
+    <string name="label_search_user">ID or Name</string>
     <string name="ready_for_search">Enter your search terms</string>
 </resources>

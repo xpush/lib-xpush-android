@@ -2,6 +2,7 @@ package io.xpush.chat.fragments;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -264,7 +266,28 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         int id = item.getItemId();
 
         if (id == R.id.action_leave) {
-            leave();
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(mActivity);
+            builder.setTitle( mActivity.getString(R.string.action_leave_dialog_title))
+                    .setMessage( mActivity.getString(R.string.action_leave_dialog_description))
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            leave();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.cancel();
+                        }
+
+                    });
+
+            AlertDialog dialog = builder.create();    // 알림창 객체 생성
+            dialog.show();    // 알림창 띄우기
+
             return true;
         }
 
@@ -293,7 +316,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void connect(){
         try {
-
 
             String url = mServerUrl + "/channel";
             mChannel = mXpushChannel.getId();
@@ -395,6 +417,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private void leave() {
         mUsername = null;
         mSocket.disconnect();
+        Handler handler = new Handler();
+
+        Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
+        getActivity().getContentResolver().delete(singleUri, null, null);
+
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mActivity.finish();
+            }
+        }, 150);
     }
 
     private Emitter.Listener onConnectSuccess = new Emitter.Listener() {

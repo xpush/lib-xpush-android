@@ -227,7 +227,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_CHANNEL:
                 tableName = CHANNEL_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = ChannelTable.KEY_ROWID + "=" + id
+                selection = ChannelTable.KEY_ID + "='" + id+"'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
@@ -237,7 +237,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_MESSAGE:
                 tableName = MESSAGE_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = MessageTable.KEY_ROWID + "=" + id
+                selection = MessageTable.KEY_ID + "='" + id+"'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
@@ -247,7 +247,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_USER:
                 tableName = USER_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = MessageTable.KEY_ID + "=" + id
+                selection = MessageTable.KEY_ID + "='" + id+"'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
@@ -276,7 +276,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_CHANNEL:
                 tableName = CHANNEL_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = ChannelTable.KEY_ID + "= '"  + id + "'"
+                selection = ChannelTable.KEY_ID + "= '" + id + "'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
@@ -286,7 +286,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_MESSAGE:
                 tableName = MESSAGE_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = MessageTable.KEY_ROWID + "=" + id
+                selection = MessageTable.KEY_ROWID + "='" + id+ "'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
@@ -296,7 +296,7 @@ public class XpushContentProvider extends ContentProvider {
             case SINGLE_USER:
                 tableName = USER_TABLE;
                 id = uri.getPathSegments().get(1);
-                selection = MessageTable.KEY_ID + "=" + id
+                selection = MessageTable.KEY_ID + "='" + id+ "'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;

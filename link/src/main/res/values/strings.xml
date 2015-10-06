@@ -25,15 +25,13 @@
     <string name="message_for_input_status_message">Input status message</string>
     <string name="title_for_change_status_message">Edit Status message</string>
 
-
     <string name="action_home">Home</string>
     <string name="action_switch">Switch</string>
     <string name="action_review">Review</string>
 
-
     <string name="drawer_menu">Menu</string>
 
-    <string name="label.text.search.user">ID or Name</string>
+    <string name="label_search_user">ID or Name</string>
     <string name="ready_for_search">Enter your search terms</string>
 
     <string name="intro.start.message">시작하기</string>

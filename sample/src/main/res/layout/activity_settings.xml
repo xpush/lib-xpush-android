@@ -12,6 +12,7 @@
         android:background="@color/primary"
         android:theme="@style/GalaxyZooThemeToolbarDarkOverflow"
         android:elevation="4dp" />
+
     <ListView
         android:id="@id/android:list"
         android:layout_width="match_parent"
