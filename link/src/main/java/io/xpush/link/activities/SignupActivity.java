@@ -29,31 +29,31 @@ import io.xpush.link.R;
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = SignupActivity.class.getSimpleName();
 
-    private EditText _nameText;
-    private EditText _idText;
-    private EditText _passwordText;
-    private Button _signupButton;
-    private TextView _loginLink;
+    private EditText mNameText;
+    private EditText mIdText;
+    private EditText mPasswordText;
+    private Button mSignupButton;
+    private TextView mLoginLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        _nameText = (EditText)findViewById(R.id.input_name);
-        _idText = (EditText)findViewById(R.id.input_id);
-        _passwordText = (EditText)findViewById(R.id.input_password);
-        _signupButton = (Button)findViewById(R.id.btn_signup);
-        _loginLink = (TextView)findViewById(R.id.link_login);
+        mNameText = (EditText)findViewById(R.id.input_name);
+        mIdText = (EditText)findViewById(R.id.input_id);
+        mPasswordText = (EditText)findViewById(R.id.input_password);
+        mSignupButton = (Button)findViewById(R.id.btn_signup);
+        mLoginLink = (TextView)findViewById(R.id.link_login);
 
-        _signupButton.setOnClickListener(new View.OnClickListener() {
+        mSignupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signup();
             }
         });
 
-        _loginLink.setOnClickListener(new View.OnClickListener() {
+        mLoginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
@@ -69,16 +69,16 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
-        _signupButton.setEnabled(false);
+        mSignupButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String name = _nameText.getText().toString();
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String name = mNameText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
         final Map<String,String> params = new HashMap<String, String>();
 
         JSONObject data = new JSONObject();
@@ -135,7 +135,7 @@ public class SignupActivity extends AppCompatActivity {
 
 
     public void onSignupSuccess() {
-        _signupButton.setEnabled(true);
+        mSignupButton.setEnabled(true);
         setResult(RESULT_OK, null);
         finish();
     }
@@ -143,35 +143,35 @@ public class SignupActivity extends AppCompatActivity {
     public void onSignupFailed() {
         Toast.makeText(getBaseContext(), "SignUp failed", Toast.LENGTH_LONG).show();
 
-        _signupButton.setEnabled(true);
+        mSignupButton.setEnabled(true);
     }
 
     public boolean validate() {
         boolean valid = true;
 
-        String name = _nameText.getText().toString();
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String name = mNameText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
 
         if (name.isEmpty() || name.length() < 3) {
-            _nameText.setError("at least 3 characters");
+            mNameText.setError("at least 3 characters");
             valid = false;
         } else {
-            _nameText.setError(null);
+            mNameText.setError(null);
         }
 
         if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
-            _idText.setError("between 4 and 10 alphanumeric characters");
+            mIdText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
-            _idText.setError(null);
+            mIdText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            mPasswordText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
-            _passwordText.setError(null);
+            mPasswordText.setError(null);
         }
 
         return valid;

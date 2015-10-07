@@ -1,8 +1,6 @@
 package io.xpush.link.fragments;
 
-import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -43,8 +41,8 @@ public class ChannelFragment extends ChannelsFragment {
                 }
 
                 String selection = UserTable.KEY_NAME + " LIKE '%"+constraint.toString() +"%'";
-                Cursor cur = mActivity.getContentResolver().query(XpushContentProvider.CHANNEL_CONTENT_URI, mProjection, selection, null, null);
-                return cur;
+                Cursor cursor = mActivity.getContentResolver().query(XpushContentProvider.CHANNEL_CONTENT_URI, mProjection, selection, null, null);
+                return cursor;
             }
         });
 
@@ -60,7 +58,6 @@ public class ChannelFragment extends ChannelsFragment {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                Log.d( TAG, s );
                 mDataAdapter.getFilter().filter(s);
                 mDataAdapter.notifyDataSetChanged();
                 return false;

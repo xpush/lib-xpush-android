@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.EditText;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -38,8 +37,6 @@ import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.link.R;
-import io.xpush.link.activities.EditNickNameActivity;
-import io.xpush.link.activities.EditStatusMessageActivity;
 
 public class ProfileFragment extends Fragment {
 
@@ -105,7 +102,7 @@ public class ProfileFragment extends Fragment {
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateProfile();
+                updateProfile(mJsonUserData);
             }
         });
 
@@ -188,13 +185,13 @@ public class ProfileFragment extends Fragment {
         return downloadUrl;
     }
 
-    private void updateProfile(){
+    private void updateProfile(final JSONObject jsonData){
 
         try {
-            if( mJsonUserData != null ) {
-                mJsonUserData.put("NM", mUserName.getText());
-                mJsonUserData.put("MG", mStatusMessage.getText());
-                mJsonUserData.put("EM", mEmail.getText());
+            if( jsonData != null ) {
+                jsonData.put("NM", mUserName.getText());
+                jsonData.put("MG", mStatusMessage.getText());
+                jsonData.put("EM", mEmail.getText());
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -204,7 +201,7 @@ public class ProfileFragment extends Fragment {
 
         params.put("A", getString(R.string.app_id));
         params.put("U", mSession.getId());
-        params.put("DT", mJsonUserData.toString());
+        params.put("DT", jsonData.toString());
         params.put("PW", mSession.getPassword());
         params.put("D", mSession.getDeviceId());
 
@@ -220,19 +217,19 @@ public class ProfileFragment extends Fragment {
                             if( "ok".equalsIgnoreCase(response.getString("status")) ){
                                 Log.d(TAG, response.getString("status"));
 
-                                if( mJsonUserData.has("I") ) {
-                                    mSession.setImage(mJsonUserData.getString("I"));
+                                if( jsonData.has("I") ) {
+                                    mSession.setImage(jsonData.getString("I"));
                                 }
-                                if( mJsonUserData.has("NM") ) {
-                                    mSession.setName(mJsonUserData.getString("NM"));
-                                }
-
-                                if( mJsonUserData.has("MG") ) {
-                                    mSession.setMessage(mJsonUserData.getString("MG"));
+                                if( jsonData.has("NM") ) {
+                                    mSession.setName(jsonData.getString("NM"));
                                 }
 
-                                if( mJsonUserData.has("EM") ) {
-                                    mSession.setEmail(mJsonUserData.getString("EM"));
+                                if( jsonData.has("MG") ) {
+                                    mSession.setMessage(jsonData.getString("MG"));
+                                }
+
+                                if( jsonData.has("EM") ) {
+                                    mSession.setEmail(jsonData.getString("EM"));
                                 }
                                 ApplicationController.getInstance().setXpushSession( mSession );
                             }

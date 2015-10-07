@@ -11,15 +11,10 @@ import android.widget.TextView;
 import io.xpush.link.R;
 import io.xpush.link.fragments.ProfileFragment;
 
-/**
- * Created by James on 2015-09-05.
- */
 public class ProfileActivity extends AppCompatActivity {
 
     public static final String TAG = ProfileActivity.class.getSimpleName();
 
-    private TextView mTvNickname;
-    private TextView mTvStatusMessage;
     private ProfileFragment f;
 
     @Override

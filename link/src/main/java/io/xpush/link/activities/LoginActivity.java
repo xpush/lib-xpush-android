@@ -31,22 +31,22 @@ public class LoginActivity extends AppCompatActivity  {
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int REQUEST_SIGNUP = 100;
 
-    EditText _idText;
-    EditText _passwordText;
-    Button _loginButton;
-    TextView _signupLink;
+    EditText mIdText;
+    EditText mPasswordText;
+    Button mLoginButton;
+    TextView mSignupLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        _idText = (EditText)findViewById(R.id.input_id);
-        _passwordText = (EditText)findViewById(R.id.input_password);
-        _loginButton = (Button)findViewById(R.id.btn_login);
-        _signupLink = (TextView)findViewById(R.id.link_signup);
+        mIdText = (EditText)findViewById(R.id.input_id);
+        mPasswordText = (EditText)findViewById(R.id.input_password);
+        mLoginButton = (Button)findViewById(R.id.btn_login);
+        mSignupLink = (TextView)findViewById(R.id.link_signup);
 
-        _loginButton.setOnClickListener(new View.OnClickListener() {
+        mLoginButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity  {
             }
         });
 
-        _signupLink.setOnClickListener(new View.OnClickListener() {
+        mSignupLink.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -72,15 +72,15 @@ public class LoginActivity extends AppCompatActivity  {
             return;
         }
 
-        _loginButton.setEnabled(false);
+        mLoginButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setIndeterminate(true);
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -140,7 +140,7 @@ public class LoginActivity extends AppCompatActivity  {
     }
 
     public void onLoginSuccess() {
-        _loginButton.setEnabled(true);
+        mLoginButton.setEnabled(true);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
@@ -157,27 +157,27 @@ public class LoginActivity extends AppCompatActivity  {
     public void onLoginFailed() {
         Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
 
-        _loginButton.setEnabled(true);
+        mLoginButton.setEnabled(true);
     }
 
     public boolean validate() {
         boolean valid = true;
 
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
 
         if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
-            _idText.setError("between 4 and 10 alphanumeric characters");
+            mIdText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
-            _idText.setError(null);
+            mIdText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            mPasswordText.setError("between 4 and 10 alphanumeric characters");
             valid = false;
         } else {
-            _passwordText.setError(null);
+            mPasswordText.setError(null);
         }
 
         return valid;
