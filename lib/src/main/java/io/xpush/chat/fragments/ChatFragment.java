@@ -43,6 +43,7 @@ import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -110,6 +111,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public ChatFragment() {
         super();
     }
+
+    private long lastReceiveTime = 0L;
 
     @Override
     public void onAttach(Activity activity) {
@@ -466,40 +469,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         @Override
         public void call(final Object... args) {
             JSONObject data = (JSONObject) args[0];
-
-            final XPushMessage xpushMessage = new XPushMessage( data );
-
-            try {
-                ContentValues values = new ContentValues();
-                values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-                values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
-                values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
-                values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
-                values.put(ChannelTable.KEY_COUNT, 0);
-
-                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-                getActivity().getContentResolver().update(singleUri, values, null, null);
-
-                if (mSession.getId().equals(xpushMessage.getSender() ) ){
-                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
-                } else {
-                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
-                }
-
-                mDataSource.insert(xpushMessage);
-
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        addMessage(xpushMessage);
-                    }
-                });
-
-            } catch (Exception e ){
-                e.printStackTrace();
-            }
+            saveMessage( data );
         }
     };
+
 
     private Emitter.Listener onUserJoined = new Emitter.Listener() {
         @Override
@@ -690,6 +663,42 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
+    private void saveMessage( JSONObject data ){
+
+        final XPushMessage xpushMessage = new XPushMessage( data );
+
+        try {
+            ContentValues values = new ContentValues();
+            values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
+            values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
+            values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+            values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
+            values.put(ChannelTable.KEY_COUNT, 0);
+
+            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
+            getActivity().getContentResolver().update(singleUri, values, null, null);
+
+            if (mSession.getId().equals(xpushMessage.getSender() ) ){
+                xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+            } else {
+                xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+            }
+
+            lastReceiveTime = xpushMessage.getUpdated();
+            mDataSource.insert(xpushMessage);
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    addMessage(xpushMessage);
+                }
+            });
+
+        } catch (Exception e ){
+            e.printStackTrace();
+        }
+    }
+
     private void channelCreate(){
 
         JSONObject jsonObject = new JSONObject();
@@ -756,5 +765,42 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         RequestQueue queue = Volley.newRequestQueue(mActivity);
         queue.add(request);
+    }
+
+    //add unread message
+    private void messageUnread(){
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+
+            if( lastReceiveTime > 0  ) {
+                jsonObject.put("TS", lastReceiveTime );
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApplicationController.getInstance().getClient().emit("message.unread", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString());
+                if (response.has("status")) {
+                    try {
+                        Log.d(TAG, response.getString("status"));
+                        if ("ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals(response.getString("status"))) {
+                            JSONArray messages = (JSONArray)response.get("result");
+                            for( int inx = 0 ; inx <  messages.length() ; inx++ ){
+                                saveMessage(messages.getJSONObject(inx));
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
