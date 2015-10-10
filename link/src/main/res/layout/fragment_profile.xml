@@ -63,7 +63,7 @@
             <EditText android:id="@+id/email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
+                android:inputType="text"
                 android:hint="Contact Email"/>
         </android.support.design.widget.TextInputLayout>
 

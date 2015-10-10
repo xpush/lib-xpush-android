@@ -20,5 +20,5 @@
         <ImageView android:id="@+id/dot3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="15.0dip" android:src="@drawable/page_off" />
         <ImageView android:id="@+id/dot4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="15.0dip" android:src="@drawable/page_off" />
     </LinearLayout>
-    <Button android:textSize="@dimen/text_large" android:layout_gravity="bottom|center" android:id="@+id/button" android:visibility="invisible" android:layout_width="wrap_content" android:layout_marginBottom="30.0dip" android:text="@string/intro.start.message" style="@style/GrayButton" />
+    <Button android:textSize="@dimen/text_large" android:layout_gravity="bottom|center" android:id="@+id/button" android:visibility="invisible" android:layout_width="wrap_content" android:layout_marginBottom="30.0dip" android:text="@string/intro_start_message" style="@style/GrayButton" />
 </FrameLayout>

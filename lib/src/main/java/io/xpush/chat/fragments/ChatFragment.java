@@ -790,10 +790,45 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 if (response.has("status")) {
                     try {
                         Log.d(TAG, response.getString("status"));
-                        if ("ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals(response.getString("status"))) {
-                            JSONArray messages = (JSONArray)response.get("result");
-                            for( int inx = 0 ; inx <  messages.length() ; inx++ ){
+                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
+                            JSONArray messages = (JSONArray) response.get("result");
+                            for (int inx = 0; inx < messages.length(); inx++) {
                                 saveMessage(messages.getJSONObject(inx));
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
+    private void emitChannelLeave(){
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if( lastReceiveTime > 0  ) {
+                jsonObject.put("C", mChannel );
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApplicationController.getInstance().getClient().emit("channel.leave", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString());
+                if (response.has("status")) {
+                    try {
+                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
+                            leave();
+                        } else {
+                            if( response.has("message") ){
+                                Toast.makeText(getActivity().getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
                             }
                         }
                     } catch (JSONException e) {

@@ -21,7 +21,7 @@
             <EditText android:id="@+id/input_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
+                android:inputType="text"
                 android:hint="@string/label.text.id" />
         </android.support.design.widget.TextInputLayout>
 
@@ -33,7 +33,7 @@
             <EditText android:id="@+id/input_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"
+                android:inputType="text"
                 android:hint="Name" />
         </android.support.design.widget.TextInputLayout>
 
@@ -45,7 +45,7 @@
             <EditText android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword"
+                android:inputType="text"
                 android:hint="@string/label.text.password"/>
         </android.support.design.widget.TextInputLayout>
 

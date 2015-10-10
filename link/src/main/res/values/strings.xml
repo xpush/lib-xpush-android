@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Link</string>
 
-    <string name="host_name">http://stalk-front-l01.cloudapp.net:8000</string>
+    <string name="host_name">http://54.178.160.166:8000</string>
     <string name="app_id">link</string>
     <string name="device_id">android</string>
     <string name="gcm_defaultSenderId">944977353393</string>
@@ -34,5 +34,5 @@
     <string name="label_search_user">ID or Name</string>
     <string name="ready_for_search">Enter your search terms</string>
 
-    <string name="intro.start.message">시작하기</string>
+    <string name="intro_start_message">시작하기</string>
 </resources>

@@ -43,7 +43,10 @@ public class LoginRequest extends StringRequest {
             if ("ok".equalsIgnoreCase(parsed.getString("status"))) {
                 JSONObject result = parsed.getJSONObject("result");
 
-                String token = result.getString("token");
+                String token = null;
+                if( result.has("token")) {
+                    token = result.getString("token");
+                }
                 String server = result.getString("server");
                 String serverUrl = result.getString("serverUrl");
 
