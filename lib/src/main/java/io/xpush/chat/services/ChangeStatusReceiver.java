@@ -3,12 +3,8 @@ package io.xpush.chat.services;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
-/**
- * Created by jhkim on 2014-12-31.
- */
 public class ChangeStatusReceiver extends BroadcastReceiver {
     private static final String TAG = "XPushService";
 
