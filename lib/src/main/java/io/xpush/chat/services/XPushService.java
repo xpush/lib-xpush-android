@@ -23,6 +23,7 @@ import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.EngineIOException;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.socketio.client.SocketIOException;
 import com.github.nkzawa.thread.EventThread;
 
 import org.json.JSONException;
@@ -591,7 +592,7 @@ public class XPushService extends Service {
         @Override
         public void call(Object... args) {
 
-            EngineIOException e = (EngineIOException) args[0];
+            SocketIOException e = (SocketIOException) args[0];
             log(e.getMessage());
             mConnecting = false;
         }
@@ -613,6 +614,4 @@ public class XPushService extends Service {
         mDbHelper = null;
         mDatabase = null;
     }
-
-
 }
