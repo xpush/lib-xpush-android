@@ -23,63 +23,52 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.xpush.chat.ApplicationController;
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.sampleChat.R;
 
 public class SignupActivity extends AppCompatActivity {
     private static final String TAG = SignupActivity.class.getSimpleName();
 
-    private EditText _nameText;
-    private EditText _idText;
-    private EditText _passwordText;
-    private Button _signupButton;
-    private TextView _loginLink;
+    @Bind(R.id.input_id)
+    EditText mIdText;
+
+    @Bind(R.id.input_name)
+    EditText mNameText;
+
+    @Bind(R.id.input_password)
+    EditText mPasswordText;
+
+    @Bind(R.id.btn_signup)
+    Button mSignupButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
-        _nameText = (EditText)findViewById(R.id.input_name);
-        _idText = (EditText)findViewById(R.id.input_id);
-        _passwordText = (EditText)findViewById(R.id.input_password);
-        _signupButton = (Button)findViewById(R.id.btn_signup);
-        _loginLink = (TextView)findViewById(R.id.link_login);
-
-        _signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signup();
-            }
-        });
-
-        _loginLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        ButterKnife.bind(this);
     }
 
+    @OnClick(R.id.btn_signup)
     public void signup() {
-        Log.d(TAG, "Signup");
 
         if (!validate()) {
             onSignupFailed();
             return;
         }
 
-        _signupButton.setEnabled(false);
+        mSignupButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this);
         progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating Account...");
+        progressDialog.setMessage(getString(R.string.progress_message_signup));
         progressDialog.show();
 
-        String name = _nameText.getText().toString();
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
+        String name = mNameText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
         final Map<String,String> params = new HashMap<String, String>();
 
         JSONObject data = new JSONObject();
@@ -93,7 +82,7 @@ public class SignupActivity extends AppCompatActivity {
         params.put("U", id);
         params.put("DT", data.toString());
         params.put("PW", password);
-        params.put("D", "web");
+        params.put("D", getString(R.string.device_id));
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
             params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
@@ -104,8 +93,6 @@ public class SignupActivity extends AppCompatActivity {
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    Log.d(TAG, "SignUp success ======================");
-                    Log.d(TAG, response.toString());
                     try {
                         if( "ok".equalsIgnoreCase(response.getString("status")) ){
                             progressDialog.dismiss();
@@ -122,7 +109,6 @@ public class SignupActivity extends AppCompatActivity {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, "SignUp error ======================");
                     error.printStackTrace();
                     progressDialog.dismiss();
                     onSignupFailed();
@@ -134,45 +120,44 @@ public class SignupActivity extends AppCompatActivity {
         queue.add(request);
     }
 
-
     public void onSignupSuccess() {
-        _signupButton.setEnabled(true);
+        mSignupButton.setEnabled(true);
         setResult(RESULT_OK, null);
         finish();
     }
 
-    public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "SignUp failed", Toast.LENGTH_LONG).show();
+    @OnClick(R.id.link_login)
+    public void onSignupCancel() {
+        mSignupButton.setEnabled(true);
+        setResult(RESULT_CANCELED, null);
+        finish();
+    }
 
-        _signupButton.setEnabled(true);
+    public void onSignupFailed() {
+        Toast.makeText(getBaseContext(), getString(R.string.fail_message_signup), Toast.LENGTH_LONG).show();
+
+        mSignupButton.setEnabled(true);
     }
 
     public boolean validate() {
         boolean valid = true;
 
-        String name = _nameText.getText().toString();
-        String id = _idText.getText().toString();
-        String password = _passwordText.getText().toString();
-
-        if (name.isEmpty() || name.length() < 3) {
-            _nameText.setError("at least 3 characters");
-            valid = false;
-        } else {
-            _nameText.setError(null);
-        }
+        String name = mNameText.getText().toString();
+        String id = mIdText.getText().toString();
+        String password = mPasswordText.getText().toString();
 
         if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
-            _idText.setError("between 4 and 10 alphanumeric characters");
+            mIdText.setError( getString(R.string.error_message_validation_4_10) );
             valid = false;
         } else {
-            _idText.setError(null);
+            mIdText.setError(null);
         }
 
         if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
+            mPasswordText.setError( getString(R.string.error_message_validation_4_10) );
             valid = false;
         } else {
-            _passwordText.setError(null);
+            mPasswordText.setError(null);
         }
 
         return valid;

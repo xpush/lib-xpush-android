@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SampleChat</string>
-    <string name="host_name">http://54.178.160.166:8000</string>
-    <!--
-    <string name="app_id">sample-chat</string>
-    -->
-    <string name="app_id">messengerx</string>
-    <string name="device_id">ionic</string>
+    <string name="app_name">사장님앱</string>
+    <string name="host_name">http://54_178_160_166:8000</string>
+    <string name="app_id">zeroapp</string>
+    <string name="device_id">android</string>
     <string name="gcm_defaultSenderId">944977353393</string>
+
+    <!-- Intro Activity -->
+    <string name="label_text_start">시작하기</string>
+
+    <!-- Login Activity && SignUp Activity -->
+    <string name="label_text_id">아이디</string>
+    <string name="label_text_name">닉네임</string>
+    <string name="label_text_password">비밀번호</string>
+    <string name="label_button_login">로그인</string>
+    <string name="label_text_signup_description">회원가입안내</string>
+
+    <string name="progress_message_authenticating">로그인 중</string>
+    <string name="progress_message_signup">회원가입 중</string>
+    <string name="success_message_signup">회원가입 성공</string>
+
+    <string name="error_message_validation_4_10">4자에서 10자의 알파벳만이 사용 가능합니다.</string>
+
+    <string name="fail_message_login">로그인 실패</string>
+    <string name="fail_message_signup">회원가입 실패</string>
+
+    <string name="label_button_signup">회원가입</string>
+    <string name="label_text_already_signed_up">이미 가입되어 있다면, 로그인하세요.</string>
 
     <string-array name="tabs">
         <item>Users</item>

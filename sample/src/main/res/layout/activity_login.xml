@@ -20,31 +20,28 @@
             android:layout_marginBottom="24dp"
             android:layout_gravity="center_horizontal" />
 
-
         <!-- Id Label -->
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:theme="@style/TextLabel">
             <EditText android:id="@+id/input_id"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:hint="@string/label.text.id" />
+                android:inputType="text"
+                android:hint="@string/label_text_id" />
         </android.support.design.widget.TextInputLayout>
 
         <!-- Password Label -->
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:theme="@style/TextLabel">
             <EditText android:id="@+id/input_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
-                android:hint="@string/label.text.password"/>
+                android:hint="@string/label_text_password"/>
         </android.support.design.widget.TextInputLayout>
 
         <android.support.v7.widget.AppCompatButton
@@ -54,13 +51,13 @@
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:padding="12dp"
-            android:text="@string/label.button.login"/>
+            android:text="@string/label_button_login"/>
 
         <TextView android:id="@+id/link_signup"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            android:text="@string/label.text.signup_description"
+            android:text="@string/label_text_signup_description"
             android:gravity="center"
             android:textSize="16dip"/>
 

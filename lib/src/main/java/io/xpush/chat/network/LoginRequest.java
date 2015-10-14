@@ -34,7 +34,7 @@ public class LoginRequest extends StringRequest {
 
     @Override
     protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-        JSONObject parsed;
+        JSONObject parsed = null;
         try {
             parsed = new JSONObject( new String(response.data) );
 

@@ -280,7 +280,7 @@ public class XPushService extends Service {
         // fetch the device ID from the preferences.
         String hostName = "";
         String appId = getString(R.string.app_id);
-        String url = mXpushSession.getServerUrl() + "/session";
+        String url = mXpushSession.getServerUrl() + "/global";
 
         IO.Options opts = new IO.Options();
         opts.forceNew = true;

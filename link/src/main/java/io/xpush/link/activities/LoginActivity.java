@@ -24,6 +24,9 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.chat.network.LoginRequest;
 import io.xpush.link.R;
 
@@ -31,40 +34,31 @@ public class LoginActivity extends AppCompatActivity  {
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int REQUEST_SIGNUP = 100;
 
+    @Bind(R.id.input_id)
     EditText mIdText;
+
+    @Bind(R.id.input_password)
     EditText mPasswordText;
-    Button mLoginButton;
-    TextView mSignupLink;
+
+    @OnClick(R.id.link_signup)
+    private void signUp() {
+        Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+        startActivityForResult(intent, REQUEST_SIGNUP);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mIdText = (EditText)findViewById(R.id.input_id);
-        mPasswordText = (EditText)findViewById(R.id.input_password);
-        mLoginButton = (Button)findViewById(R.id.btn_login);
-        mSignupLink = (TextView)findViewById(R.id.link_signup);
-
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                login();
-            }
-        });
-
-        mSignupLink.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
-            }
-        });
+        ButterKnife.bind(this);
     }
 
-    public void login() {
+    @Bind(R.id.btn_login)
+    Button mLoginButton;
+
+    @OnClick(R.id.btn_login)
+    private void login() {
         Log.d(TAG, "Login");
 
         if (!validate()) {
@@ -96,7 +90,7 @@ public class LoginActivity extends AppCompatActivity  {
                 @Override
                 public void onResponse(JSONObject response) {
                     try {
-                        if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                        if( response != null && "ok".equalsIgnoreCase(response.getString("status")) ){
                             progressDialog.dismiss();
                             onLoginSuccess();
                         } else {

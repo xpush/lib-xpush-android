@@ -15,26 +15,29 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
 import io.xpush.sampleChat.R;
 
-/**
- * Created by 정진영 on 2015-09-19.
- */
 public class IntroActivity extends AppCompatActivity {
 
     static final int NUM_ITEMS = 4;
     ImageFragmentPagerAdapter imageFragmentPagerAdapter;
-    ViewPager viewPager;
+
     public static final String[] IMAGE_NAME = {"intro_bear", "intro_bonobo", "intro_eagle", "intro_horse"};
 
     ImageView[] dots;
-    Button button;
 
+    @Bind(R.id.btn_start)
+    Button mBtnStart;
+
+    @Bind(R.id.viewPager)
+    ViewPager mViewPager;
 
     ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
-        public void onPageScrollStateChanged(int paramAnonymousInt)
-        {
+        public void onPageScrollStateChanged(int paramAnonymousInt) {
             if (paramAnonymousInt == 0) {
                 IntroActivity.this.updateState();
             }
@@ -42,8 +45,7 @@ public class IntroActivity extends AppCompatActivity {
 
         public void onPageScrolled(int paramAnonymousInt1, float paramAnonymousFloat, int paramAnonymousInt2) {}
 
-        public void onPageSelected(int paramAnonymousInt)
-        {
+        public void onPageSelected(int paramAnonymousInt) {
             ImageView[] arrayOfImageView = IntroActivity.this.dots;
             int j = arrayOfImageView.length;
             int i = 0;
@@ -55,52 +57,46 @@ public class IntroActivity extends AppCompatActivity {
         }
     };
 
-    void updateState()
-    {
-        if (this.viewPager.getCurrentItem() + 1 == this.NUM_ITEMS) {
-            this.button.setVisibility(View.VISIBLE);
+    @OnClick(R.id.btn_start)
+    public void start() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = pref.edit();
+        editor.putBoolean("SHOW_INTRO", true);
+        editor.commit();
+
+        Intent intent = null;
+
+        if (null == ApplicationController.getInstance().getXpushSession()) {
+            intent = new Intent(IntroActivity.this, LoginActivity.class);
+        } else {
+            intent = new Intent(IntroActivity.this, MainActivity.class);
+        }
+        startActivity(intent);
+        finish();
+    }
+
+    void updateState() {
+        if (mViewPager.getCurrentItem() + 1 == this.NUM_ITEMS) {
+            mBtnStart.setVisibility(View.VISIBLE);
             return;
         }
-        this.button.setVisibility(View.INVISIBLE);
+        mBtnStart.setVisibility(View.INVISIBLE);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
+        ButterKnife.bind(this);
 
         this.dots = new ImageView[] { (ImageView)findViewById(R.id.dot1), (ImageView)findViewById(R.id.dot2), (ImageView)findViewById(R.id.dot3), (ImageView)findViewById(R.id.dot4) };
         this.dots[0].setImageResource(R.drawable.page_on);
 
 
         imageFragmentPagerAdapter = new ImageFragmentPagerAdapter(getSupportFragmentManager());
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        viewPager.setAdapter(imageFragmentPagerAdapter);
+        mViewPager.setAdapter(imageFragmentPagerAdapter);
 
-        button = (Button) findViewById(R.id.button);
-
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putBoolean("SHOW_INTRO", true);
-                editor.commit();
-
-                Intent intent = null;
-
-                if (null == ApplicationController.getInstance().getXpushSession()) {
-                    intent = new Intent(IntroActivity.this, LoginActivity.class);
-                } else {
-                    intent = new Intent(IntroActivity.this, MainActivity.class);
-                }
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        this.viewPager.addOnPageChangeListener(this.onPageChangeListener);
+        mViewPager.addOnPageChangeListener(this.onPageChangeListener);
     }
 
     public static class ImageFragmentPagerAdapter extends FragmentPagerAdapter {
@@ -115,7 +111,6 @@ public class IntroActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            SwipeFragment fragment = new SwipeFragment();
             return SwipeFragment.newInstance(position);
         }
     }

@@ -1,34 +1,34 @@
 <resources>
 
+    <style name="OrangeButton">
+        <item name="android:textSize">@dimen/text_xlarge</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:background">@drawable/btn_big_orange</item>
+        <item name="android:paddingLeft">25.0dip</item>
+        <item name="android:paddingRight">25.0dip</item>
+        <item name="android:layout_height">50.0dip</item>
+    </style>
+
+    <style name="TextLabel" parent="TextAppearance.AppCompat">
+        <item name="android:textColorHint">@color/font_gray4</item>
+        <item name="android:textSize">16sp</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
     </style>
 
-
     <style name="GalaxyZooThemeToolbarDarkOverflow" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- android:textColorPrimary is the  color of the title text
-             in the Toolbar, in the Theme.AppCompat theme:  -->
         <item name="android:textColorPrimary">@color/white</item>
-
-        <!-- android:textColorPrimaryInverse is the  color of the title
-             text in the Toolbar, in the Theme.AppCompat.Light theme:  -->
-        <!-- <item name="android:textColorPrimaryInverse">@color/abc_primary_text_material_light</item> -->
-
-        <!-- android:actionMenuTextColor is the color of the text of
-              action (menu) items in the Toolbar, at least in the
-              Theme.AppCompat theme.
-              For some reason, they already get the textColorPrimary
-              when running on API 21, but not on older versions of
-              Android, so this is only necessary to support older
-              Android versions.-->
         <item name="actionMenuTextColor">@color/white</item>
-        <!-- android:textColorSecondary is the color of the menu
-             overflow icon (three vertical dots) -->
         <item name="android:textColorSecondary">@color/white</item>
-
-        <!-- This would set the toolbar's background color,
-              but setting this also changes the popup menu's background,
-              even if we define popupTheme for our <Toolbar> -->
-        <!-- <item name="android:background">@color/color_primary</item> -->
     </style>
 
     <style name="Layout" />
@@ -52,18 +52,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingStart">14.0dip</item>
         <item name="android:paddingEnd">14.0dip</item>
-    </style>
-
-    <style name="OrangeButton">
-        <item name="android:textSize">@dimen/text_xlarge</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/white</item>
-        <item name="android:gravity">center</item>
-        <item name="android:layout_gravity">center</item>
-        <item name="android:background">@drawable/btn_big_orange</item>
-        <item name="android:paddingLeft">25.0dip</item>
-        <item name="android:paddingRight">25.0dip</item>
-        <item name="android:layout_height">50.0dip</item>
     </style>
 
     <style name="D4.Layout.SettingSimpleTextInputLayout" parent="@style/Layout">
