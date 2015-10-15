@@ -31,7 +31,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.common.Constants;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
@@ -43,20 +47,30 @@ public class ProfileFragment extends Fragment {
 
     private String TAG = ProfileFragment.class.getSimpleName();
     private Context mActivity;
-    private View mNicknameButton;
-    private View mStatusMessageButton;
 
-    private View mImageBox;
-    private SimpleDraweeView mThumbnail;
     private XPushSession mSession;
-    private TextView mTvNickname;
-    private TextView mTvStatusMessage;
-
     private JSONObject mJsonUserData;
+
+    @Bind(R.id.nickname_button)
+    View mNicknameButton;
+
+    @Bind(R.id.status_message_button)
+    View mStatusMessageButton;
+
+    @Bind(R.id.imageBox)
+    View mImageBox;
+
+    @Bind(R.id.thumbnail)
+    SimpleDraweeView mThumbnail;
+
+    @Bind(R.id.nickname)
+    TextView mTvNickname;
+
+    @Bind(R.id.status_message)
+    TextView mTvStatusMessage;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
         mSession = ApplicationController.getInstance().getXpushSession();
@@ -66,43 +80,16 @@ public class ProfileFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        ButterKnife.bind(this, view);
 
-        mNicknameButton = view.findViewById(R.id.nickname_button);
-        mNicknameButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editUserName();
-            }
-        });
-
-        mStatusMessageButton = view.findViewById(R.id.status_message_button);
-        mStatusMessageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                editStatusMessage();
-            }
-        });
-
-        mImageBox = view.findViewById(R.id.imageBox);
-        mImageBox.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                openGallery(110);
-            }
-        });
-
-        mThumbnail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
         if( mSession.getImage() != null ) {
             mThumbnail.setImageURI(Uri.parse(mSession.getImage()));
         }
 
-        mTvNickname = (TextView) view.findViewById(R.id.nickname);
         if( null != mSession.getName() ) {
             mTvNickname.setText(mSession.getName());
         }
 
-        mTvStatusMessage = (TextView) view.findViewById(R.id.status_message);
         if( null != mSession.getMessage() ) {
             mTvStatusMessage.setText(mSession.getMessage());
         }
@@ -110,21 +97,24 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    public void editUserName() {
+    @OnClick(R.id.nickname_button)
+    public void editNickName() {
         Intent localIntent = new Intent(mActivity, EditNickNameActivity.class);
-        getActivity().startActivityForResult(localIntent, 103);
+        getActivity().startActivityForResult(localIntent, Constants.REQUEST_EDIT_NICKNAME);
     }
 
+    @OnClick(R.id.status_message_button)
     public void editStatusMessage() {
         Intent localIntent = new Intent(mActivity, EditStatusMessageActivity.class);
-        getActivity().startActivityForResult(localIntent, 104);
+        getActivity().startActivityForResult(localIntent, Constants.REQUEST_EDIT_STATUS_MESSAGE);
     }
 
-    public void openGallery(int req_code){
+    @OnClick(R.id.imageBox)
+    public void openGallery(){
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        getActivity().startActivityForResult(Intent.createChooser(intent, "Select file to use profile"), req_code);
+        getActivity().startActivityForResult(Intent.createChooser(intent, "Select file to use profile"), Constants.REQUEST_EDIT_IMAGE);
     }
 
     public void setImage(Uri uri){

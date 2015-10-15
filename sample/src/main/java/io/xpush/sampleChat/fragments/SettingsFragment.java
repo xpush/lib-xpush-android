@@ -36,9 +36,9 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     private void pickPreferenceObject(Preference p) {
         if (p instanceof PreferenceCategory) {
-            PreferenceCategory cat = (PreferenceCategory) p;
-            for (int i = 0; i < cat.getPreferenceCount(); i++) {
-                pickPreferenceObject(cat.getPreference(i));
+            PreferenceCategory category = (PreferenceCategory) p;
+            for (int i = 0; i < category.getPreferenceCount(); i++) {
+                pickPreferenceObject(category.getPreference(i));
             }
         } else {
             initSummary(p);

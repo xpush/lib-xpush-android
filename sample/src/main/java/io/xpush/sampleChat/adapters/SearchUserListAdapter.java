@@ -1,7 +1,6 @@
 package io.xpush.sampleChat.adapters;
 
 import android.net.Uri;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,12 +9,10 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-import io.xpush.sampleChat.R;
 import io.xpush.chat.models.XPushUser;
+import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.SearchUserFragment;
 
 

@@ -51,7 +51,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:padding="50dp"
-        android:text="@string/ready_for_search"
+        android:text="@string/ready_message_search"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#384452" />
 </RelativeLayout>

@@ -29,10 +29,6 @@ public class SplashActivity extends Activity {
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private int SPLASH_TIME = 1500;
 
-    private int NETWORK_WIFI            = 1;
-    private int NETWORK_MOBILE          = 2;
-    private int NETWORK_NOT_AVAILABLE   = 0;
-
     private Activity mActivity;
     private Button mReloadBtn;
 

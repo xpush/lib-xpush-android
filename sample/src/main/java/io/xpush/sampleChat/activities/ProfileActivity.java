@@ -8,12 +8,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import io.xpush.chat.common.Constants;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ProfileFragment;
 
-/**
- * Created by James on 2015-09-05.
- */
+
 public class ProfileActivity extends AppCompatActivity {
 
     public static final String TAG = ProfileActivity.class.getSimpleName();
@@ -45,22 +44,21 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // 수행을 제대로 한 경우
         if(resultCode == RESULT_OK && data != null) {
 
-            if( requestCode == 103 ) {
+            if( requestCode == Constants.REQUEST_EDIT_NICKNAME ) {
                 mTvNickname = (TextView) f.getView().findViewById(R.id.nickname);
                 String nickname = data.getStringExtra("nickname");
                 mTvNickname.setText(nickname);
 
                 f.setNickName(nickname);
-            } else if( requestCode == 104 ) {
+            } else if( requestCode == Constants.REQUEST_EDIT_STATUS_MESSAGE ) {
                 mTvStatusMessage = (TextView) f.getView().findViewById(R.id.status_message);
                 String statusMessage = data.getStringExtra("statusMessage");
                 mTvStatusMessage.setText(statusMessage);
 
                 f.setStatusMessage(statusMessage);
-            } else if ( requestCode == 110 ){
+            } else if ( requestCode == Constants.REQUEST_EDIT_IMAGE ){
                 Uri selectedImageUri = data.getData();
                 f.setImage( selectedImageUri );
             }

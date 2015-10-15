@@ -41,7 +41,7 @@ public class LoginActivity extends AppCompatActivity  {
     EditText mPasswordText;
 
     @OnClick(R.id.link_signup)
-    private void signUp() {
+    public void signUp() {
         Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
         startActivityForResult(intent, REQUEST_SIGNUP);
     }
@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity  {
     Button mLoginButton;
 
     @OnClick(R.id.btn_login)
-    private void login() {
+    public void login() {
         Log.d(TAG, "Login");
 
         if (!validate()) {

@@ -11,11 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,8 +26,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
@@ -48,18 +48,25 @@ public class SearchUserFragment extends Fragment  {
 
     private Activity mActivity;
     private String mUsername;
-    private TextView mTvMessage;
+    private String mSearchKey = "";
+    private int mViewPage;
 
-    private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
 
-    private int mViewPage;
     private RecyclerOnScrollListener mOnScrollListener;
     private LoadMoreHandler mHandler;
-    private EditText mEditSearch;
-    private String mSearchKey = "";
 
-    private ImageView mIconSearch;
+    @Bind(R.id.tvMessage)
+    TextView mTvMessage;
+
+    @Bind(R.id.listView)
+    RecyclerView mRecyclerView;
+
+    @Bind(R.id.editSearch)
+    EditText mEditSearch;
+
+    @Bind(R.id.iconSearch)
+    ImageView mIconSearch;
 
     @Override
     public void onAttach(Activity activity) {
@@ -80,14 +87,12 @@ public class SearchUserFragment extends Fragment  {
         mUsername = ApplicationController.getInstance().getXpushSession().getId();
 
         View view = inflater.inflate(R.layout.fragment_search_users, container, false);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.listView);
+        ButterKnife.bind(this, view);
 
-        mEditSearch = (EditText) view.findViewById(R.id.editSearch);
         mEditSearch.addTextChangedListener(new TextWatcher() {
 
             @Override
             public void afterTextChanged(Editable arg0) {
-                //String text = mEditSearch.getText().toString().toLowerCase(Locale.getDefault());
             }
 
             @Override
@@ -98,19 +103,6 @@ public class SearchUserFragment extends Fragment  {
             public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
             }
         });
-
-        mIconSearch = (ImageView) view.findViewById(R.id.iconSearch);
-
-        mIconSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mViewPage = 1;
-                mSearchKey = "%"+mEditSearch.getText().toString()+"%";
-                getUsers(mViewPage);
-            }
-        });
-        
-        mTvMessage = ( TextView ) view.findViewById(R.id.tvMessage);
 
         mHandler = new LoadMoreHandler();
         return view;
@@ -129,6 +121,13 @@ public class SearchUserFragment extends Fragment  {
         super.onResume();
     }
 
+    @OnClick(R.id.iconSearch)
+    public void search() {
+        mViewPage = 1;
+        mSearchKey = "%" + mEditSearch.getText().toString() + "%";
+        getUsers(mViewPage);
+    }
+
     private void displayListView() {
         mRecyclerView.setAdapter(mAdapter);
         mLayoutManager = new LinearLayoutManager(getActivity());
@@ -136,8 +135,8 @@ public class SearchUserFragment extends Fragment  {
 
         mOnScrollListener = new RecyclerOnScrollListener(mLayoutManager, RecyclerOnScrollListener.RecylclerDirection.DOWN) {
             @Override
-            public void onLoadMore(int current_page) {
-                Log.d(TAG, " onLoadMore : " + current_page);
+            public void onLoadMore(int currentPage) {
+                Log.d(TAG, " onLoadMore : " + currentPage);
                 getUsers(++mViewPage);
             }
         };
@@ -288,9 +287,7 @@ public class SearchUserFragment extends Fragment  {
 
             switch (msg.what) {
                 case 0:
-
                     mTvMessage.setVisibility(View.INVISIBLE);
-
                     mAdapter.notifyDataSetChanged();
                     break;
             }
