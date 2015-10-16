@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">사장님앱</string>
-    <string name="host_name">http://54_178_160_166:8000</string>
+    <string name="host_name">http://54.178.160.166:8000</string>
     <string name="app_id">zeroapp</string>
     <string name="device_id">android</string>
     <string name="gcm_defaultSenderId">944977353393</string>
@@ -50,12 +50,6 @@
     <string name="text_for_status_message">Status message</string>
     <string name="message_for_input_status_message">Input status message</string>
     <string name="title_for_change_status_message">Edit Status message</string>
-
-    <!-- Menus in Drawer -->
-    <string name="drawer_menu">Menu</string>
-    <string name="action_home">Home</string>
-    <string name="action_switch">Switch</string>
-    <string name="action_review">Review</string>
 
     <string name="label_search_user">ID or Name</string>
 </resources>

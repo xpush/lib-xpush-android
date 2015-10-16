@@ -99,11 +99,7 @@
                 <!-- regist gcm action -->
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                <!-- regist mqtt action -->
-                <action android:name="com.gsshop.pms.mqtt.MGRECVD" />
-
-                <category android:name="com.gsshop.pms.push"/>
+                <action android:name="io.xpush.chat.MGRECVD" />
             </intent-filter>
         </receiver>
 

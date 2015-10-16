@@ -592,8 +592,13 @@ public class XPushService extends Service {
         @Override
         public void call(Object... args) {
 
-            SocketIOException e = (SocketIOException) args[0];
-            log(e.getMessage());
+            if( args[0] instanceof SocketIOException ) {
+                SocketIOException e = (SocketIOException) args[0];
+                log(e.getMessage());
+            } else if ( args[0] instanceof  EngineIOException){
+                EngineIOException e = (EngineIOException) args[0];
+                log(e.getMessage());
+            }
             mConnecting = false;
         }
     };

@@ -38,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private Toolbar mToolbar;
     private Menu mMenu;
-    private DrawerLayout mDrawerLayout;
     private Adapter mApdater;
     private FloatingActionButton fab;
     private EditText mEditSearch;
@@ -66,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mToolbar.setTitle( getResources().getStringArray(R.array.tabs)[0] );
+        mToolbar.setTitle(getResources().getStringArray(R.array.tabs)[0]);
         setSupportActionBar(mToolbar);
 
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -75,17 +74,6 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        final ActionBar ab = getSupportActionBar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            setupDrawerContent(navigationView);
-        }
 
         SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         tabLayout.setDistributeEvenly(true);
@@ -180,54 +168,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
-        //mMenu = menu;
-        //getMenuInflater().inflate(R.menu.main_menu, menu);
-
-        /**
-        final MenuItem searchViewItem = mMenu.findItem(R.id.action_search);
-        mSearchView = (SearchView) searchViewItem.getActionView();
-
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                if (s.length() > 2) {
-                    filterData(s);
-                }
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                return false;
-            }
-        });
-
-        mSearchView.setOnSearchClickListener(new SearchView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mToolbar.setTitle("");
-                mSearchView.setMaxWidth(10000);
-            }
-        });
-
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                mToolbar.setTitle(mApdater.getTitle(mPosition));
-                return false;
-            }
-        });
-
-         */
-
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            mDrawerLayout.openDrawer(GravityCompat.START);
             return true;
         } else if( item.getItemId() == R.id.action_search_user ){
             searchUser();
@@ -242,31 +188,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupDrawerContent(NavigationView navigationView) {
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
-
-                        menuItem.setChecked(true);
-
-                        if (menuItem.getItemId() == R.id.nav_swap) {
-
-                        } else if (menuItem.getItemId() == R.id.nav_review) {
-
-                        }
-
-                        mDrawerLayout.closeDrawers();
-                        return true;
-                    }
-                });
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // 수행을 제대로 한 경우
-        if(requestCode == 110 && resultCode == RESULT_OK && data != null) {
+        if(requestCode == 200 && resultCode == RESULT_OK && data != null) {
             ( (FriendsFragment) mApdater.getItem(0) ).getUsers();
         }  else if(resultCode == RESULT_CANCELED){
 
@@ -275,6 +201,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void searchUser(){
         Intent intent = new Intent(MainActivity.this, SearchUserActivity.class);
-        startActivityForResult(intent, 110);
+        startActivityForResult(intent, 200);
     }
 }
