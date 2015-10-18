@@ -39,9 +39,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.emitter.Emitter;
+import com.github.nkzawa.engineio.client.EngineIOException;
 import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.socketio.client.SocketIOException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -157,6 +159,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     public void onResume(){
         super.onResume();
         if( mSocket == null || !mSocket.connected() ) {
+
             if (mUsers != null) {
                 channelCreate();
             } else {
@@ -207,7 +210,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (null == mUsername) return;
-                if (mSocket != null && !mSocket.connected()) return;
+                if (mSocket == null || !mSocket.connected()) return;
 
                 if (!mTyping) {
                     mTyping = true;
@@ -328,7 +331,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             String appId = getString(R.string.app_id);
 
-            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+mServerName+"&D=web&U="+mSession.getId();
+            opts.query = "A=" + appId+"&C="+ mChannel+"&S="+mServerName+"&D="+mSession.getDeviceId()+"&U="+mSession.getId();
 
             mSocket = IO.socket( url, opts );
 
@@ -423,7 +426,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         Handler handler = new Handler();
 
         Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
-        getActivity().getContentResolver().delete(singleUri, null, null);
+        mActivity.getContentResolver().delete(singleUri, null, null);
 
         handler.postDelayed(new Runnable() {
             @Override
@@ -445,7 +448,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             values.put(ChannelTable.KEY_COUNT, 0);
 
             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
-            getActivity().getContentResolver().update(singleUri, values, null, null);
+            mActivity.getContentResolver().update(singleUri, values, null, null);
         }
     };
 
@@ -456,10 +459,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
             Log.d(TAG, "error");
 
-            getActivity().runOnUiThread(new Runnable() {
+            if( args[0] instanceof SocketIOException) {
+                SocketIOException e = (SocketIOException) args[0];
+                Log.d(TAG, e.getMessage());
+            } else if ( args[0] instanceof EngineIOException){
+                EngineIOException e = (EngineIOException) args[0];
+                Log.d(TAG, e.getMessage());
+            }
+
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getActivity().getApplicationContext(), R.string.error_connect, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity, R.string.error_connect, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -477,7 +488,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onUserJoined = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
@@ -500,7 +511,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onUserLeft = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
@@ -524,7 +535,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
@@ -543,7 +554,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private Emitter.Listener onStopTyping = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
-            getActivity().runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     JSONObject data = (JSONObject) args[0];
@@ -588,7 +599,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         String selection = MessageTable.KEY_CHANNEL + "='" + mChannel +"'";
         String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + String.valueOf(mViewCount);
 
-        mDataLoader = new MessageDataLoader(getActivity(), mDataSource, selection, null, null, null, sortOrder);
+        mDataLoader = new MessageDataLoader(mActivity, mDataSource, selection, null, null, null, sortOrder);
         return mDataLoader;
     }
 
@@ -676,7 +687,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             values.put(ChannelTable.KEY_COUNT, 0);
 
             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-            getActivity().getContentResolver().update(singleUri, values, null, null);
+            mActivity.getContentResolver().update(singleUri, values, null, null);
 
             if (mSession.getId().equals(xpushMessage.getSender() ) ){
                 xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
@@ -687,7 +698,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             lastReceiveTime = xpushMessage.getUpdated();
             mDataSource.insert(xpushMessage);
 
-            getActivity().runOnUiThread(new Runnable() {
+            mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     addMessage(xpushMessage);
@@ -704,22 +715,30 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("C", mChannel);
-            jsonObject.put("U", mUsers);
+
+            JSONArray user = new JSONArray();
+            for( String userId : mUsers ){
+                user.put(userId);
+            }
+
+            jsonObject.put("U", user);
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        ApplicationController.getInstance().getClient().emit("channel-create", jsonObject, new Ack() {
+        Log.d(TAG, "===== channelCreate() =====");
+
+        ApplicationController.getInstance().getClient().emit("channel.create", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
 
                 Log.d(TAG, response.toString());
-                if( response.has("status") ){
+                if (response.has("status")) {
                     try {
                         Log.d(TAG, response.getString("status"));
-                        if( "ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals( response.getString("status") ) ){
+                        if ("ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals(response.getString("status"))) {
                             getServerUrl();
                         }
                     } catch (JSONException e) {
@@ -828,7 +847,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                             leave();
                         } else {
                             if( response.has("message") ){
-                                Toast.makeText(getActivity().getApplicationContext(), response.getString("message"), Toast.LENGTH_LONG).show();
+                                Toast.makeText(mActivity, response.getString("message"), Toast.LENGTH_LONG).show();
                             }
                         }
                     } catch (JSONException e) {

@@ -508,7 +508,6 @@ public class XPushService extends Service {
                 if( "NOTIFICATION".equals( json.getString("event") ) ){
                     JSONObject data = json.getJSONObject("DT");
 
-
                     XPushMessage xpushMessage = new XPushMessage( data );
 
                     try {

@@ -77,15 +77,12 @@ public class SplashActivity extends Activity {
                     overridePendingTransition(0, android.R.anim.fade_in);
 
                     Intent intent = null;
-                    if( pref.getBoolean("SHOW_INTRO", false) ){
-                        if (null == ApplicationController.getInstance().getXpushSession()) {
-                            intent = new Intent(SplashActivity.this, LoginActivity.class);
-                        } else {
-                            intent = new Intent(SplashActivity.this, MainActivity.class);
-                        }
+                    if (null == ApplicationController.getInstance().getXpushSession()) {
+                        intent = new Intent(SplashActivity.this, LoginActivity.class);
                     } else {
-                        intent = new Intent(SplashActivity.this, IntroActivity.class);
+                        intent = new Intent(SplashActivity.this, MainActivity.class);
                     }
+
                     startActivity(intent);
                     finish();
                 }

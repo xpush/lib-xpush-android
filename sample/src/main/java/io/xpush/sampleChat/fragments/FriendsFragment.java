@@ -115,7 +115,7 @@ public class FriendsFragment extends UsersFragment {
             e.printStackTrace();
         }
 
-        ApplicationController.getInstance().getClient().emit("group-list", jsonObject, new Ack() {
+        ApplicationController.getInstance().getClient().emit("group.list", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
