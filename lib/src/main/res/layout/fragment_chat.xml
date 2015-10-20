@@ -15,6 +15,7 @@
         android:layout_weight="1"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingBottom="16dp"
         android:scrollbars="vertical"
         android:transcriptMode="alwaysScroll"
         android:scrollbarStyle="outsideOverlay"/>

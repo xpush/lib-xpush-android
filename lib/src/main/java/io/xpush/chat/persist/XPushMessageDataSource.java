@@ -16,10 +16,18 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
     public final static String TAG = XPushMessageDataSource.class.getSimpleName();
 
     private String mTableName;
+    private String mUserTableName;
 
     public XPushMessageDataSource(SQLiteDatabase database, String tableName) {
         super(database);
         this.mTableName = tableName;
+        this.mUserTableName = null;
+    }
+
+    public XPushMessageDataSource(SQLiteDatabase database, String tableName, String userTableName) {
+        super(database);
+        this.mTableName = tableName;
+        this.mUserTableName = userTableName;
     }
 
     @Override
@@ -73,8 +81,31 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
     public List<XPushMessage> read(String selection, String[] selectionArgs,
                            String groupBy, String having, String orderBy) {
 
-        Cursor cursor = mDatabase.query(mTableName, getAllColumns(), selection,
-                selectionArgs, groupBy, having, orderBy);
+        Cursor cursor = null;
+
+        if( "".equals( mUserTableName ) || mUserTableName == null ){
+            cursor = mDatabase.query(mTableName, getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+        } else {
+            String messageTableAlias = "a";
+            String userTableAlias = "b";
+
+            StringBuffer query = new StringBuffer();
+            query.append("select ");
+            query.append(MessageTable.KEY_CHANNEL).append(", ");
+            query.append(messageTableAlias+"."+MessageTable.KEY_ID).append(", ");
+            query.append(UserTable.KEY_NAME).append(" as sender, ");
+            query.append(userTableAlias+"."+UserTable.KEY_IMAGE).append(" as image, ");
+            query.append(MessageTable.KEY_COUNT).append(", ");
+            query.append(messageTableAlias+"."+MessageTable.KEY_MESSAGE).append(", ");
+            query.append(messageTableAlias+"."+MessageTable.KEY_TYPE).append(", ");
+            query.append(messageTableAlias+"."+MessageTable.KEY_UPDATED).append(" ");
+            query.append(" from " + mTableName + " " + messageTableAlias + " LEFT outer join " + mUserTableName + " " + userTableAlias);
+            query.append(" on " + messageTableAlias + "." + MessageTable.KEY_SENDER + "=" + userTableAlias + "." + UserTable.KEY_ID);
+            Log.d(TAG, query.toString() +" where " +selection+ " order by " + orderBy );
+
+            cursor = mDatabase.rawQuery(query.toString() +" where " +selection+ " order by " + orderBy , selectionArgs);
+        }
+
         List messages = new ArrayList();
         if (cursor != null && cursor.moveToFirst()) {
             while (!cursor.isAfterLast()) {
@@ -83,6 +114,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
             }
             cursor.close();
         }
+
         return messages;
     }
 
@@ -98,7 +130,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
 
     @Override
     public int count(String selection, String[] selectionArgs) {
-        Cursor mCount = mDatabase.rawQuery("select count(*) from " + mTableName + " where "+ selection, selectionArgs );
+        Cursor mCount = mDatabase.rawQuery("select count(*) from " + mTableName + " where " + selection, selectionArgs);
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
@@ -133,7 +165,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
         ContentValues values = new ContentValues();
         values.put(MessageTable.KEY_CHANNEL, entity.getChannel());
         values.put(MessageTable.KEY_ID, entity.getId());
-        values.put(MessageTable.KEY_SENDER, entity.getSender());
+        values.put(MessageTable.KEY_SENDER, entity.getSenderId());
         values.put(MessageTable.KEY_IMAGE, entity.getImage());
         values.put(MessageTable.KEY_COUNT, entity.getCount());
         values.put(MessageTable.KEY_MESSAGE, entity.getMessage());

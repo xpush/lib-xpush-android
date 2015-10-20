@@ -21,7 +21,6 @@ import io.xpush.sampleChat.R;
 import io.xpush.chat.services.RegistrationIntentService;
 import io.xpush.chat.services.XPushService;
 
-
 public class SplashActivity extends Activity {
 
     public static final String TAG = SplashActivity.class.getSimpleName();
@@ -51,7 +50,7 @@ public class SplashActivity extends Activity {
         });
 
         if (checkPlayServices()) {
-            if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null ) ){
+            if( null == pref.getString("REGISTERED_NOTIFICATION_ID", null ) ){
                 Intent intent = new Intent(this, RegistrationIntentService.class);
                 startService(intent);
             }
@@ -68,8 +67,7 @@ public class SplashActivity extends Activity {
             @Override
             public void run() {
                 if ((ApplicationController.getInstance().getClient() == null && System.currentTimeMillis() - started < SPLASH_TIME) || (ApplicationController.getInstance().getClient() != null && ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < SPLASH_TIME)
-                        || (ApplicationController.getInstance().getClient() != null && !ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
-                    Log.d(TAG, "waiting : " + ApplicationController.getInstance().getClient() + ", " +i.incrementAndGet() );
+                        || (ApplicationController.getInstance().getClient() != null && !ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < (SPLASH_TIME * 6))) {
                     handler.postDelayed(this, 150);
                 } else {
 
@@ -94,8 +92,7 @@ public class SplashActivity extends Activity {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
                 Log.i(TAG, "This device is not supported.");
                 finish();

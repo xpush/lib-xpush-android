@@ -55,7 +55,7 @@ public class SplashActivity extends Activity {
         });
 
         if (checkPlayServices()) {
-            if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null ) ){
+            if( null == pref.getString("REGISTERED_NOTIFICATION_ID", null ) ){
                 Intent intent = new Intent(this, RegistrationIntentService.class);
                 startService(intent);
             }

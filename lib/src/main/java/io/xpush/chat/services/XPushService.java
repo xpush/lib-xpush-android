@@ -29,7 +29,6 @@ import com.github.nkzawa.thread.EventThread;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URLDecoder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -44,11 +43,8 @@ import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.persist.ChannelTable;
 
-/**
- * Created by jhkim on 2014-12-17.
- */
 public class XPushService extends Service {
-    private static final String TAG = "XPushService"; // Debug TAG
+    private static final String TAG = XPushService.class.getSimpleName();
 
     private static final String XPUSH_THREAD_NAME = "XPushService[" + TAG + "]"; // Handler Thread ID
 
@@ -140,7 +136,7 @@ public class XPushService extends Service {
 
         mDbHelper = new DBHelper(this);
         mDatabase = mDbHelper.getWritableDatabase();
-        mDataSource = new XPushMessageDataSource(mDatabase, getString(R.string.message_table_name));
+        mDataSource = new XPushMessageDataSource(mDatabase, getString(R.string.message_table_name), getString(R.string.user_table_name) );
 
         mDeviceId = String.format(DEVICE_ID_FORMAT,
                 Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
@@ -206,6 +202,7 @@ public class XPushService extends Service {
 
             Log.i(TAG, "Not logged in user");
             mStarted = false;
+            stopKeepAlives();
             return;
         } else {
             mXpushSession = ApplicationController.getInstance().getXpushSession();
@@ -291,17 +288,12 @@ public class XPushService extends Service {
         mOpts = opts;
         Log.i(TAG, "Connecting with URL: " + url);
         try {
-
-            Log.i(TAG, "Connecting with MemStore");
             mClient = IO.socket(url, mOpts);
-
             mClient.on(Socket.EVENT_CONNECT, onConnectSuccess);
             mClient.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mClient.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mClient.on("_event", onNewMessage);
             mClient.on("pong", onPong);
-
-            mClient.on("message", onNewMessage);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -314,7 +306,7 @@ public class XPushService extends Service {
 
                     ApplicationController.getInstance().setClient( mClient );
 
-                    mStarted = true; // Service is now connected
+                    mStarted = true;
                     Log.i(TAG, "Successfully connected and subscribed starting keep alives");
 
                     startKeepAlives();
@@ -366,8 +358,7 @@ public class XPushService extends Service {
     }
 
     private synchronized void reconnectIfNecessary() {
-        Log.d(TAG, "reconnectIfNecessary");
-        Log.d(TAG, "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
+        Log.d(TAG, "reconnectIfNecessary - " + "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
         if (mStarted ) {
             if( !mClient.connected() && !mConnecting  ){
                 connect();
@@ -455,7 +446,7 @@ public class XPushService extends Service {
     }
 
     public void connectionLost(Throwable arg0) {
-        Log.e(TAG, "mqtt connection Lost");
+        Log.e(TAG, "socket connection Lost");
         stopKeepAlives();
 
         mClient = null;
@@ -476,13 +467,13 @@ public class XPushService extends Service {
         broadcastIntent.putExtra("rcvd.MG", message);
 
         sendBroadcast(broadcastIntent);
-
     }
 
     // log helper function
     private void log(String message) {
         log(message, null);
     }
+
     private void log(String message, Throwable e) {
         if (e != null) {
             Log.e(TAG, message, e);
@@ -542,7 +533,7 @@ public class XPushService extends Service {
                             getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                         }
 
-                        if (mXpushSession.getId().equals(xpushMessage.getSender() ) ){
+                        if (mXpushSession.getId().equals(xpushMessage.getSenderId() ) ){
                             xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
                         } else {
                             xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
@@ -590,7 +581,6 @@ public class XPushService extends Service {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
-
             if( args[0] instanceof SocketIOException ) {
                 SocketIOException e = (SocketIOException) args[0];
                 log(e.getMessage());

@@ -1,6 +1,7 @@
 package io.xpush.chat.models;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -20,7 +21,8 @@ public class XPushMessage {
     private String rowId;
     private String id;
     private String channel;
-    private String sender;
+    private String senderId;
+    private String senderName;
     private String image;
     private String count;
     private String message;
@@ -51,12 +53,21 @@ public class XPushMessage {
         this.channel = channel;
     }
 
-    public String getSender() {
-        return sender;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
+    }
+
+
+    public String getSenderName() {
+        return senderName;
+    }
+
+    public void setSenderName(String senderName) {
+        this.senderName = senderName;
     }
 
     public String getImage() {
@@ -110,7 +121,11 @@ public class XPushMessage {
                 uo = data.getJSONObject("UO");
 
                 if( uo.has("U") ){
-                    this.sender = uo.getString("U");
+                    this.senderId = uo.getString("U");
+                }
+
+                if( uo.has("NM") ){
+                    this.senderName = uo.getString("NM");
                 }
 
                 if( uo.has("I") ) {
@@ -130,9 +145,9 @@ public class XPushMessage {
     }
 
     public XPushMessage(Cursor cursor){
-        this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
+        this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
         this.id= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_ID));
-        this.sender= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_SENDER));
+        this.senderName= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_SENDER));
         this.image= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_IMAGE));
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
         this.type= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_TYPE));
@@ -141,12 +156,18 @@ public class XPushMessage {
 
     public static class Builder {
         private final int mType;
+        private String mUserId;
         private String mUsername;
         private String mMessage;
         private long mTimestamp;
 
         public Builder(int type) {
             mType = type;
+        }
+
+        public Builder userId(String mUserId) {
+            mUserId = mUserId;
+            return this;
         }
 
         public Builder username(String username) {
@@ -167,7 +188,7 @@ public class XPushMessage {
         public XPushMessage build() {
             XPushMessage xpushMessage = new XPushMessage();
             xpushMessage.type = mType;
-            xpushMessage.sender= mUsername;
+            xpushMessage.senderName= mUsername;
             xpushMessage.message = mMessage;
             xpushMessage.updated = mTimestamp;
             return xpushMessage;
@@ -179,7 +200,7 @@ public class XPushMessage {
         return "XPushMessage{" +
                 "rowId='" + rowId + '\'' +
                 ", id='" + id + '\'' +
-                ", sender='" + sender + '\'' +
+                ", senderId='" + senderId + '\'' +
                 ", image='" + image + '\'' +
                 ", message='" + message + '\'' +
                 ", type='" + type + '\'' +

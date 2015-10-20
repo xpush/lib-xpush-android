@@ -15,13 +15,9 @@ import android.util.Log;
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushChannel;
 
-/**
- * Mqtt 메시지 수신 시, 노티 표시
- * Created by jhkim on 2014-12-18.
- */
 public class PushMsgReceiver extends BroadcastReceiver {
 
-    private static final int NOTIFICATION_ID = 23432223;
+    private static final int NOTIFICATION_ID = 0;
     private static final String DEBUG_TAG = "PushReceiver";
 
     @Override
@@ -33,7 +29,7 @@ public class PushMsgReceiver extends BroadcastReceiver {
 
             Log.d(DEBUG_TAG, "onReceiver : " + action);
             if(action.isEmpty()){
-            }else if ("io.xpush.chat.MGRECVD".equals(action)) {  // mqtt msg receive
+            }else if ("io.xpush.chat.MGRECVD".equals(action)) {
 
                 String channel = intent.getStringExtra("rcvd.C");
                 String message = intent.getStringExtra("rcvd.MG");

@@ -17,7 +17,7 @@ public class MessageTable {
     public static final String KEY_COUNT = "count";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_TYPE = "type";
-    public static final String KEY_UPDATED = "updated";
+    public static final String KEY_UPDATED = "received";
     public static String SQLITE_TABLE;
 
     public static void onCreate(SQLiteDatabase db, String tableName) {

@@ -84,6 +84,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private RecyclerView.Adapter mAdapter;
     private boolean mTyping = false;
     private Handler mTypingHandler = new Handler();
+
+    private String mUserId;
     private String mUsername;
     private Socket mSocket;
 
@@ -130,7 +132,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         mDbHelper = new DBHelper(mActivity);
         mDatabase = mDbHelper.getWritableDatabase();
-        mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name));
+        mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
 
         mSession = ApplicationController.getInstance().getXpushSession();
 
@@ -139,7 +141,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         mChannel = mXpushChannel.getId();
         mUsers = mXpushChannel.getUsers();
-        mUsername = ApplicationController.getInstance().getXpushSession().getId();
+
+        mUserId = mSession.getId();
+        mUsername = mSession.getName();
 
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -247,21 +251,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (Activity.RESULT_OK != resultCode) {
-            getActivity().finish();
-            return;
-        }
-
-        mUsername = data.getStringExtra("U");
-        int numUsers = data.getIntExtra("numUsers", 1);
-
-        addLog(getResources().getString(R.string.message_welcome));
-        addParticipantsLog(numUsers);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_chat, menu);
@@ -305,10 +294,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                XPushMessage message =  mXpushMessages.get(0);
+                XPushMessage message = mXpushMessages.get(0);
 
                 mViewCount = mViewCount * 2;
-                String selection = MessageTable.KEY_CHANNEL +  "='" + mChannel +"' and "+ MessageTable.KEY_UPDATED + " < " + message.getUpdated();
+                String selection = MessageTable.KEY_CHANNEL + "='" + mChannel + "' and " + MessageTable.KEY_UPDATED + " < " + message.getUpdated();
                 String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + mViewCount;
 
                 mDataLoader.setSelection(selection);
@@ -320,7 +309,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }, 1);
     }
 
-    private void connect(){
+    private void connect() {
         try {
 
             String url = mServerUrl + "/channel";
@@ -365,20 +354,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mAdapter.notifyDataSetChanged();
     }
 
-    private void addParticipantsLog(int numUsers) {
-        addLog(getResources().getQuantityString(R.plurals.message_participants, numUsers, numUsers));
-    }
-
-    private void addTyping(String username) {
+    private void addTyping(String userId) {
         mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
-                .username(username).build());
+                .username(userId).build());
         mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
     }
 
-    private void removeTyping(String username) {
+    private void removeTyping(String userId) {
         for (int i = mXpushMessages.size() - 1; i >= 0; i--) {
             XPushMessage xpushMessage = mXpushMessages.get(i);
-            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getSender().equals(username)) {
+            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getSenderId().equals(userId)) {
                 mXpushMessages.remove(i);
                 mAdapter.notifyItemRemoved(i);
             }
@@ -386,8 +371,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void attemptSend() {
-        if (null == mUsername) return;
-        if (!mSocket.connected()) return;
+        if (null == mUserId) return;
+        if (mSocket == null || !mSocket.connected()) return;
 
         mTyping = false;
 
@@ -398,7 +383,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
 
         mInputMessageView.setText("");
-        // perform the sending message attempt.
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -406,7 +390,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
         try {
 
-            user.put( "U", mUsername );
+            user.put( "U", mUserId );
+            user.put( "NM", mUsername );
+
             data.put( "UO", user  );
             data.put( "MG", message );
 
@@ -502,7 +488,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                     }
 
                     addLog(getResources().getString(R.string.message_user_joined, username));
-                    addParticipantsLog(numUsers);
                 }
             });
         }
@@ -525,7 +510,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                     }
 
                     addLog(getResources().getString(R.string.message_user_left, username));
-                    addParticipantsLog(numUsers);
                     removeTyping(username);
                 }
             });
@@ -676,6 +660,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void saveMessage( JSONObject data ){
 
+        Log.d(TAG, data.toString());
+
         final XPushMessage xpushMessage = new XPushMessage( data );
 
         try {
@@ -689,7 +675,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
             mActivity.getContentResolver().update(singleUri, values, null, null);
 
-            if (mSession.getId().equals(xpushMessage.getSender() ) ){
+            if (mSession.getId().equals(xpushMessage.getSenderId() ) ){
                 xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
             } else {
                 xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
@@ -738,7 +724,10 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 if (response.has("status")) {
                     try {
                         Log.d(TAG, response.getString("status"));
-                        if ("ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals(response.getString("status"))) {
+                        if ("ok".equalsIgnoreCase(response.getString("status")) || "WARN-EXISTED".equals(response.getString("status"))
+
+                                // duplicate is
+                                || ( "ERR-INTERNAL".equals(response.getString("status") ) ) && response.get("message").toString().indexOf("E11000") > -1 ) {
                             getServerUrl();
                         }
                     } catch (JSONException e) {

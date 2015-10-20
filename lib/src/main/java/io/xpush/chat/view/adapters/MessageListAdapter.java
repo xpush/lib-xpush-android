@@ -46,7 +46,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         XPushMessage xpushMessage = mXPushMessages.get(position);
         viewHolder.setMessage(xpushMessage.getMessage());
-        viewHolder.setUsername(xpushMessage.getSender());
+        viewHolder.setUsername(xpushMessage.getSenderName());
         viewHolder.setIime(xpushMessage.getUpdated());
     }
 

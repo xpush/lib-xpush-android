@@ -48,8 +48,6 @@ public class ApplicationController extends Application {
             final String loginUserStr = pref.getString("XPUSH_SESSION", "");
             if( !"".equals( loginUserStr ) ){
                 try {
-                    Log.d(TAG, "===== XPUSH_SESSION =====");
-                    Log.d(TAG, loginUserStr);
                     mXpushSession = new XPushSession( new JSONObject( loginUserStr ) );
                 } catch (JSONException e) {
                     e.printStackTrace();
