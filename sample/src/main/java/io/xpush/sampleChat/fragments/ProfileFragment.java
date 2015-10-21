@@ -159,6 +159,8 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
         }
 
+        Log.d(TAG, " ====== url  ====== ");
+        Log.d(TAG, url );
         String realPath = RealPathUtil.getRealPath(mActivity, uri);
 
         File aFile = new File(realPath);
@@ -191,13 +193,17 @@ public class ProfileFragment extends Fragment {
             }
 
             JSONObject res = new JSONObject( response.body().string() );
-            JSONObject result = res.getJSONObject("result");
+            if( "ok".equals(res.getString("status")) ) {
+                JSONObject result = res.getJSONObject("result");
 
-            String channel = result.getString("channel");
-            String tname = result.getString("tname");
+                String channel = result.getString("channel");
+                String tname = result.getString("name");
 
-            downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/"+ApplicationController.getInstance().getClient().id() +"/"+tname;
-            mJsonUserData.put("I", downloadUrl);
+                downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/" + tname;
+
+                Log.d(TAG, downloadUrl );
+                mJsonUserData.put("I", downloadUrl);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

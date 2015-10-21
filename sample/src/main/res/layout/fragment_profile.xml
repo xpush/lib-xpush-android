@@ -16,7 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:importantForAccessibility="no">
-            <include android:id="@+id/profile" android:clickable="true" android:layout_width="@dimen/profile_image_in_my_profile" android:layout_height="@dimen/profile_image_in_my_profile" layout="@layout/profile_image" />
+            <include android:id="@+id/profile" android:clickable="true" android:layout_width="@dimen/profile_image_in_my_profile" android:layout_height="@dimen/profile_image_in_my_profile" layout="@layout/include_profile_image" />
             <ImageView android:layout_gravity="end|bottom|center" android:background="@drawable/btn_camera_editprofile" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@null" android:importantForAccessibility="no" />
         </FrameLayout>
         <TextView android:textSize="@dimen/font_level_4" android:textColor="@color/font_point1" android:id="@+id/phone_number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" android:text="phone_number" />
