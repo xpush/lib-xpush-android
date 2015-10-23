@@ -27,6 +27,8 @@ public class ApplicationController extends Application {
     private XPushSession mXpushSession;
 
     private Socket mClient;
+
+    private String mHostname;
     private String mAppId;
 
     public static synchronized ApplicationController getInstance() {
@@ -38,6 +40,7 @@ public class ApplicationController extends Application {
         super.onCreate();
         mInstance = this;
 
+        mHostname = getString(R.string.host_name);
         mAppId = getString(R.string.app_id);
         getXpushSession();
     }
@@ -75,7 +78,6 @@ public class ApplicationController extends Application {
     }
 
     public <T> void addToRequestQueue(Request<T> req, String tag) {
-        // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
         getRequestQueue().add(req);
     }
@@ -101,5 +103,9 @@ public class ApplicationController extends Application {
 
     public String getAppId(){
         return this.mAppId;
+    }
+
+    public String getHostname(){
+        return this.mHostname;
     }
 }

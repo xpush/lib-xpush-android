@@ -159,8 +159,6 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
         }
 
-        Log.d(TAG, " ====== url  ====== ");
-        Log.d(TAG, url );
         String realPath = RealPathUtil.getRealPath(mActivity, uri);
 
         File aFile = new File(realPath);
