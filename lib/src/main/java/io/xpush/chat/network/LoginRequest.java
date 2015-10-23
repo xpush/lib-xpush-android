@@ -55,8 +55,6 @@ public class LoginRequest extends StringRequest {
 
                 XPushSession xpushSession = new XPushSession();
 
-                xpushSession.setAppId(getParams().get("A"));
-
                 xpushSession.setId(getParams().get("U"));
                 xpushSession.setPassword(getParams().get("PW"));
                 xpushSession.setDeviceId(getParams().get("D"));

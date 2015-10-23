@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.DBHelper;
@@ -214,6 +215,7 @@ public class XPushService extends Service {
                 connect();
             } else {
                 ApplicationController.getInstance().setClient(mClient);
+                XPushCore.getInstance().setGlobalSocket(mClient);
                 Log.i(TAG, "Attempt to start while already started and connected");
                 return;
             }
@@ -304,7 +306,8 @@ public class XPushService extends Service {
                 try {
                     mClient.connect();
 
-                    ApplicationController.getInstance().setClient( mClient );
+                    ApplicationController.getInstance().setClient(mClient);
+                    XPushCore.getInstance().setGlobalSocket(mClient);
 
                     mStarted = true;
                     Log.i(TAG, "Successfully connected and subscribed starting keep alives");

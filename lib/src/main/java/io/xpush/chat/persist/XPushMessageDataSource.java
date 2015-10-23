@@ -101,7 +101,6 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
             query.append(messageTableAlias+"."+MessageTable.KEY_UPDATED).append(" ");
             query.append(" from " + mTableName + " " + messageTableAlias + " LEFT outer join " + mUserTableName + " " + userTableAlias);
             query.append(" on " + messageTableAlias + "." + MessageTable.KEY_SENDER + "=" + userTableAlias + "." + UserTable.KEY_ID);
-            Log.d(TAG, query.toString() +" where " +selection+ " order by " + orderBy );
 
             cursor = mDatabase.rawQuery(query.toString() +" where " +selection+ " order by " + orderBy , selectionArgs);
         }

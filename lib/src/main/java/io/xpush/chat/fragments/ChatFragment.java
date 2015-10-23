@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -257,13 +258,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                     .setMessage( mActivity.getString(R.string.action_leave_dialog_description))
                     .setCancelable(false)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            leave();
+                            channelLeave();
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
                         public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.cancel();
                         }
@@ -361,13 +360,14 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void leave() {
+
         mUsername = null;
         mChannelCore.disconnect();
-        Handler handler = new Handler();
 
         Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
         mActivity.getContentResolver().delete(singleUri, null, null);
 
+        Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -407,7 +407,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(mActivity, R.string.error_connect, Toast.LENGTH_LONG).show();
+                    //Toast.makeText(mActivity, R.string.error_connect, Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -633,7 +633,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void createChannelAndConnect(){
-        Log.d(TAG, "===== channelCreate() =====");
         XPushCore.getInstance().createChannel(mUsers, new CallbackEvent() {
             @Override
             public void call(Object... args) {
@@ -667,37 +666,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         });
     }
 
-    private void emitChannelLeave(){
-
-        JSONObject jsonObject = new JSONObject();
-        try {
-            if( lastReceiveTime > 0  ) {
-                jsonObject.put("C", mChannel );
-            }
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ApplicationController.getInstance().getClient().emit("channel.leave", jsonObject, new Ack() {
+    private void channelLeave(){
+        mChannelCore.channelLeave(new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                JSONObject response = (JSONObject) args[0];
-
-                Log.d(TAG, response.toString());
-                if (response.has("status")) {
-                    try {
-                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
-                            leave();
-                        } else {
-                            if( response.has("message") ){
-                                Toast.makeText(mActivity, response.getString("message"), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
+                leave();
             }
         });
     }

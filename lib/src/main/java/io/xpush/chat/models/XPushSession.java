@@ -11,7 +11,6 @@ import java.util.Map;
 
 public class XPushSession {
 
-    public static final String APP_ID = "A";
     public static final String ID = "U";
     public static final String PASSWORD = "PW";
     public static final String DEVICE_ID = "D";
@@ -24,7 +23,6 @@ public class XPushSession {
     public static final String MESSAGE = "MG";
     public static final String EMAIL = "EM";
 
-    private String appId;
     private String id;
     private String password;
     private String deviceId;
@@ -36,14 +34,6 @@ public class XPushSession {
     private String name;
     private String message;
     private String email;
-
-    public String getAppId() {
-        return appId;
-    }
-
-    public void setAppId(String appId) {
-        this.appId = appId;
-    }
 
     public String getId() {
         return id;

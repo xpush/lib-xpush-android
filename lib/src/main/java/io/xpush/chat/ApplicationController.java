@@ -1,7 +1,9 @@
 package io.xpush.chat;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,7 +19,7 @@ import org.json.JSONObject;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.XpushContentProvider;
 
-public class ApplicationController extends Application {
+public class ApplicationController extends Application{
 
     public static final String TAG = ApplicationController.class.getSimpleName();
 
@@ -48,10 +50,10 @@ public class ApplicationController extends Application {
     public XPushSession getXpushSession(){
         if( mXpushSession == null ){
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            final String loginUserStr = pref.getString("XPUSH_SESSION", "");
-            if( !"".equals( loginUserStr ) ){
+            final String sessionStr = pref.getString("XPUSH_SESSION", "");
+            if( !"".equals( sessionStr ) ){
                 try {
-                    mXpushSession = new XPushSession( new JSONObject( loginUserStr ) );
+                    mXpushSession = new XPushSession( new JSONObject( sessionStr ) );
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

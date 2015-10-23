@@ -1,6 +1,7 @@
 package io.xpush.chat.core;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Ack;
@@ -34,26 +35,26 @@ public class ChannelCore {
 
     private HashMap<String, Emitter.Listener> mEvents;
 
-    public ChannelCore(){
+    public ChannelCore() {
         init();
     }
 
-    public ChannelCore( String channelId, String serveUrl, String serverName ){
+    public ChannelCore(String channelId, String serveUrl, String serverName) {
         this();
         this.mChannelId = channelId;
         this.mServerUrl = serveUrl;
         this.mServerName = serverName;
     }
 
-    public void init(){
+    public void init() {
         xpushSession = ApplicationController.getInstance().getXpushSession();
 
         this.mHost = ApplicationController.getInstance().getHostname();
-        this.mAppId = xpushSession.getAppId();
+        this.mAppId = ApplicationController.getInstance().getAppId();
         this.mDeviceId = xpushSession.getDeviceId();
     }
 
-    public void connect( HashMap<String, Emitter.Listener> events ){
+    public void connect(HashMap<String, Emitter.Listener> events) {
 
         mEvents = events;
         String url = mServerUrl + "/channel";
@@ -61,27 +62,26 @@ public class ChannelCore {
         IO.Options opts = new IO.Options();
         opts.forceNew = true;
 
-        String appId = mAppId;
-        opts.query = "A=" + appId+"&C="+ mChannelId+"&S="+mServerName+"&D="+mDeviceId+"&U="+xpushSession.getId();
+        opts.query = "A=" + mAppId + "&C=" + mChannelId + "&S=" + mServerName + "&D=" + mDeviceId + "&U=" + xpushSession.getId();
 
         mChannelSocket = null;
 
-        try{
-            mChannelSocket = IO.socket( url, opts );
+        try {
+            mChannelSocket = IO.socket(url, opts);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
-        if( events != null ){
-            for( String eventName : events.keySet() ){
-                this.on( eventName, events.get( eventName) );
+        if (events != null) {
+            for (String eventName : events.keySet()) {
+                this.on(eventName, events.get(eventName));
             }
         }
-        
+
         mChannelSocket.connect();
     }
 
-    public void sendMessage( String message ){
+    public void sendMessage(String message) {
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -89,20 +89,20 @@ public class ChannelCore {
 
         try {
 
-            user.put( "U", xpushSession.getId() );
-            user.put( "NM", xpushSession.getName() );
+            user.put("U", xpushSession.getId());
+            user.put("NM", xpushSession.getName());
 
-            data.put( "UO", user  );
-            data.put( "MG", message );
+            data.put("UO", user);
+            data.put("MG", message);
 
-            json.put("DT", data );
-            json.put("NM", "message" );
+            json.put("DT", data);
+            json.put("NM", "message");
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        if( mChannelSocket != null && mChannelSocket.connected() ) {
+        if (mChannelSocket != null && mChannelSocket.connected()) {
             mChannelSocket.emit("send", json);
         }
     }
@@ -123,32 +123,32 @@ public class ChannelCore {
         mChannelSocket.off(event, fn);
     }
 
-    public boolean connected(){
-        if(  mChannelSocket == null ){
+    public boolean connected() {
+        if (mChannelSocket == null) {
             return false;
         }
 
         return mChannelSocket.connected();
     }
 
-    public void disconnect(){
-        if(  mChannelSocket != null ){
+    public void disconnect() {
+        if (mChannelSocket != null) {
             mChannelSocket.disconnect();
 
-            for( String eventName : mEvents.keySet() ){
+            for (String eventName : mEvents.keySet()) {
                 this.off(eventName);
             }
         }
     }
 
-    public void getMessageUnread(long lastReceiveTime, final CallbackEvent callback){
-        if(  mChannelSocket != null) {
+    public void getMessageUnread(long lastReceiveTime, final CallbackEvent callback) {
+        if (mChannelSocket != null) {
 
             JSONObject jsonObject = new JSONObject();
             try {
 
-                if( lastReceiveTime > 0  ) {
-                    jsonObject.put("TS", lastReceiveTime );
+                if (lastReceiveTime > 0) {
+                    jsonObject.put("TS", lastReceiveTime);
                 }
 
             } catch (JSONException e) {
@@ -175,5 +175,30 @@ public class ChannelCore {
                 }
             });
         }
+    }
+
+    public void channelLeave(final CallbackEvent callback) {
+
+        mChannelSocket.emit("channel.leave", new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString());
+                if (response.has("status")) {
+                    try {
+                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
+                            callback.call();
+                        } else {
+                            if (response.has("message") && "ERR-NOTEXIST".equals(response.getString("message") ) ) {
+                                callback.call();
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }

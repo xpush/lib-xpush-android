@@ -2,9 +2,7 @@ package io.xpush.chat.core;
 
 import android.util.Log;
 
-import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -15,10 +13,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.models.XPushSession;
@@ -31,12 +27,11 @@ public class XPushCore {
     public static XPushCore instance;
     private XPushSession xpushSession;
 
-    private String mHost;
+    private String mHostname;
     private String mAppId;
     private String mDeviceId;
 
     private Socket mGlobalSocket;
-    private Socket mChannelSocket;
 
     public static XPushCore getInstance(){
         if( instance == null ) {
@@ -50,13 +45,18 @@ public class XPushCore {
     public XPushCore(){
     }
 
+
     public void init(){
         xpushSession = ApplicationController.getInstance().getXpushSession();
 
-        this.mHost = ApplicationController.getInstance().getHostname();
-        this.mAppId = xpushSession.getAppId();
+        this.mHostname = ApplicationController.getInstance().getHostname();
+        this.mAppId = ApplicationController.getInstance().getAppId();
         this.mDeviceId = xpushSession.getDeviceId();
         mGlobalSocket = ApplicationController.getInstance().getClient();
+    }
+
+    public void setGlobalSocket(Socket socket){
+        this.mGlobalSocket = socket;
     }
 
     public void createChannel(ArrayList<String> users, final CallbackEvent callbackEvent){
@@ -112,15 +112,12 @@ public class XPushCore {
 
     public ChannelCore createChannelCore(String channelId){
 
-
         ChannelCore result = null;
         String url = null;
 
         try {
-            url = mHost + "/node/"+ ApplicationController.getInstance().getAppId()+"/"+ URLEncoder.encode(channelId, "UTF-8");
+            url = mHostname + "/node/"+ ApplicationController.getInstance().getAppId()+"/"+ URLEncoder.encode(channelId, "UTF-8");
             OkHttpClient client = new OkHttpClient();
-
-            Log.d( TAG, "1111111 : " + url );
 
             Request request = new Request.Builder()
                     .url(url)
@@ -146,8 +143,6 @@ public class XPushCore {
         } catch (JSONException e) {
             e.printStackTrace();
         } finally {
-
-            // prevent null point exception
             if( result == null ){
                 result = new ChannelCore();
             }
