@@ -36,6 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.common.Constants;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
@@ -73,7 +74,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
-        mSession = ApplicationController.getInstance().getXpushSession();
+        mSession = XPushCore.getInstance().getXpushSession();
         mJsonUserData = mSession.getUserData();
     }
 
@@ -168,7 +169,7 @@ public class ProfileFragment extends Fragment {
                 .addFormDataPart("file", aFile.getName(), RequestBody.create(MEDIA_TYPE_PNG, aFile)).build();
 
 
-        String appId = ApplicationController.getInstance().getAppId();
+        String appId = XPushCore.getInstance().getAppId();
 
         Request request = new Request.Builder()
                 .url(url)
@@ -246,7 +247,7 @@ public class ProfileFragment extends Fragment {
                                 if( mJsonUserData.has("MG") ) {
                                     mSession.setMessage(mJsonUserData.getString("MG"));
                                 }
-                                ApplicationController.getInstance().setXpushSession( mSession );
+                                XPushCore.getInstance().setXpushSession( mSession );
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

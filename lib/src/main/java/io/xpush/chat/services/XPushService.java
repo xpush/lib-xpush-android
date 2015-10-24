@@ -199,14 +199,14 @@ public class XPushService extends Service {
      */
     private synchronized void start() {
 
-        if( ApplicationController.getInstance().getXpushSession() == null) {
+        if( XPushCore.getInstance().getXpushSession() == null) {
 
             Log.i(TAG, "Not logged in user");
             mStarted = false;
             stopKeepAlives();
             return;
         } else {
-            mXpushSession = ApplicationController.getInstance().getXpushSession();
+            mXpushSession = XPushCore.getInstance().getXpushSession();
         }
 
         if (mStarted) {
@@ -214,7 +214,6 @@ public class XPushService extends Service {
                 Log.i(TAG, "not connected 1");
                 connect();
             } else {
-                ApplicationController.getInstance().setClient(mClient);
                 XPushCore.getInstance().setGlobalSocket(mClient);
                 Log.i(TAG, "Attempt to start while already started and connected");
                 return;
@@ -305,8 +304,6 @@ public class XPushService extends Service {
             public void run() {
                 try {
                     mClient.connect();
-
-                    ApplicationController.getInstance().setClient(mClient);
                     XPushCore.getInstance().setGlobalSocket(mClient);
 
                     mStarted = true;

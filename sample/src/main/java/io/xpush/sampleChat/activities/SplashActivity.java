@@ -35,6 +35,9 @@ public class SplashActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState){
         Fresco.initialize(this);
+
+        XPushCore.initialize(ApplicationController.getInstance());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
@@ -67,10 +70,10 @@ public class SplashActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                // connected, not yet splash
-                if ((XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < SPLASH_TIME)
+                // connected, not yet splash or not logined
+                if (  ( ( !XPushCore.getInstance().isLogined() || XPushCore.getInstance().isGlobalConnected() )&& System.currentTimeMillis() - started < SPLASH_TIME)
                         // not connected, splash * 4
-                        || ( !XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
+                        || ( XPushCore.getInstance().isLogined() &&!XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
                     handler.postDelayed(this, 150);
                 } else {
 

@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.fragments.UsersFragment;
 import io.xpush.chat.persist.UserTable;
@@ -107,67 +108,13 @@ public class FriendsFragment extends UsersFragment {
 
     @Override
     public void getUsers(){
-        JSONObject jsonObject = new JSONObject();
 
-        try {
-            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId() );
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ApplicationController.getInstance().getClient().emit("group.list", jsonObject, new Ack() {
+        XPushCore.getInstance().getUsers(new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                JSONObject response = (JSONObject) args[0];
-
-                Log.d( TAG, response.toString() );
-                if( response.has( "result" ) ){
-                    try {
-
-                        JSONArray result = (JSONArray) response.getJSONArray("result");
-                        List<ContentValues> valuesToInsert = new ArrayList<ContentValues>();
-
-                        for( int inx = 0 ; inx < result.length() ; inx++ ){
-                            JSONObject json =  (JSONObject)result.get(inx);
-                            Log.d(TAG, json.toString());
-
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put( UserTable.KEY_ID, json.getString("U"));
-
-                            if( json.has("DT") && !json.isNull("DT")  ){
-                                Object obj = json.get("DT");
-                                JSONObject data = null;
-                                if( obj instanceof JSONObject ){
-                                    data = (JSONObject) obj;
-                                } else if ( obj instanceof String){
-                                    data = new JSONObject( (String)obj );
-                                }
-
-                                if( data.has("NM")) {
-                                    contentValues.put(UserTable.KEY_NAME, data.getString("NM"));
-                                }
-                                if( data.has("MG")) {
-                                    contentValues.put(UserTable.KEY_MESSAGE, data.getString("MG"));
-                                }
-                                if( data.has("I")) {
-                                    contentValues.put(UserTable.KEY_IMAGE, data.getString("I"));
-                                }
-                            } else {
-                                contentValues.put(UserTable.KEY_NAME, json.getString("U"));
-                            }
-
-                            contentValues.put( XpushContentProvider.SQL_INSERT_OR_REPLACE, true );
-                            valuesToInsert.add( contentValues );
-                        }
-
-                        synchronized( this ) {
-                            getActivity( ).getContentResolver().bulkInsert(XpushContentProvider.USER_CONTENT_URI, valuesToInsert.toArray(new ContentValues[0]));
-                        }
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+                if( args != null && args.length >0 ) {
+                    JSONArray users = (JSONArray) args[0];
+                    XPushCore.getInstance().storeUsers(getActivity(), users);
                 }
             }
         });

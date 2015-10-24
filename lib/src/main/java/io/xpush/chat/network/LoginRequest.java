@@ -1,5 +1,6 @@
 package io.xpush.chat.network;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -21,11 +22,15 @@ import io.xpush.chat.services.XPushService;
 
 public class LoginRequest extends StringRequest {
 
-    public LoginRequest(String url, Map<String, String> params, Response.Listener<JSONObject> listener,
+    private Context baseContext;
+
+    public LoginRequest(Context context, String url, Map<String, String> params, Response.Listener<JSONObject> listener,
                         Response.ErrorListener errorListener) {
         super(url, params, listener, errorListener);
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ApplicationController.getInstance());
+        baseContext = context;
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         String notiId = pref.getString("REGISTERED_NOTIFICATION_ID", null);
         if( notiId != null ) {
             params.put("N", notiId);
@@ -50,7 +55,7 @@ public class LoginRequest extends StringRequest {
                 String server = result.getString("server");
                 String serverUrl = result.getString("serverUrl");
 
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ApplicationController.getInstance());
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(baseContext);
                 SharedPreferences.Editor editor = pref.edit();
 
                 XPushSession xpushSession = new XPushSession();
@@ -89,7 +94,7 @@ public class LoginRequest extends StringRequest {
                 editor.putString("XPUSH_SESSION", xpushSession.toJSON().toString());
                 editor.commit();
 
-                XPushService.actionStart(ApplicationController.getInstance());
+                XPushService.actionStart(baseContext);
             }
         } catch (JSONException e) {
             e.printStackTrace();

@@ -125,7 +125,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mDatabase = mDbHelper.getWritableDatabase();
         mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
 
-        mSession = ApplicationController.getInstance().getXpushSession();
+        mSession = XPushCore.getInstance().getXpushSession();
 
         Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
         mXpushChannel = new XPushChannel(bundle);
@@ -643,7 +643,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void getChannelAndConnect(){
-        mChannelCore = XPushCore.getInstance().createChannel(mChannel);
+        mChannelCore = XPushCore.getInstance().getChannel(mChannel);
         connectChannel();
     }
 

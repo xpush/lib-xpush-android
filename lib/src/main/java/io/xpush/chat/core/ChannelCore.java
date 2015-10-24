@@ -47,10 +47,10 @@ public class ChannelCore {
     }
 
     public void init() {
-        xpushSession = ApplicationController.getInstance().getXpushSession();
+        xpushSession = XPushCore.getInstance().getXpushSession();
 
-        this.mHost = ApplicationController.getInstance().getHostname();
-        this.mAppId = ApplicationController.getInstance().getAppId();
+        this.mHost = XPushCore.getInstance().getHostname();
+        this.mAppId = XPushCore.getInstance().getAppId();
         this.mDeviceId = xpushSession.getDeviceId();
     }
 

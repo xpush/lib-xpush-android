@@ -38,6 +38,7 @@ import java.util.Locale;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.activities.ChatActivity;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
@@ -142,7 +143,7 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
 
                 ArrayList<String> userArray = new ArrayList<String>();
                 userArray.add( user.getId() );
-                userArray.add(ApplicationController.getInstance().getXpushSession().getId());
+                userArray.add(XPushCore.getInstance().getXpushSession().getId());
 
                 XPushChannel channel = new XPushChannel();
                 channel.setId(XPushUtils.generateChannelId( userArray ) );

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">사장님앱</string>
+    <string name="app_name">SampleChat</string>
     <string name="host_name">http://54.178.160.166:8000</string>
     <string name="app_id">zeroapp</string>
     <string name="device_id">android</string>

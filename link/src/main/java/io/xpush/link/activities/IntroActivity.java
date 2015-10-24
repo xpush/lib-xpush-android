@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.link.R;
 
 public class IntroActivity extends AppCompatActivity {
@@ -87,7 +88,7 @@ public class IntroActivity extends AppCompatActivity {
 
                 Intent intent = null;
 
-                if (null == ApplicationController.getInstance().getXpushSession()) {
+                if (null == XPushCore.getInstance().getXpushSession()) {
                     intent = new Intent(IntroActivity.this, LoginActivity.class);
                 } else {
                     if( pref.getBoolean("SITE_READY", false) ) {

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.util.RealPathUtil;
@@ -60,7 +61,7 @@ public class ProfileFragment extends Fragment {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
-        mSession = ApplicationController.getInstance().getXpushSession();
+        mSession = XPushCore.getInstance().getXpushSession();
         mJsonUserData = mSession.getUserData();
     }
 
@@ -145,7 +146,7 @@ public class ProfileFragment extends Fragment {
                 .addFormDataPart("file", aFile.getName(), RequestBody.create(MEDIA_TYPE_PNG, aFile)).build();
 
 
-        String appId = ApplicationController.getInstance().getAppId();
+        String appId = XPushCore.getInstance().getAppId();
 
         Request request = new Request.Builder()
                 .url(url)
@@ -173,7 +174,7 @@ public class ProfileFragment extends Fragment {
             String channel = result.getString("channel");
             String tname = result.getString("tname");
 
-            downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/"+ApplicationController.getInstance().getClient().id() +"/"+tname;
+            downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/"+tname;
             mJsonUserData.put("I", downloadUrl);
 
         } catch (IOException e) {
@@ -231,7 +232,7 @@ public class ProfileFragment extends Fragment {
                                 if( jsonData.has("EM") ) {
                                     mSession.setEmail(jsonData.getString("EM"));
                                 }
-                                ApplicationController.getInstance().setXpushSession( mSession );
+                                XPushCore.getInstance().setXpushSession( mSession );
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

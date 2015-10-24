@@ -24,6 +24,9 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.xpush.chat.common.Constants;
+import io.xpush.chat.core.CallbackEvent;
+import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.LoginRequest;
 import io.xpush.sampleChat.R;
 
@@ -70,47 +73,19 @@ public class LoginActivity extends AppCompatActivity  {
         String id = mIdText.getText().toString();
         String password = mPasswordText.getText().toString();
 
-        final Map<String,String> params = new HashMap<String, String>();
-
-        params.put("A", getString(R.string.app_id));
-        params.put("U", id);
-        params.put("PW", password);
-        params.put("D", getString(R.string.device_id));
-
-        String url = getString(R.string.host_name)+"/auth";
-
-        LoginRequest request = new LoginRequest(url, params,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    try {
-                        if( "ok".equalsIgnoreCase(response.getString("status")) ){
-                            progressDialog.dismiss();
-                            onLoginSuccess();
-                        } else {
-                            progressDialog.dismiss();
-                            onLoginFailed();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, "Login error ======================");
-                    error.printStackTrace();
-                    progressDialog.dismiss();
-                    onLoginFailed();
+         XPushCore.getInstance().login(id, password, new CallbackEvent() {
+             @Override
+             public void call(Object... args) {
+                 if ( args ==null || args.length == 0 ) {
+                     progressDialog.dismiss();
+                     onLoginSuccess();
+                 } else {
+                     progressDialog.dismiss();
+                     onLoginFailed();
                 }
             }
-        );
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
+        });
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

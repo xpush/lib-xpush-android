@@ -37,6 +37,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.network.LoginRequest;
 import io.xpush.chat.network.StringRequest;
@@ -92,7 +93,7 @@ public class SearchUserFragment extends Fragment  {
                              Bundle savedInstanceState) {
 
         mActivity = getActivity();
-        mUsername = ApplicationController.getInstance().getXpushSession().getId();
+        mUsername = XPushCore.getInstance().getXpushSession().getId();
 
         View view = inflater.inflate(R.layout.fragment_search_users, container, false);
         ButterKnife.bind(this, view);
@@ -248,7 +249,7 @@ public class SearchUserFragment extends Fragment  {
         try {
             array.put( user.getId() );
 
-            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId()  );
+            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId()  );
             jsonObject.put("U", array );
 
         } catch (JSONException e) {
@@ -257,6 +258,7 @@ public class SearchUserFragment extends Fragment  {
 
         Log.d(TAG, jsonObject.toString());
 
+        /**
         ApplicationController.getInstance().getClient().emit("group.add", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
@@ -281,6 +283,7 @@ public class SearchUserFragment extends Fragment  {
                 }
             }
         });
+         */
     }
 
     // Handler 클래스

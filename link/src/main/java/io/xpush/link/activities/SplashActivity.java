@@ -73,7 +73,7 @@ public class SplashActivity extends Activity {
             @Override
             public void run() {
                 if ((XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < SPLASH_TIME)
-                        || ( !XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
+                        || ( XPushCore.getInstance().getXpushSession() != null && !XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
                     handler.postDelayed(this, 150);
                 } else {
 
@@ -82,7 +82,7 @@ public class SplashActivity extends Activity {
 
                     Intent intent = null;
                     if( pref.getBoolean("SHOW_INTRO", false) ){
-                        if (null == ApplicationController.getInstance().getXpushSession()) {
+                        if (null == XPushCore.getInstance().getXpushSession()) {
                             intent = new Intent(SplashActivity.this, LoginActivity.class);
                         } else {
                             if( pref.getBoolean("SITE_READY", false) ) {
