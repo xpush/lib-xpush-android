@@ -44,10 +44,10 @@ public class ApplicationController extends Application{
 
         mHostname = getString(R.string.host_name);
         mAppId = getString(R.string.app_id);
-        getXpushSession();
+        restoreXpushSession();
     }
 
-    public XPushSession getXpushSession(){
+    public XPushSession restoreXpushSession(){
         if( mXpushSession == null ){
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
             final String sessionStr = pref.getString("XPUSH_SESSION", "");
@@ -60,6 +60,10 @@ public class ApplicationController extends Application{
             }
         }
 
+        return mXpushSession;
+    }
+
+    public XPushSession getXpushSession(){
         return mXpushSession;
     }
 
@@ -77,22 +81,6 @@ public class ApplicationController extends Application{
         }
 
         return mRequestQueue;
-    }
-
-    public <T> void addToRequestQueue(Request<T> req, String tag) {
-        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
-        getRequestQueue().add(req);
-    }
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        req.setTag(TAG);
-        getRequestQueue().add(req);
-    }
-
-    public void cancelPendingRequests(Object tag) {
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(tag);
-        }
     }
 
     public void setClient( Socket socket ){

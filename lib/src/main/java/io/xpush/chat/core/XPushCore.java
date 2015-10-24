@@ -2,6 +2,10 @@ package io.xpush.chat.core;
 
 import android.util.Log;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.Socket;
 import com.squareup.okhttp.OkHttpClient;
@@ -15,9 +19,12 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.network.LoginRequest;
 import io.xpush.chat.util.XPushUtils;
 
 public class XPushCore {
@@ -45,7 +52,6 @@ public class XPushCore {
     public XPushCore(){
     }
 
-
     public void init(){
         xpushSession = ApplicationController.getInstance().getXpushSession();
 
@@ -57,6 +63,14 @@ public class XPushCore {
 
     public void setGlobalSocket(Socket socket){
         this.mGlobalSocket = socket;
+    }
+
+    public boolean isGlobalConnected(){
+        if( mGlobalSocket == null ){
+            return false;
+        }
+
+        return mGlobalSocket.connected();
     }
 
     public void createChannel(ArrayList<String> users, final CallbackEvent callbackEvent){
@@ -99,7 +113,7 @@ public class XPushCore {
                                 // duplicate
                                 || ("ERR-INTERNAL".equals(response.getString("status"))) && response.get("message").toString().indexOf("E11000") > -1) {
 
-                            ChannelCore channelCore = createChannelCore(cid);
+                            ChannelCore channelCore = createChannel(cid);
                             callbackEvent.call(channelCore);
                         }
                     } catch (JSONException e) {
@@ -110,7 +124,7 @@ public class XPushCore {
         });
     }
 
-    public ChannelCore createChannelCore(String channelId){
+    public ChannelCore createChannel(String channelId){
 
         ChannelCore result = null;
         String url = null;
@@ -150,4 +164,6 @@ public class XPushCore {
 
         return result;
     }
+
+
 }

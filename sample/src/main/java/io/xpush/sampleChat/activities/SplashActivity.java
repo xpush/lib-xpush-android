@@ -17,6 +17,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.services.RegistrationIntentService;
 import io.xpush.chat.services.XPushService;
@@ -66,8 +67,10 @@ public class SplashActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if ((ApplicationController.getInstance().getClient() == null && System.currentTimeMillis() - started < SPLASH_TIME) || (ApplicationController.getInstance().getClient() != null && ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < SPLASH_TIME)
-                        || (ApplicationController.getInstance().getClient() != null && !ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < (SPLASH_TIME * 6))) {
+                // connected, not yet splash
+                if ((XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < SPLASH_TIME)
+                        // not connected, splash * 4
+                        || ( !XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
                     handler.postDelayed(this, 150);
                 } else {
 
@@ -75,7 +78,7 @@ public class SplashActivity extends Activity {
                     overridePendingTransition(0, android.R.anim.fade_in);
 
                     Intent intent = null;
-                    if (null == ApplicationController.getInstance().getXpushSession()) {
+                    if (null == XPushCore.getInstance().getXpushSession()) {
                         intent = new Intent(SplashActivity.this, LoginActivity.class);
                     } else {
                         intent = new Intent(SplashActivity.this, MainActivity.class);

@@ -17,6 +17,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.services.RegistrationIntentService;
 import io.xpush.chat.services.XPushService;
 import io.xpush.link.R;
@@ -71,9 +72,8 @@ public class SplashActivity extends Activity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if ((ApplicationController.getInstance().getClient() == null && System.currentTimeMillis() - started < SPLASH_TIME) || (ApplicationController.getInstance().getClient() != null && ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < SPLASH_TIME)
-                        || (ApplicationController.getInstance().getClient() != null && !ApplicationController.getInstance().getClient().connected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
-                    Log.d(TAG, "waiting : " + ApplicationController.getInstance().getClient() + ", " +i.incrementAndGet() );
+                if ((XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < SPLASH_TIME)
+                        || ( !XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
                     handler.postDelayed(this, 150);
                 } else {
 

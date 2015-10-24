@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.fragments.UsersFragment;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
@@ -109,7 +110,7 @@ public class FriendsFragment extends UsersFragment {
         JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("GR", ApplicationController.getInstance().getXpushSession().getId() );
+            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId() );
 
         } catch (JSONException e) {
             e.printStackTrace();

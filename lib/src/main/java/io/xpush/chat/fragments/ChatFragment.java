@@ -643,7 +643,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void getChannelAndConnect(){
-        mChannelCore = XPushCore.getInstance().createChannelCore(mChannel);
+        mChannelCore = XPushCore.getInstance().createChannel(mChannel);
         connectChannel();
     }
 

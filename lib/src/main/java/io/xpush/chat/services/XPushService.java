@@ -362,7 +362,7 @@ public class XPushService extends Service {
 
     private synchronized void reconnectIfNecessary() {
         Log.d(TAG, "reconnectIfNecessary - " + "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
-        if (mStarted ) {
+        if (mStarted && mClient != null ) {
             if( !mClient.connected() && !mConnecting  ){
                 connect();
             }
