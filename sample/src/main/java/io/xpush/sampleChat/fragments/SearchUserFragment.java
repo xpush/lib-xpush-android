@@ -37,6 +37,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
+import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.network.LoginRequest;
@@ -232,7 +233,7 @@ public class SearchUserFragment extends Fragment  {
             new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG, "Login error ======================");
+                    Log.d(TAG, "search user error ======================");
                     error.printStackTrace();
                 }
             }
@@ -243,47 +244,14 @@ public class SearchUserFragment extends Fragment  {
     }
 
     public void addFriend(final XPushUser user){
-        JSONObject jsonObject = new JSONObject();
-        JSONArray array = new JSONArray();
-
-        try {
-            array.put( user.getId() );
-
-            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId()  );
-            jsonObject.put("U", array );
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        Log.d(TAG, jsonObject.toString());
-
-        /**
-        ApplicationController.getInstance().getClient().emit("group.add", jsonObject, new Ack() {
+        XPushCore.getInstance().addFriend( mActivity, user, new CallbackEvent(){
             @Override
             public void call(Object... args) {
-                JSONObject response = (JSONObject) args[0];
-                Log.d(TAG, response.toString());
-                try {
-                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
-
-                        ContentValues contentValues = new ContentValues();
-                        contentValues.put(UserTable.KEY_ID, user.getId());
-                        contentValues.put(UserTable.KEY_NAME, user.getName());
-                        contentValues.put(UserTable.KEY_MESSAGE, user.getMessage());
-                        contentValues.put(UserTable.KEY_IMAGE, user.getImage());
-
-                        contentValues.put( XpushContentProvider.SQL_INSERT_OR_REPLACE, true );
-                        getActivity( ).getContentResolver().insert(XpushContentProvider.USER_CONTENT_URI, contentValues);
-
-                        mActivity.finish();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if( args == null || args.length == 0 ){
+                    mActivity.finish();
                 }
             }
         });
-         */
     }
 
     // Handler 클래스

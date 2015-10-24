@@ -109,12 +109,12 @@ public class FriendsFragment extends UsersFragment {
     @Override
     public void getUsers(){
 
-        XPushCore.getInstance().getUsers(new CallbackEvent() {
+        XPushCore.getInstance().getFriends(new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 if( args != null && args.length >0 ) {
                     JSONArray users = (JSONArray) args[0];
-                    XPushCore.getInstance().storeUsers(getActivity(), users);
+                    XPushCore.getInstance().storeFriends(getActivity(), users);
                 }
             }
         });

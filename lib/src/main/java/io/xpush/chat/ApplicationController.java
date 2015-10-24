@@ -22,7 +22,7 @@ import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.persist.XpushContentProvider;
 
-public class ApplicationController extends Application implements BaseContextListener{
+public class ApplicationController extends Application {
 
     public static final String TAG = ApplicationController.class.getSimpleName();
     private static ApplicationController mInstance;
@@ -35,10 +35,5 @@ public class ApplicationController extends Application implements BaseContextLis
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-    }
-
-    @Override
-    public synchronized Context getBaseContext(){
-        return mInstance;
     }
 }

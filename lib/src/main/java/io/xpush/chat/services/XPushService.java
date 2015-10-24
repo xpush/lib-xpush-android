@@ -162,7 +162,6 @@ public class XPushService extends Service {
         super.onStartCommand(intent, flags, startId);
 
         Log.d(TAG, "onStartCommand");
-
         String action = intent.getAction();
 
         Log.i(TAG, "Received action of " + action);
@@ -206,7 +205,8 @@ public class XPushService extends Service {
             stopKeepAlives();
             return;
         } else {
-            mXpushSession = XPushCore.getInstance().getXpushSession();
+            XPushCore.getInstance().setBaseContext( this.getBaseContext() );
+            mXpushSession = XPushCore.getInstance().restoreXpushSession();
         }
 
         if (mStarted) {

@@ -1,6 +1,7 @@
 package io.xpush.chat.core;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -31,6 +32,7 @@ import java.util.Map;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.network.LoginRequest;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
@@ -48,24 +50,19 @@ public class XPushCore {
     private String mHostname;
     private String mAppId;
     private String mDeviceId;
+    private Context baseContext;
 
     private Socket mGlobalSocket;
 
-    BaseContextListener baseContextListener;
-
-    public void setBaseContextListener(BaseContextListener listener){
-        baseContextListener = listener;
-    }
-
-    public static void initialize(BaseContextListener listener){
+    public static void initialize(Context context){
         if( sInstance == null ){
-            sInstance =  new XPushCore();
-            sInstance.setBaseContextListener(listener);
+            sInstance =  new XPushCore(context);
             sInstance.init();
         }
     }
 
     public static XPushCore getInstance(){
+
         if( sInstance == null ){
             sInstance =  new XPushCore();
             sInstance.init();
@@ -77,6 +74,10 @@ public class XPushCore {
     public XPushCore(){
     }
 
+    public XPushCore(Context context){
+        this.baseContext = context;
+    }
+
     public String getHostname(){
         return this.mHostname;
     }
@@ -85,8 +86,13 @@ public class XPushCore {
         return this.mAppId;
     }
 
+    public void setBaseContext(Context context){
+        this.baseContext = context;
+        this.init();
+    }
+
     public void init(){
-        if( baseContextListener != null ) {
+        if( getBaseContext() != null ) {
             xpushSession = restoreXpushSession();
             this.mHostname = getBaseContext().getString(R.string.host_name);
             this.mAppId = getBaseContext().getString(R.string.app_id);
@@ -112,7 +118,7 @@ public class XPushCore {
      *
      *
      */
-    public void login( String id, String password, final CallbackEvent callbackEvent){
+    public void login(String id, String password, final CallbackEvent callbackEvent){
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -152,7 +158,7 @@ public class XPushCore {
                 }
         );
 
-        RequestQueue queue = Volley.newRequestQueue(ApplicationController.getInstance().getBaseContext());
+        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
         queue.add(request);
     }
 
@@ -300,7 +306,13 @@ public class XPushCore {
         return result;
     }
 
-    public void getUsers(final CallbackEvent callbackEvent) {
+
+    /**
+     *
+     * Group Start
+     *
+     */
+    public void getFriends(final CallbackEvent callbackEvent) {
 
         JSONObject jsonObject = new JSONObject();
 
@@ -330,7 +342,7 @@ public class XPushCore {
         });
     }
 
-    public void storeUsers(final Context mContext, final JSONArray result) {
+    public void storeFriends(final Context mContext, final JSONArray result) {
         try {
             List<ContentValues> valuesToInsert = new ArrayList<ContentValues>();
 
@@ -375,8 +387,47 @@ public class XPushCore {
         }
     }
 
-    public Context getBaseContext(){
-        return baseContextListener.getBaseContext();
+    public void addFriend(final Context mContext, final XPushUser user, final CallbackEvent callbackEvent) {
+
+        JSONObject jsonObject = new JSONObject();
+        JSONArray array = new JSONArray();
+
+        try {
+            array.put( user.getId() );
+
+            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId()  );
+            jsonObject.put("U", array );
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        mGlobalSocket.emit("group.add", jsonObject, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+                Log.d(TAG, response.toString());
+                try {
+                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
+
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(UserTable.KEY_ID, user.getId());
+                        contentValues.put(UserTable.KEY_NAME, user.getName());
+                        contentValues.put(UserTable.KEY_MESSAGE, user.getMessage());
+                        contentValues.put(UserTable.KEY_IMAGE, user.getImage());
+
+                        contentValues.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
+                        mContext.getContentResolver().insert(XpushContentProvider.USER_CONTENT_URI, contentValues);
+
+                        callbackEvent.call();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
+    public Context getBaseContext(){
+        return baseContext;
+    }
 }

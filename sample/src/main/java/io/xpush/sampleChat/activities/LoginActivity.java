@@ -76,7 +76,7 @@ public class LoginActivity extends AppCompatActivity  {
          XPushCore.getInstance().login(id, password, new CallbackEvent() {
              @Override
              public void call(Object... args) {
-                 if ( args ==null || args.length == 0 ) {
+                 if ( args == null || args.length == 0 ) {
                      progressDialog.dismiss();
                      onLoginSuccess();
                  } else {
