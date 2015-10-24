@@ -156,7 +156,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         if( mChannelCore == null || !mChannelCore.connected() ) {
 
             if (mUsers != null) {
-                createChannelAndConnect();
+                createChannelAndConnect(mXpushChannel);
             } else {
                 if( mChannelCore != null ) {
                     connectChannel();
@@ -364,8 +364,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mUsername = null;
         mChannelCore.disconnect();
 
-        Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
-        mActivity.getContentResolver().delete(singleUri, null, null);
+        Uri channelUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
+        mActivity.getContentResolver().delete(channelUri, null, null);
+
+        Uri messageUri = Uri.parse(XpushContentProvider.MESSAGE_CONTENT_URI + "/" + mChannel );
+        mActivity.getContentResolver().delete(messageUri, null, null);
 
         Handler handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(new Runnable() {
@@ -632,8 +635,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         }
     }
 
-    private void createChannelAndConnect(){
-        XPushCore.getInstance().createChannel(mUsers, new CallbackEvent() {
+    private void createChannelAndConnect(XPushChannel xpushChannel){
+        XPushCore.getInstance().createChannel(xpushChannel, new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 mChannelCore = (ChannelCore) args[0];
@@ -667,11 +670,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     private void channelLeave(){
-        mChannelCore.channelLeave(new CallbackEvent() {
-            @Override
-            public void call(Object... args) {
-                leave();
-            }
-        });
+
+        // 1:1 Channel, only delete local data
+        if( mUsers.size() == 2 ){
+            leave();
+        } else {
+            mChannelCore.channelLeave(new CallbackEvent() {
+                @Override
+                public void call(Object... args) {
+                    leave();
+                }
+            });
+        }
     }
 }

@@ -146,9 +146,10 @@ public abstract class UsersFragment extends Fragment implements LoaderManager.Lo
                 userArray.add(XPushCore.getInstance().getXpushSession().getId());
 
                 XPushChannel channel = new XPushChannel();
-                channel.setId(XPushUtils.generateChannelId( userArray ) );
-                channel.setName( user.getName() );
-                channel.setUsers( userArray );
+                channel.setId(XPushUtils.generateChannelId(userArray));
+                channel.setName(user.getName());
+                channel.setUsers(userArray );
+                channel.setImage(user.getImage());
 
                 Bundle bundle = channel.toBundle();
                 Intent intent = new Intent(mActivity, ChatActivity.class);

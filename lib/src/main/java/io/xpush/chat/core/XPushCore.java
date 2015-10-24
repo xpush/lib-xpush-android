@@ -5,6 +5,8 @@ import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -14,6 +16,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.Socket;
+import com.squareup.okhttp.Call;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 
@@ -31,9 +34,12 @@ import java.util.Map;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.network.LoginRequest;
+import io.xpush.chat.network.StringRequest;
+import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.util.XPushUtils;
@@ -214,17 +220,14 @@ public class XPushCore {
      *
      */
 
-    public void createChannel(ArrayList<String> users, final CallbackEvent callbackEvent){
-        createChannel(null, users, callbackEvent);
-    }
-
-    public void createChannel(String channelId, ArrayList<String> users, final CallbackEvent callbackEvent){
+    public void createChannel(final XPushChannel xpushChannel, final CallbackEvent callbackEvent){
 
         JSONArray userArray = new JSONArray();
-        for( String userId : users ){
+        for( String userId : xpushChannel.getUsers() ){
             userArray.put(userId);
         }
-        final String cid = channelId != null ? channelId : XPushUtils.generateChannelId(users);
+        final String cid = xpushChannel.getId() != null ? xpushChannel.getId() : XPushUtils.generateChannelId(xpushChannel.getUsers());
+        xpushChannel.setId( cid );
 
         JSONObject jsonObject = new JSONObject();
         try {
@@ -254,6 +257,7 @@ public class XPushCore {
                                 // duplicate
                                 || ("ERR-INTERNAL".equals(response.getString("status"))) && response.get("message").toString().indexOf("E11000") > -1) {
 
+                            storeChannel(xpushChannel);
                             ChannelCore channelCore = getChannel(cid);
                             callbackEvent.call(channelCore);
                         }
@@ -306,6 +310,16 @@ public class XPushCore {
         return result;
     }
 
+    public void storeChannel(XPushChannel channel){
+        ContentValues values = new ContentValues();
+        values.put(ChannelTable.KEY_ID, channel.getId());
+        values.put(ChannelTable.KEY_UPDATED, System.currentTimeMillis());
+        values.put(ChannelTable.KEY_MESSAGE, channel.getMessage());
+        values.put(ChannelTable.KEY_IMAGE, channel.getImage());
+
+        values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
+        getBaseContext().getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+    }
 
     /**
      *
@@ -425,6 +439,94 @@ public class XPushCore {
                 }
             }
         });
+    }
+
+    public void searchUser(final Context context, String searchKey, final CallbackEvent callbackEvent){
+        this.searchUser(context,searchKey,1,50,callbackEvent);
+    }
+
+    public void searchUser(final Context context, String searchKey, int pageNum, int pageSize, final CallbackEvent callbackEvent){
+
+        JSONObject options = new JSONObject();
+
+        try {
+            options.put("pageNum", pageNum);
+            options.put("pageSize", pageSize);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        final Map<String,String> params = new HashMap<String, String>();
+        params.put("A", mAppId);
+        params.put("K", searchKey);
+        params.put("option", options.toString());
+
+        String url = mHostname+"/user/search";
+
+        StringRequest request = new StringRequest(url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d(TAG, "====== search user response ====== " + response.toString() );
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                JSONArray result = (JSONArray) response.getJSONObject("result").getJSONArray("users");
+
+                                ArrayList<XPushUser> users = new ArrayList<XPushUser>();
+
+                                for (int inx = 0; inx < result.length(); inx++) {
+                                    JSONObject json = (JSONObject) result.get(inx);
+                                    Log.d(TAG, json.toString());
+
+                                    XPushUser xpushUser = new XPushUser();
+
+                                    xpushUser.setId(json.getString("U"));
+
+                                    if (json.has("DT") && !json.isNull("DT")) {
+                                        Object obj = json.get("DT");
+                                        JSONObject data = null;
+                                        if (obj instanceof JSONObject) {
+                                            data = (JSONObject) obj;
+                                        } else if (obj instanceof String) {
+                                            data = new JSONObject((String) obj);
+                                        }
+
+                                        if (data.has("NM")) {
+                                            xpushUser.setName(data.getString("NM"));
+                                        } else {
+                                            xpushUser.setName(json.getString("U"));
+                                        }
+                                        if (data.has("MG")) {
+                                            xpushUser.setMessage(data.getString("MG"));
+                                        }
+                                        if (data.has("I")) {
+                                            xpushUser.setImage(data.getString("I"));
+                                        }
+                                    } else {
+                                        xpushUser.setName(json.getString("U"));
+                                    }
+
+                                    users.add(xpushUser);
+                                }
+
+                                callbackEvent.call(users);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        callbackEvent.call(error.getMessage());
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
     }
 
     public Context getBaseContext(){

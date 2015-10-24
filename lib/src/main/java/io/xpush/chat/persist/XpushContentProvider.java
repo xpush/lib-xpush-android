@@ -22,14 +22,15 @@ public class XpushContentProvider extends ContentProvider {
 
     public static final String SQL_INSERT_OR_REPLACE = "SQL_INSERT_OR_REPLACE";
 
-    private static final int ALL_CHANNELS = 1;
-    private static final int SINGLE_CHANNEL = 2;
+    private static final int ALL_CHANNELS = 10;
+    private static final int SINGLE_CHANNEL = 11;
 
-    private static final int ALL_MESSAGES = 3;
-    private static final int SINGLE_MESSAGE = 4;
+    private static final int ALL_MESSAGES = 20;
+    private static final int SINGLE_CHANNEL_MESSAGE = 21;
+    private static final int SINGLE_MESSAGE = 22;
 
-    private static final int ALL_USERS = 5;
-    private static final int SINGLE_USER = 6;
+    private static final int ALL_USERS = 30;
+    private static final int SINGLE_USER = 31;
 
     public static String CHANNEL_URI_STRING;
     public static String MESSAGE_URI_STRING;
@@ -71,7 +72,8 @@ public class XpushContentProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, "channels/*", SINGLE_CHANNEL);
 
         uriMatcher.addURI(AUTHORITY, "messages", ALL_MESSAGES);
-        uriMatcher.addURI(AUTHORITY, "messages/*", SINGLE_MESSAGE);
+        uriMatcher.addURI(AUTHORITY, "messages/*", SINGLE_CHANNEL_MESSAGE);
+        uriMatcher.addURI(AUTHORITY, "messages/*/*", SINGLE_MESSAGE);
 
         uriMatcher.addURI(AUTHORITY, "users", ALL_USERS);
         uriMatcher.addURI(AUTHORITY, "users/*", SINGLE_USER);
@@ -90,6 +92,8 @@ public class XpushContentProvider extends ContentProvider {
                 return "vnd.android.cursor.item/vnd.contentprovider.channels";
             case ALL_MESSAGES:
                 return "vnd.android.cursor.dir/vnd.contentprovider.messages";
+            case SINGLE_CHANNEL_MESSAGE:
+                return "vnd.android.cursor.dir/vnd.contentprovider.messages.in";
             case SINGLE_MESSAGE:
                 return "vnd.android.cursor.item/vnd.contentprovider.messages";
             case ALL_USERS:
@@ -174,7 +178,7 @@ public class XpushContentProvider extends ContentProvider {
                 }
 
                 break;
-            case SINGLE_MESSAGE:
+            case SINGLE_CHANNEL_MESSAGE:
                 tableName = MESSAGE_TABLE;
                 if ( sortOrder == null ){
                     sortOrder = MessageTable.KEY_UPDATED + " ASC";
@@ -234,10 +238,11 @@ public class XpushContentProvider extends ContentProvider {
             case ALL_MESSAGES:
                 tableName = MESSAGE_TABLE;
                 break;
-            case SINGLE_MESSAGE:
+            case SINGLE_CHANNEL_MESSAGE:
                 tableName = MESSAGE_TABLE;
-                id = uri.getPathSegments().get(1);
-                selection = MessageTable.KEY_ID + "='" + id+"'"
+
+                String channel = uri.getPathSegments().get(1);
+                selection = MessageTable.KEY_CHANNEL + "='" + channel+"'"
                         + (!TextUtils.isEmpty(selection) ?
                         " AND (" + selection + ')' : "");
                 break;
