@@ -2,9 +2,6 @@ package io.xpush.chat.persist;
 
 import android.database.sqlite.SQLiteDatabase;
 
-/**
- * Created by luffy on 2015-07-05.
- */
 public class ChannelTable {
 
     public static final String SEPARATOR = "#$SEP$#";
@@ -27,7 +24,7 @@ public class ChannelTable {
         String DATABASE_CREATE =
                 "CREATE TABLE if not exists " + tableName + " (" +
                         KEY_ROWID + " integer PRIMARY KEY autoincrement," +
-                        KEY_ID + "," +
+                        KEY_ID + " unique ," +
                         KEY_NAME + "," +
                         KEY_USERS + "," +
                         KEY_IMAGE + "," +

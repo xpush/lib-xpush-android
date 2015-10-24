@@ -1,6 +1,5 @@
 package io.xpush.sampleChat.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
@@ -12,16 +11,11 @@ import io.xpush.chat.view.activities.AppCompatPreferenceActivity;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.SettingsFragment;
 
-/**
- * Created by James on 2015-09-05.
- */
+
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @Override
     public void onBuildHeaders(List<Header> target) {
-        //loadHeadersFromResource(R.xml.settings, target);
-        //bar.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        //bar.setTitle(...);
     }
 
     @Override

@@ -1,27 +1,15 @@
 package io.xpush.chat;
 
-import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
-import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
-import com.github.nkzawa.socketio.client.Socket;
+import org.acra.ACRA;
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import io.xpush.chat.core.BaseContextListener;
 import io.xpush.chat.core.XPushCore;
-import io.xpush.chat.models.XPushSession;
-import io.xpush.chat.persist.XpushContentProvider;
 
+@ReportsCrashes( mailTo = "xpush.io@gmail.com",
+        mode = ReportingInteractionMode.TOAST)
 public class ApplicationController extends Application {
 
     public static final String TAG = ApplicationController.class.getSimpleName();
@@ -33,7 +21,9 @@ public class ApplicationController extends Application {
 
     @Override
     public void onCreate() {
-        super.onCreate();
+        XPushCore.initialize(this);
+        ACRA.init(this);
         mInstance = this;
+        super.onCreate();
     }
 }

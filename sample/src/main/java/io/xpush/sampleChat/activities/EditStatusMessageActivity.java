@@ -1,6 +1,5 @@
 package io.xpush.sampleChat.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -11,24 +10,25 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
 
 public class EditStatusMessageActivity extends FragmentActivity implements TextWatcher{
 
-    private TextView mStatusMessage = null;
+    private EditText mStatusMessage = null;
     private TextView mTextCount;
-
-    private Context mActivity;
 
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
-        setContentView(R.layout.edit_status_message);
-
-        mActivity = this;
+        setContentView(R.layout.activity_edit_status_message);
 
         mStatusMessage = ((EditText)findViewById(R.id.status_message));
         mTextCount = ((TextView)findViewById(R.id.text_count));
+
+        mStatusMessage.setText(XPushCore.getInstance().getXpushSession().getMessage() );
+        mTextCount.setText( XPushUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getMessage(), 20) );
+        mStatusMessage.setSelection(mStatusMessage.getText().length());
 
         mStatusMessage.addTextChangedListener(this);
         mStatusMessage.setOnEditorActionListener(new TextView.OnEditorActionListener() {

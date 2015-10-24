@@ -36,6 +36,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.common.Constants;
+import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.network.StringRequest;
@@ -145,126 +146,20 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    private static final MediaType MEDIA_TYPE_PNG = MediaType.parse("image/png");
-
-    public String uploadImage(Uri uri){
-
-        String downloadUrl = null;
-        String url = mSession.getServerUrl()+"/upload";
-        JSONObject userData = new JSONObject();
-
-        try {
-            userData.put( "U", mSession.getId() );
-            userData.put( "D", mSession.getDeviceId() );
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        String realPath = RealPathUtil.getRealPath(mActivity, uri);
-
-        File aFile = new File(realPath);
-
-        RequestBody requestBody = new MultipartBuilder()
-                .type(MultipartBuilder.FORM)
-                .addFormDataPart("file", aFile.getName(), RequestBody.create(MEDIA_TYPE_PNG, aFile)).build();
-
-
-        String appId = XPushCore.getInstance().getAppId();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("XP-A", appId )
-                .addHeader("XP-C", mSession.getId() +"^"+ appId)
-                .addHeader("XP-U", userData.toString() )
-                .addHeader("XP-FU-org",  aFile.getName())
-                .addHeader("XP-FU-nm", aFile.getName().substring(0, aFile.getName().lastIndexOf(".") ) )
-                .addHeader("XP-FU-tp", "image")
-                .post(requestBody)
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-
-        com.squareup.okhttp.Response response = null;
-        try {
-            response = client.newCall(request).execute();
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-
-            JSONObject res = new JSONObject( response.body().string() );
-            if( "ok".equals(res.getString("status")) ) {
-                JSONObject result = res.getJSONObject("result");
-
-                String channel = result.getString("channel");
-                String tname = result.getString("name");
-
-                downloadUrl = mSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mSession.getId() + "/" + tname;
-
-                Log.d(TAG, downloadUrl );
-                mJsonUserData.put("I", downloadUrl);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return downloadUrl;
-
-    }
-
     private void updateProfile(){
-
-        final Map<String,String> params = new HashMap<String, String>();
-
-        params.put("A", getString(R.string.app_id));
-        params.put("U", mSession.getId());
-        params.put("DT", mJsonUserData.toString());
-        params.put("PW", mSession.getPassword());
-        params.put("D", mSession.getDeviceId());
-
-        String url = getString(R.string.host_name)+"/user/update";
-
-        StringRequest request = new StringRequest(url, params,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d(TAG, "Update user success ======================");
-                        Log.d(TAG, response.toString());
-                        try {
-                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
-                                Log.d(TAG, response.getString("status"));
-
-                                if( mJsonUserData.has("I") ) {
-                                    mThumbnail.setImageURI(Uri.parse(mJsonUserData.getString("I")));
-                                    mSession.setImage(mJsonUserData.getString("I"));
-                                }
-                                if( mJsonUserData.has("NM") ) {
-                                    mSession.setName(mJsonUserData.getString("NM"));
-                                }
-
-                                if( mJsonUserData.has("MG") ) {
-                                    mSession.setMessage(mJsonUserData.getString("MG"));
-                                }
-                                XPushCore.getInstance().setXpushSession( mSession );
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+        XPushCore.getInstance().updateUser(mJsonUserData, new CallbackEvent() {
+            @Override
+            public void call(Object... args) {
+                try {
+                    if( args.length > 0 ) {
+                        JSONObject result = (JSONObject) args[0];
+                        mThumbnail.setImageURI(Uri.parse(result.getString("I")));
                     }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "Update user error ======================");
-                        error.printStackTrace();
-                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-        );
-
-        RequestQueue queue = Volley.newRequestQueue(mActivity);
-        queue.add(request);
+            }
+        });
     }
 
     private class UploadImageTask extends AsyncTask<Void, Void, String> {
@@ -276,8 +171,13 @@ public class ProfileFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... voids) {
-            String uploadImageUrl = uploadImage(mUri);
-            return uploadImageUrl;
+            String downloadUrl = XPushCore.getInstance().uploadImage(mUri);
+            try {
+                mJsonUserData.put("I", downloadUrl);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return downloadUrl;
         }
 
         @Override

@@ -39,17 +39,22 @@
     <string name="action_setting">Setting</string>
     <string name="action_search">Search</string>
     <string name="action_search_user">Search User</string>
-
     <string name="ready_message_search">검색어를 입력하세요.</string>
 
+    <string name="title_text_input_search_user">검색어를 입력하세요.</string>
+    <string name="message_no_search_user">사용자를 찾을 수 없습니다.</string>
+
     <!-- ProfileActivity -->
+
+    <!-- EditNicknameActivity -->
     <string name="label_text_nickname">닉네임</string>
     <string name="title_text_input_nickname">닉네임을 입력해주세요.</string>
     <string name="title_text_edit_nickname">닉네임을 입력해주세요.</string>
 
-    <string name="text_for_status_message">Status message</string>
-    <string name="message_for_input_status_message">Input status message</string>
-    <string name="title_for_change_status_message">Edit Status message</string>
+    <!-- EditStatusMessageActivity -->
+    <string name="label_text_status_message">상태 메시지</string>
+    <string name="title_text_input_status_message">상태 메시지를 입력해주세요.</string>
+    <string name="title_text_edit_status_message">상태 메시지를 입력해주세요.</string>
 
     <string name="label_search_user">ID or Name</string>
 </resources>

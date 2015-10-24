@@ -10,9 +10,11 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -94,6 +96,17 @@ public class SearchUserFragment extends Fragment  {
             }
         });
 
+        mEditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int id, KeyEvent event) {
+                if (id == R.id.search || id == EditorInfo.IME_NULL) {
+                    search();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         mHandler = new LoadMoreHandler();
         return view;
     }
@@ -149,6 +162,9 @@ public class SearchUserFragment extends Fragment  {
                     if (users.size() > 0) {
                         mXpushUsers.addAll(users);
                         mHandler.sendEmptyMessage(0);
+                    } else {
+                        mXpushUsers.clear();
+                        mHandler.sendEmptyMessage(1);
                     }
                 }
             }
@@ -176,6 +192,11 @@ public class SearchUserFragment extends Fragment  {
             switch (msg.what) {
                 case 0:
                     mTvMessage.setVisibility(View.INVISIBLE);
+                    mAdapter.notifyDataSetChanged();
+                    break;
+                case 1:
+                    mTvMessage.setVisibility(View.VISIBLE);
+                    mTvMessage.setText(R.string.message_no_search_user);
                     mAdapter.notifyDataSetChanged();
                     break;
             }

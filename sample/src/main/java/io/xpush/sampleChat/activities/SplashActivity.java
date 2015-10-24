@@ -36,8 +36,6 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState){
         Fresco.initialize(this);
 
-        XPushCore.initialize(ApplicationController.getInstance());
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 

@@ -74,12 +74,14 @@
 
         <activity
             android:name=".activities.EditNickNameActivity"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/label_text_nickname">
         </activity>
 
         <activity
             android:name=".activities.EditStatusMessageActivity"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/label_text_status_message">
         </activity>
 
 

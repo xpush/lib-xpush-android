@@ -1,6 +1,5 @@
 package io.xpush.sampleChat.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -11,24 +10,25 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
 
 public class EditNickNameActivity extends FragmentActivity implements TextWatcher{
 
-    private TextView mUserName = null;
+    private EditText mUserName = null;
     private TextView mTextCount;
-
-    private Context mActivity;
 
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
-        setContentView(R.layout.edit_nickname);
-
-        mActivity = this;
+        setContentView(R.layout.activity_edit_nickname);
 
         mUserName = ((EditText)findViewById(R.id.user_name));
         mTextCount = ((TextView)findViewById(R.id.text_count));
+
+        mUserName.setText(XPushCore.getInstance().getXpushSession().getName() );
+        mTextCount.setText( XPushUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getName(), 20) );
+        mUserName.setSelection(mUserName.getText().length());
 
         mUserName.addTextChangedListener(this);
         mUserName.setOnEditorActionListener(new TextView.OnEditorActionListener() {

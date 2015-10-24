@@ -10,14 +10,17 @@
         android:background="@color/iron">
 
         <EditText
+            android:id="@+id/editSearch"
             android:layout_gravity="center"
             android:padding="4dp"
             android:layout_margin="4dp"
-            android:id="@+id/editSearch"
             android:background="@color/white"
             android:layout_width="fill_parent"
             android:layout_height="40dp"
             android:singleLine="true"
+            android:imeActionId="@+id/search"
+            android:imeActionLabel="@string/action_search"
+            android:imeOptions="actionSearch"
             android:hint="@string/label_search_user" >
         </EditText>
 

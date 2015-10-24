@@ -1,11 +1,8 @@
 package io.xpush.chat.core;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -16,14 +13,16 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.Socket;
-import com.squareup.okhttp.Call;
+import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -34,6 +33,7 @@ import java.util.Map;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
+import io.xpush.chat.common.Constants;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.models.XPushUser;
@@ -42,6 +42,7 @@ import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.util.RealPathUtil;
 import io.xpush.chat.util.XPushUtils;
 
 public class XPushCore {
@@ -84,6 +85,15 @@ public class XPushCore {
         this.baseContext = context;
     }
 
+    public void init(){
+        if( getBaseContext() != null ) {
+            xpushSession = restoreXpushSession();
+            this.mHostname = getBaseContext().getString(R.string.host_name);
+            this.mAppId = getBaseContext().getString(R.string.app_id);
+            this.mDeviceId = getBaseContext().getString(R.string.device_id);
+        }
+    }
+
     public String getHostname(){
         return this.mHostname;
     }
@@ -97,13 +107,12 @@ public class XPushCore {
         this.init();
     }
 
-    public void init(){
-        if( getBaseContext() != null ) {
-            xpushSession = restoreXpushSession();
-            this.mHostname = getBaseContext().getString(R.string.host_name);
-            this.mAppId = getBaseContext().getString(R.string.app_id);
-            this.mDeviceId = getBaseContext().getString(R.string.device_id);
+    public Context getBaseContext(){
+        if( baseContext == null){
+            Log.w(TAG, "!!!!! baseContext is null !!!!!");
+            baseContext = ApplicationController.getInstance();
         }
+        return baseContext;
     }
 
     public void setGlobalSocket(Socket socket){
@@ -146,7 +155,7 @@ public class XPushCore {
                                 if( response.has("message") ){
                                     callbackEvent.call( response.getString("message") );
                                 } else {
-                                    callbackEvent.call( response.getString("status") );
+                                    callbackEvent.call(response.getString("status"));
                                 }
                             }
                         } catch (JSONException e) {
@@ -160,6 +169,58 @@ public class XPushCore {
                         Log.d(TAG, "Login error ======================");
                         error.printStackTrace();
                         callbackEvent.call();
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+        queue.add(request);
+    }
+
+    public void updateUser(final JSONObject mJsonUserData, final CallbackEvent callbackEvent){
+        final Map<String,String> params = new HashMap<String, String>();
+
+        params.put("A", mAppId);
+        params.put("U", mXpushSession.getId());
+        params.put("DT", mJsonUserData.toString());
+        params.put("PW", mXpushSession.getPassword());
+        params.put("D", mXpushSession.getDeviceId());
+
+        String url = getBaseContext().getString(R.string.host_name)+"/user/update";
+
+        StringRequest request = new StringRequest(url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Update user success ======================");
+                        Log.d(TAG, response.toString());
+                        try {
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                Log.d(TAG, response.getString("status"));
+
+                                if( mJsonUserData.has("I") ) {
+                                    mXpushSession.setImage(mJsonUserData.getString("I"));
+                                }
+                                if( mJsonUserData.has("NM") ) {
+                                    mXpushSession.setName(mJsonUserData.getString("NM"));
+                                }
+
+                                if( mJsonUserData.has("MG") ) {
+                                    mXpushSession.setMessage(mJsonUserData.getString("MG"));
+                                }
+
+                                callbackEvent.call( mJsonUserData );
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Update user error ======================");
+                        error.printStackTrace();
                     }
                 }
         );
@@ -421,7 +482,7 @@ public class XPushCore {
                 JSONObject response = (JSONObject) args[0];
                 Log.d(TAG, response.toString());
                 try {
-                    if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                    if ("ok".equalsIgnoreCase(response.getString("status"))) {
 
                         ContentValues contentValues = new ContentValues();
                         contentValues.put(UserTable.KEY_ID, user.getId());
@@ -442,7 +503,7 @@ public class XPushCore {
     }
 
     public void searchUser(final Context context, String searchKey, final CallbackEvent callbackEvent){
-        this.searchUser(context,searchKey,1,50,callbackEvent);
+        this.searchUser(context, searchKey, 1, 50, callbackEvent);
     }
 
     public void searchUser(final Context context, String searchKey, int pageNum, int pageSize, final CallbackEvent callbackEvent){
@@ -529,7 +590,68 @@ public class XPushCore {
         queue.add(request);
     }
 
-    public Context getBaseContext(){
-        return baseContext;
+    public String uploadImage(Uri uri){
+
+        String downloadUrl = null;
+        String url = mXpushSession.getServerUrl()+"/upload";
+        JSONObject userData = new JSONObject();
+
+        try {
+            userData.put( "U", mXpushSession.getId() );
+            userData.put( "D", mDeviceId );
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        String realPath = RealPathUtil.getRealPath(getBaseContext(), uri);
+
+        File aFile = new File(realPath);
+
+        RequestBody requestBody = new MultipartBuilder()
+                .type(MultipartBuilder.FORM)
+                .addFormDataPart("file", aFile.getName(), RequestBody.create(Constants.MEDIA_TYPE_PNG, aFile)).build();
+
+
+        String appId = XPushCore.getInstance().getAppId();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("XP-A", appId )
+                .addHeader("XP-C", getXpushSession().getId() +"^"+ appId)
+                .addHeader("XP-U", userData.toString() )
+                .addHeader("XP-FU-org",  aFile.getName())
+                .addHeader("XP-FU-nm", aFile.getName().substring(0, aFile.getName().lastIndexOf(".") ) )
+                .addHeader("XP-FU-tp", "image")
+                .post(requestBody)
+                .build();
+
+        OkHttpClient client = new OkHttpClient();
+
+        com.squareup.okhttp.Response response = null;
+        try {
+            response = client.newCall(request).execute();
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            JSONObject res = new JSONObject( response.body().string() );
+            if( "ok".equals(res.getString("status")) ) {
+                JSONObject result = res.getJSONObject("result");
+
+                String channel = result.getString("channel");
+                String tname = result.getString("name");
+
+                downloadUrl = mXpushSession.getServerUrl() + "/download/" + appId + "/" + channel + "/" + mXpushSession.getId() + "/" + tname;
+
+                Log.d(TAG, downloadUrl );
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return downloadUrl;
     }
 }
