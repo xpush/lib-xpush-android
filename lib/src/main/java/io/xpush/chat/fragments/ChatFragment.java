@@ -30,11 +30,9 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.EngineIOException;
-import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.socketio.client.SocketIOException;
 
@@ -48,7 +46,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.ChannelCore;
@@ -62,8 +59,8 @@ import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 import io.xpush.chat.view.adapters.MessageListAdapter;
+import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 
 public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
@@ -76,7 +73,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private EditText mInputMessageView;
     private RecyclerView.Adapter mAdapter;
     private boolean mTyping = false;
-    private Handler mTypingHandler = new Handler();
 
     private String mUserId;
     private String mUsername;
@@ -209,11 +205,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
                 if (!mTyping) {
                     mTyping = true;
-                    mChannelCore.emit("typing");
                 }
-
-                mTypingHandler.removeCallbacks(onTypingTimeout);
-                mTypingHandler.postDelayed(onTypingTimeout, TYPING_TIMER_LENGTH);
             }
 
             @Override
@@ -307,10 +299,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         events.put(Socket.EVENT_CONNECT, onConnectSuccess);
 
         events.put("message", onNewMessage);
-        events.put("user joined", onUserJoined);
-        events.put("user left", onUserLeft);
-        events.put("typing", onTyping);
-        events.put("stop typing", onStopTyping);
 
         mChannelCore.connect(events);
     }
@@ -425,109 +413,12 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     };
 
 
-    private Emitter.Listener onUserJoined = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("U");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(getResources().getString(R.string.message_user_joined, username));
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onUserLeft = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    int numUsers;
-                    try {
-                        username = data.getString("U");
-                        numUsers = data.getInt("numUsers");
-                    } catch (JSONException e) {
-                        return;
-                    }
-
-                    addLog(getResources().getString(R.string.message_user_left, username));
-                    removeTyping(username);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onTyping = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("U");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    addTyping(username);
-                }
-            });
-        }
-    };
-
-    private Emitter.Listener onStopTyping = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    try {
-                        username = data.getString("U");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    removeTyping(username);
-                }
-            });
-        }
-    };
-
-    private Runnable onTypingTimeout = new Runnable() {
-        @Override
-        public void run() {
-            if (!mTyping) return;
-
-            mTyping = false;
-            mChannelCore.emit("stop typing");
-        }
-    };
-
     private void disconnect(){
         if( mChannelCore != null && mChannelCore.connected() ) {
             mChannelCore.disconnect();
             mChannelCore.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
             mChannelCore.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
             mChannelCore.off("message", onNewMessage);
-            mChannelCore.off("user joined", onUserJoined);
-            mChannelCore.off("user left", onUserLeft);
-            mChannelCore.off("typing", onTyping);
-            mChannelCore.off("stop typing", onStopTyping);
         }
     }
 
@@ -604,22 +495,28 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         final XPushMessage xpushMessage = new XPushMessage( data );
 
         try {
-            ContentValues values = new ContentValues();
-            values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-            values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
-            values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
-            values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
-            values.put(ChannelTable.KEY_COUNT, 0);
-
-            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-            mActivity.getContentResolver().update(singleUri, values, null, null);
-
             if (mSession.getId().equals(xpushMessage.getSenderId() ) ){
                 xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
             } else {
                 xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
             }
 
+            ContentValues values = new ContentValues();
+            values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
+            values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+            if ( xpushMessage.getType() != XPushMessage.TYPE_SEND_MESSAGE ){
+                values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
+            } else {
+                values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
+            }
+            values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
+            values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
+            values.put(ChannelTable.KEY_COUNT, 0);
+
+            values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
+            mActivity.getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+
+            // INSERT INTO MESSAGE TABLE
             lastReceiveTime = xpushMessage.getUpdated();
             mDataSource.insert(xpushMessage);
 
@@ -639,15 +536,25 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         XPushCore.getInstance().createChannel(xpushChannel, new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                mChannelCore = (ChannelCore) args[0];
-                connectChannel();
+                if( args[0] != null ) {
+                    mChannelCore = (ChannelCore) args[0];
+                    connectChannel();
+                }
             }
         });
     }
 
     private void getChannelAndConnect(){
-        mChannelCore = XPushCore.getInstance().getChannel(mChannel);
-        connectChannel();
+
+        XPushCore.getInstance().getChannel(mActivity, mChannel, new CallbackEvent() {
+            @Override
+            public void call(Object... args) {
+                if (args[0] != null) {
+                    mChannelCore = (ChannelCore) args[0];
+                    connectChannel();
+                }
+            }
+        });
     }
 
     //add unread message

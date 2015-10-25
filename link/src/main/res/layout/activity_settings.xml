@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/primary"
-        android:theme="@style/GalaxyZooThemeToolbarDarkOverflow"
+        android:theme="@style/ToolbarDarkOverflow"
         android:elevation="4dp" />
     <ListView
         android:id="@id/android:list"

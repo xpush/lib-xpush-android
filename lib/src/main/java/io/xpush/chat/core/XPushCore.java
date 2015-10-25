@@ -318,9 +318,7 @@ public class XPushCore {
                                 // duplicate
                                 || ("ERR-INTERNAL".equals(response.getString("status"))) && response.get("message").toString().indexOf("E11000") > -1) {
 
-                            storeChannel(xpushChannel);
-                            ChannelCore channelCore = getChannel(cid);
-                            callbackEvent.call(channelCore);
+                            getChannel(cid, callbackEvent);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -330,53 +328,59 @@ public class XPushCore {
         });
     }
 
-    public ChannelCore getChannel(String channelId){
 
-        ChannelCore result = null;
+    public void getChannel(final String channelId, final CallbackEvent callbackEvent){
+        getChannel(getBaseContext(), channelId, callbackEvent);
+    }
+
+    public void getChannel(Context context, final String channelId, final CallbackEvent callbackEvent){
         String url = null;
-
         try {
             url = mHostname + "/node/"+ XPushCore.getInstance().getAppId()+"/"+ URLEncoder.encode(channelId, "UTF-8");
-            OkHttpClient client = new OkHttpClient();
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .get()
-                    .build();
-
-            com.squareup.okhttp.Response response = null;
-
-            response = client.newCall(request).execute();
-            if (!response.isSuccessful()) {
-                throw new IOException("Unexpected code " + response);
-            }
-
-            JSONObject res = new JSONObject( response.body().string() );
-            if( "ok".equals(res.getString("status")) ) {
-                JSONObject serverInfo = res.getJSONObject("result").getJSONObject("server");
-                result = new ChannelCore(channelId, serverInfo.getString("url"), serverInfo.getString("name") );
-            }
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } finally {
-            if( result == null ){
-                result = new ChannelCore();
-            }
         }
 
-        return result;
+        StringRequest request = new StringRequest(url,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d(TAG, "====== search user response ====== " + response.toString() );
+
+                            ChannelCore result = null;
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                JSONObject serverInfo = response.getJSONObject("result").getJSONObject("server");
+                                result = new ChannelCore(channelId, serverInfo.getString("url"), serverInfo.getString("name") );
+                            }
+
+                            callbackEvent.call( result );
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            callbackEvent.call( null );
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        callbackEvent.call(error.getMessage());
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(context);
+        queue.add(request);
     }
 
     public void storeChannel(XPushChannel channel){
         ContentValues values = new ContentValues();
         values.put(ChannelTable.KEY_ID, channel.getId());
-        values.put(ChannelTable.KEY_UPDATED, System.currentTimeMillis());
-        values.put(ChannelTable.KEY_MESSAGE, channel.getMessage());
+        values.put(ChannelTable.KEY_NAME, channel.getName());
         values.put(ChannelTable.KEY_IMAGE, channel.getImage());
+        values.put(ChannelTable.KEY_MESSAGE, channel.getMessage());
+        values.put(ChannelTable.KEY_UPDATED, System.currentTimeMillis());
 
         values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
         getBaseContext().getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);

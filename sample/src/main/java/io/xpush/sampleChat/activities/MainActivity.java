@@ -48,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
+
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -63,9 +64,6 @@ public class MainActivity extends AppCompatActivity {
         final ViewPager mViewPager = (ViewPager) findViewById(R.id.viewpager);
         mApdater = new Adapter(getSupportFragmentManager());
         mViewPager.setAdapter(mApdater);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         SlidingTabLayout tabLayout = (SlidingTabLayout) findViewById(R.id.tabs);
         tabLayout.setDistributeEvenly(true);

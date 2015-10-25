@@ -19,7 +19,7 @@
             <include android:id="@+id/profile" android:clickable="true" android:layout_width="@dimen/profile_image_in_my_profile" android:layout_height="@dimen/profile_image_in_my_profile" layout="@layout/include_profile_image" />
             <ImageView android:layout_gravity="end|bottom|center" android:background="@drawable/btn_camera_editprofile" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@null" android:importantForAccessibility="no" />
         </FrameLayout>
-        <TextView android:textSize="@dimen/font_level_4" android:textColor="@color/font_point1" android:id="@+id/phone_number" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" android:text="phone_number" />
+        <TextView android:id="@+id/tvUserId" android:textSize="@dimen/font_level_4" android:textColor="@color/font_point1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16.0dip" />
     </LinearLayout>
 
     <LinearLayout
@@ -27,12 +27,12 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10.0dip" >
-        <LinearLayout android:orientation="horizontal" android:id="@+id/nickname_button" style="@style/D4.Layout.SettingItemLayout">
-            <TextView android:id="@+id/nickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/label_text_nickname" android:singleLine="true" android:layout_weight="1.0" android:paddingEnd="10.0dip" style="@style/D4.Widget.SettingItemTextView"  />
+        <LinearLayout android:orientation="horizontal" android:id="@+id/nickname_button" style="@style/Layout.SettingItemLayout">
+            <TextView android:id="@+id/nickname" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/label_text_nickname" android:singleLine="true" android:layout_weight="1.0" android:paddingEnd="10.0dip" style="@style/Widget.SettingItemTextView"  />
             <ImageView android:id="@+id/nickname_arrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/more_list_arrow" android:layout_weight="0.0" android:contentDescription="@string/title_text_input_nickname" />
         </LinearLayout>
-        <LinearLayout android:orientation="horizontal" android:id="@+id/status_message_button" style="@style/D4.Layout.SettingItemLayout">
-            <TextView android:id="@+id/status_message" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/title_text_input_status_message" android:singleLine="true"  android:layout_weight="1.0" android:textAlignment="viewStart" android:paddingEnd="10.0dip" style="@style/D4.Widget.SettingItemTextView" />
+        <LinearLayout android:orientation="horizontal" android:id="@+id/status_message_button" style="@style/Layout.SettingItemLayout">
+            <TextView android:id="@+id/status_message" android:layout_width="fill_parent" android:layout_height="wrap_content" android:hint="@string/title_text_input_status_message" android:singleLine="true"  android:layout_weight="1.0" android:textAlignment="viewStart" android:paddingEnd="10.0dip" style="@style/Widget.SettingItemTextView" />
             <ImageView android:id="@+id/status_message_arrow" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/more_list_arrow" android:layout_weight="0.0" android:contentDescription="@string/title_text_edit_status_message" />
         </LinearLayout>
     </LinearLayout>

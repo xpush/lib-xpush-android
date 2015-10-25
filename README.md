@@ -6,14 +6,18 @@ Android library for xpush
 
 	git clone https://github.com/xpush/lib-xpush-android.git
 
+And open/import this project in Android Studio.
+
+
+## Usage
 Initialize XPushCore in user application. 
 
 ```java
 public class MyApplication extends Application {
 	@Override
-	public void onCreate() {	    
-	    XPushCore.initialize(this);
-	    super.onCreate();
+	public void onCreate() {
+		super.onCreate();
+	    XPushCore.initialize(this);	    
 	}
 }
 ```
@@ -63,5 +67,4 @@ SampleChat is simple chat application using [XPUSH](https://github.com/xpush/xpu
 This sample project helps you learn how to use XPUSH platform.
 
 ## License
-
 [MIT Licensed](https://github.com/xpush/lib-xpush-android/blob/master/LICENSE).

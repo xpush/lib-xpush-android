@@ -504,7 +504,7 @@ public class XPushService extends Service {
                     try {
                         ContentValues values = new ContentValues();
                         values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-
+                        values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                         values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
                         values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
                         values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());

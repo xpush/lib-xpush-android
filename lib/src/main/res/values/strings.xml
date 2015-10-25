@@ -34,4 +34,6 @@
 
     <string name="action_leave_dialog_title">Confirm</string>
     <string name="action_leave_dialog_description">Do you want to leave</string>
+
+    <string name="crash_dialog_text">Crahed !!!</string>
 </resources>

@@ -28,9 +28,9 @@ android:fitsSystemWindows="true">
         android:padding="@dimen/padding_normal"
         android:orientation="vertical">
         <TextView android:textSize="@dimen/font_level_4" android:textColor="@color/font_point2" android:id="@+id/please_input_status_message" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/label_text_status_message" style="android:style/Widget.TextView" />
-        <EditText android:id="@+id/status_message" android:layout_marginTop="16.0dip" android:maxLength="20" android:inputType="textNoSuggestions" style="@style/D4.Widget.EditTextWithClearButton" />
-        <TextView android:layout_gravity="center_horizontal" android:id="@+id/error" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dip" style="@style/Widget.FormSmallLabelView" />
-        <TextView android:textSize="@dimen/font_level_3" android:textColor="@color/font_gray4" android:layout_gravity="right" android:id="@+id/text_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" style="@style/Widget.FormSmallLabelView" />
+        <EditText android:id="@+id/status_message" android:layout_marginTop="16.0dip" android:maxLength="20" android:inputType="textNoSuggestions" style="@style/Widget.EditTextWithClearButton" />
+        <TextView android:layout_gravity="center_horizontal" android:id="@+id/error" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20.0dip" style="@style/Widget.FormSmallLabel" />
+        <TextView android:textSize="@dimen/font_level_3" android:textColor="@color/font_gray4" android:layout_gravity="right" android:id="@+id/text_count" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" style="@style/Widget.FormSmallLabel" />
     </LinearLayout>
 
 </RelativeLayout>

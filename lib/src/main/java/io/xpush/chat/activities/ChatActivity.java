@@ -37,10 +37,10 @@ public class ChatActivity extends AppCompatActivity{
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         Bundle bundle = getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
         XPushChannel xpushChannel = new XPushChannel(bundle);
         toolbar.setTitle(xpushChannel.getName()) ;
+        setSupportActionBar(toolbar);
     }
 }

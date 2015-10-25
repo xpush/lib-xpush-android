@@ -6,41 +6,23 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.MultipartBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.xpush.chat.ApplicationController;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushSession;
-import io.xpush.chat.network.StringRequest;
-import io.xpush.chat.util.RealPathUtil;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.activities.EditNickNameActivity;
 import io.xpush.sampleChat.activities.EditStatusMessageActivity;
@@ -58,6 +40,9 @@ public class ProfileFragment extends Fragment {
 
     @Bind(R.id.status_message_button)
     View mStatusMessageButton;
+
+    @Bind(R.id.tvUserId)
+    TextView mTvUserId;
 
     @Bind(R.id.imageBox)
     View mImageBox;
@@ -94,6 +79,10 @@ public class ProfileFragment extends Fragment {
 
         if( null != mSession.getMessage() ) {
             mTvStatusMessage.setText(mSession.getMessage());
+        }
+
+        if( null != mSession.getId() ){
+            mTvUserId.setText( mSession.getId() );
         }
 
         return view;

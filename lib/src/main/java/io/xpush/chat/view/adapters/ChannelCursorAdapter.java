@@ -45,7 +45,7 @@ public class ChannelCursorAdapter extends CursorAdapter implements Filterable {
 
         XPushChannel xpushChannel = new XPushChannel(cursor);
 
-        String title = xpushChannel.getId();
+        String title = xpushChannel.getName();
         long date = xpushChannel.getUpdated();
 
         if( xpushChannel.getImage() != null && !"".equals(xpushChannel.getImage()) ) {
