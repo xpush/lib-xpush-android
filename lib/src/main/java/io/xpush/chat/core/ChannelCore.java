@@ -133,11 +133,11 @@ public class ChannelCore {
 
     public void disconnect() {
         if (mChannelSocket != null) {
-            mChannelSocket.disconnect();
-
             for (String eventName : mEvents.keySet()) {
                 this.off(eventName);
             }
+            Log.d(TAG, "=== disconnect ===");
+            mChannelSocket.disconnect();
         }
     }
 
@@ -184,7 +184,6 @@ public class ChannelCore {
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
 
-                Log.d(TAG, response.toString());
                 if (response.has("status")) {
                     try {
                         if ("ok".equalsIgnoreCase(response.getString("status"))) {

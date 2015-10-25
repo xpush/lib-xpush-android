@@ -10,7 +10,7 @@ import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.XPushCore;
 
 @ReportsCrashes( mailTo = "xpush.io@gmail.com",
-        mode = ReportingInteractionMode.TOAST)
+        mode = ReportingInteractionMode.NOTIFICATION)
 public class ApplicationController extends Application {
 
     public static final String TAG = ApplicationController.class.getSimpleName();
@@ -25,7 +25,6 @@ public class ApplicationController extends Application {
         super.onCreate();
         mInstance = this;
         ACRA.init(this);
-        ACRA.getConfig().setResDialogText(R.string.crash_dialog_text);
         XPushCore.initialize(this);
     }
 }

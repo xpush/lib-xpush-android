@@ -457,13 +457,13 @@ public class XPushService extends Service {
     }
 
     // 수신 메세지 noti
-    private void broadcastReceivedMessage(String channel, String message) {
-        Log.d(TAG, "broadcastReceivedMessage:message = " + message);
+    private void broadcastReceivedMessage(String channel, String name, String message) {
 
         Intent broadcastIntent = new Intent(getApplicationContext(), PushMsgReceiver.class);
         broadcastIntent.setAction("io.xpush.chat.MGRECVD");
 
         broadcastIntent.putExtra("rcvd.C", channel);
+        broadcastIntent.putExtra("rcvd.NM", name);
         broadcastIntent.putExtra("rcvd.MG", message);
 
         sendBroadcast(broadcastIntent);
@@ -477,7 +477,6 @@ public class XPushService extends Service {
     private void log(String message, Throwable e) {
         if (e != null) {
             Log.e(TAG, message, e);
-
         } else {
             Log.i(TAG, message);
         }
@@ -541,12 +540,11 @@ public class XPushService extends Service {
 
                         mDataSource.insert(xpushMessage);
 
-
                     } catch (Exception e ){
                         e.printStackTrace();
                     }
 
-                    broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getMessage() );
+                    broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getSenderName(), xpushMessage.getMessage() );
                 } else {
 
                 }

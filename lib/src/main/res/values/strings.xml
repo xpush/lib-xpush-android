@@ -18,7 +18,7 @@
     <string name="host_name">http://stalk-front-s01.cloudapp.net:8000</string>
     <string name="app_id">sample-chat</string>
     <string name="device_id">android</string>
-    <string name="gcm_defaultSenderId">944977353393</string>
+    <string name="gcm_defaultSenderId">USER KEY</string>
 
     <string name="content_provider_authority">io.xpush.chat.persist.xpushcontentprovider</string>
     <string name="channel_table_name">TB_CHANNEL</string>

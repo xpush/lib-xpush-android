@@ -12,13 +12,16 @@ import android.os.PowerManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushChannel;
 
 public class PushMsgReceiver extends BroadcastReceiver {
 
     private static final int NOTIFICATION_ID = 0;
-    private static final String DEBUG_TAG = "PushReceiver";
+    private static final String TAG = PushMsgReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(Context mContext, Intent intent) {
@@ -27,26 +30,31 @@ public class PushMsgReceiver extends BroadcastReceiver {
             String action = intent.getAction().toString();
             Bundle extras = intent.getExtras();
 
-            Log.d(DEBUG_TAG, "onReceiver : " + action);
             if(action.isEmpty()){
             }else if ("io.xpush.chat.MGRECVD".equals(action)) {
 
                 String channel = intent.getStringExtra("rcvd.C");
+                String name = intent.getStringExtra("rcvd.NM");
                 String message = intent.getStringExtra("rcvd.MG");
-                showNotification(mContext, channel, message);
+                showNotification(mContext, name, channel, message);
             }else if("com.google.android.c2dm.intent.RECEIVE".equals(action)) {    // gcm msg receive
                 if (!extras.isEmpty()) {
-                    showNotification(mContext, extras.getString("key1"), extras.getString("key1"));
-                    intent.putExtra("rcvd.MG", extras.getString("key1"));
+                    Log.d(TAG, extras.toString());
+                    try {
+                        JSONObject userData =  new JSONObject(extras.getString("UO"));
+                        showNotification(mContext, userData.getString("NM"), extras.getString("C"), extras.getString("MG"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
     }
 
-    public void showNotification(Context mContext, String channel, String message) {
-        Log.d(DEBUG_TAG, "showNotification");
+    public void showNotification(Context mContext, String name, String channel, String message) {
+        Log.d(TAG, "showNotification");
 
-        String startActivity;
+        String startActivity = null;
         Class cls = null;
         try {
             startActivity = (String) mContext.getPackageManager().getApplicationInfo(mContext.getPackageName(), PackageManager.GET_META_DATA).metaData.get("INTRO_ACTIVITY");
@@ -69,9 +77,9 @@ public class PushMsgReceiver extends BroadcastReceiver {
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setSmallIcon(R.drawable.ic_launcher);//required
-        mBuilder.setContentTitle("contentTitle");//required
+        mBuilder.setContentTitle(name);//required
         mBuilder.setContentText(message);//required
-        mBuilder.setTicker("tickerText");//optional
+        mBuilder.setTicker( mContext.getString(R.string.app_id));//optional
         mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(contentIntent);
 

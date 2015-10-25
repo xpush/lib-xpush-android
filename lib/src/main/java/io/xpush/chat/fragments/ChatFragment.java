@@ -408,7 +408,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         @Override
         public void call(final Object... args) {
             JSONObject data = (JSONObject) args[0];
-            saveMessage( data );
+            saveMessage(data);
         }
     };
 
@@ -416,9 +416,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private void disconnect(){
         if( mChannelCore != null && mChannelCore.connected() ) {
             mChannelCore.disconnect();
-            mChannelCore.off(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mChannelCore.off(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mChannelCore.off("message", onNewMessage);
         }
     }
 
@@ -490,7 +487,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private void saveMessage( JSONObject data ){
 
-        Log.d(TAG, data.toString());
+        Log.d(TAG, "onMessage : " + data.toString());
 
         final XPushMessage xpushMessage = new XPushMessage( data );
 
