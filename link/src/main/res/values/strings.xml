@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Link</string>
+    <string name="content_provider_authority">io.xpush.link.persist.xpushcontentprovider</string>
 
     <string name="host_name">http://54.178.160.166:8000</string>
     <string name="app_id">link</string>
