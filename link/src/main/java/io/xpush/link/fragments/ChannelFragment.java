@@ -1,6 +1,8 @@
 package io.xpush.link.fragments;
 
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -8,14 +10,17 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FilterQueryProvider;
 
-import io.xpush.chat.fragments.ChannelsFragment;
+import io.xpush.chat.fragments.XPushChannelsFragment;
+import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.link.R;
+import io.xpush.link.activities.ChatActivity;
 
-public class ChannelFragment extends ChannelsFragment {
+public class ChannelFragment extends XPushChannelsFragment {
 
     private static final String TAG = ChannelFragment.class.getSimpleName();
 
@@ -80,6 +85,18 @@ public class ChannelFragment extends ChannelsFragment {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onChannelItemClick(AdapterView<?> listView, View view, int position, long id) {
+        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+
+        XPushChannel xpushChannel = new XPushChannel(cursor);
+        Bundle bundle = xpushChannel.toBundle();
+
+        Intent intent = new Intent(mActivity, ChatActivity.class);
+        intent.putExtra(xpushChannel.CHANNEL_BUNDLE, bundle);
+        startActivity(intent);
     }
 
 }

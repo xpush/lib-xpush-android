@@ -1,7 +1,8 @@
 package io.xpush.sampleChat.fragments;
 
-import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -9,26 +10,25 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FilterQueryProvider;
 
-import com.github.nkzawa.socketio.client.Ack;
-
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import io.xpush.chat.ApplicationController;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
-import io.xpush.chat.fragments.UsersFragment;
+import io.xpush.chat.fragments.XPushUsersFragment;
+import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
+import io.xpush.sampleChat.activities.ChatActivity;
 
-public class FriendsFragment extends UsersFragment {
+public class FriendsFragment extends XPushUsersFragment {
 
     private static final String TAG = FriendsFragment.class.getSimpleName();
 
@@ -112,11 +112,33 @@ public class FriendsFragment extends UsersFragment {
         XPushCore.getInstance().getFriends(new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                if( args != null && args.length >0 ) {
+                if (args != null && args.length > 0) {
                     JSONArray users = (JSONArray) args[0];
                     XPushCore.getInstance().storeFriends(getActivity(), users);
                 }
             }
         });
+    }
+
+    @Override
+    public void onUserItemClick(AdapterView<?> listView, View view, int position, long id){
+        Cursor cursor = (Cursor) listView.getItemAtPosition(position);
+
+        XPushUser user = new XPushUser(cursor);
+
+        ArrayList<String> userArray = new ArrayList<String>();
+        userArray.add( user.getId() );
+        userArray.add(XPushCore.getInstance().getXpushSession().getId());
+
+        XPushChannel channel = new XPushChannel();
+        channel.setId(XPushUtils.generateChannelId(userArray));
+        channel.setName(user.getName());
+        channel.setUsers(userArray);
+        channel.setImage(user.getImage());
+
+        Bundle bundle = channel.toBundle();
+        Intent intent = new Intent(mActivity, ChatActivity.class);
+        intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
+        startActivity(intent);
     }
 }

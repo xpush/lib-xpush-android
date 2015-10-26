@@ -11,42 +11,33 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
-
 import io.xpush.chat.R;
-import io.xpush.chat.activities.ChatActivity;
-import io.xpush.chat.models.XPushChannel;
-import io.xpush.chat.persist.ChannelTable;
+
+import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
-import io.xpush.chat.view.adapters.ChannelCursorAdapter;
+import io.xpush.chat.view.adapters.UserCursorAdapter;
 
-public class ChannelsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public abstract class XPushUsersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private static final String TAG = ChannelsFragment.class.getSimpleName();
+    private static final String TAG = XPushUsersFragment.class.getSimpleName();
 
+    protected UserCursorAdapter mDataAdapter;
     protected Activity mActivity;
-    protected ChannelCursorAdapter mDataAdapter;
     private TextView mEmptyMsg;
-
-    protected String[] mProjection = {
-        ChannelTable.KEY_ROWID,
-                ChannelTable.KEY_ID,
-                ChannelTable.KEY_NAME,
-                ChannelTable.KEY_USERS,
-                ChannelTable.KEY_IMAGE,
-                ChannelTable.KEY_COUNT,
-                ChannelTable.KEY_MESSAGE,
-                ChannelTable.KEY_UPDATED
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        mActivity = getActivity();
+        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         setHasOptionsMenu(true);
-        return inflater.inflate(R.layout.fragment_channel, container, false);
+        return inflater.inflate(R.layout.fragment_friends, container, false);
     }
 
     @Override
@@ -69,8 +60,17 @@ public class ChannelsFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] projection = {
+            UserTable.KEY_ROWID,
+            UserTable.KEY_ID,
+            UserTable.KEY_NAME,
+            UserTable.KEY_IMAGE,
+            UserTable.KEY_MESSAGE,
+            UserTable.KEY_UPDATED
+        };
+
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                XpushContentProvider.CHANNEL_CONTENT_URI, mProjection, null, null, null);
+                XpushContentProvider.USER_CONTENT_URI, projection, null, null, null);
         return cursorLoader;
     }
 
@@ -94,19 +94,16 @@ public class ChannelsFragment extends Fragment implements LoaderManager.LoaderCa
     private void displayListView(View view) {
 
         String[] columns = new String[]{
-            ChannelTable.KEY_ROWID,
-            ChannelTable.KEY_ID,
-            ChannelTable.KEY_NAME,
-            ChannelTable.KEY_USERS,
-            ChannelTable.KEY_IMAGE,
-            ChannelTable.KEY_COUNT,
-            ChannelTable.KEY_MESSAGE,
-            ChannelTable.KEY_UPDATED
+            UserTable.KEY_ROWID,
+            UserTable.KEY_ID,
+            UserTable.KEY_NAME,
+            UserTable.KEY_IMAGE,
+            UserTable.KEY_MESSAGE,
+            UserTable.KEY_UPDATED
         };
 
-        mActivity = getActivity();
-        mDataAdapter = new ChannelCursorAdapter(mActivity, null, 0);
 
+        mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
 
         final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
@@ -116,15 +113,14 @@ public class ChannelsFragment extends Fragment implements LoaderManager.LoaderCa
         listView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
-                Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-
-                XPushChannel xpushChannel = new XPushChannel(cursor);
-                Bundle bundle = xpushChannel.toBundle();
-
-                Intent intent = new Intent(mActivity, ChatActivity.class);
-                intent.putExtra(xpushChannel.CHANNEL_BUNDLE, bundle);
-                startActivity(intent);
+                onUserItemClick(listView, view, position, id );
             }
         });
+
+        getUsers();
     }
+
+    public abstract void getUsers();
+
+    public abstract void onUserItemClick(AdapterView<?> listView, View view, int position, long id);
 }

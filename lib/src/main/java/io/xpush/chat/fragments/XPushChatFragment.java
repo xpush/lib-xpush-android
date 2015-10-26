@@ -62,9 +62,9 @@ import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 
-public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
+public class XPushChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
-    public static final String TAG = ChatFragment.class.getSimpleName();
+    public static final String TAG = XPushChatFragment.class.getSimpleName();
 
     private static final int TYPING_TIMER_LENGTH = 600;
     private int mViewCount;
@@ -99,7 +99,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     private ChannelCore mChannelCore;
 
-    public ChatFragment() {
+    public XPushChatFragment() {
         super();
     }
 

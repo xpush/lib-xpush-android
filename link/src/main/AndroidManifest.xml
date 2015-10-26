@@ -76,7 +76,7 @@
         </activity>
 
         <activity
-            android:name="io.xpush.chat.activities.ChatActivity"
+            android:name="io.xpush.link.activities.ChatActivity"
             android:windowSoftInputMode="adjustResize"
             android:label="@string/app_name">
         </activity>
@@ -115,7 +115,7 @@
         <service android:name="io.xpush.chat.services.XPushService" android:enabled="true" android:exported="true" >
         </service>
 
-        <meta-data android:name="INTRO_ACTIVITY" android:value="io.xpush.chat.activities.ChatActivity"/>
+        <meta-data android:name="INTRO_ACTIVITY" android:value="io.xpush.link.activities.ChatActivity"/>
 
         <provider
             android:name="io.xpush.chat.persist.XpushContentProvider"

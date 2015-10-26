@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.AudioManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -75,6 +78,7 @@ public class PushMsgReceiver extends BroadcastReceiver {
 
         PendingIntent contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
 
+        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setSmallIcon(R.drawable.ic_launcher);//required
         mBuilder.setContentTitle(name);//required
@@ -82,6 +86,26 @@ public class PushMsgReceiver extends BroadcastReceiver {
         mBuilder.setTicker( mContext.getString(R.string.app_id));//optional
         mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(contentIntent);
+
+        AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        //long[] pattern = {200,200,300,300};
+        long[] pattern = {500,500};
+        int ringerMode = audioManager.getRingerMode();
+        switch ( ringerMode ){
+            case AudioManager.RINGER_MODE_NORMAL :
+                mBuilder.setSound(defaultSoundUri);
+                break;
+            case AudioManager.RINGER_MODE_VIBRATE :
+                mBuilder.setVibrate(pattern);
+                break;
+            case AudioManager.RINGER_MODE_SILENT :
+                mBuilder.setVibrate(pattern);
+                break;
+            default:
+                mBuilder.setSound(defaultSoundUri);
+                break;
+        }
 
         PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
 
