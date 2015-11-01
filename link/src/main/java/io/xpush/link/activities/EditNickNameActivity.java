@@ -23,7 +23,7 @@ public class EditNickNameActivity extends FragmentActivity implements TextWatche
 
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
-        setContentView(R.layout.edit_nickname);
+        setContentView(R.layout.activity_edit_nickname);
 
         mActivity = this;
 

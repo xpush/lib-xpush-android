@@ -23,7 +23,7 @@ public class EditStatusMessageActivity extends FragmentActivity implements TextW
 
     protected void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
-        setContentView(R.layout.edit_status_message);
+        setContentView(R.layout.activity_edit_status_message);
 
         mActivity = this;
 

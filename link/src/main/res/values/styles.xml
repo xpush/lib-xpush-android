@@ -3,6 +3,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
     </style>
 
+
     <style name="ToolbarDarkOverflow" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:textColorPrimary">@color/white</item>
         <item name="actionMenuTextColor">@color/white</item>
@@ -22,13 +23,17 @@
     </style>
 
     <style name="Layout" />
-    <style name="D4" />
-    <style name="Widget" parent="@style/D4" />
 
-    <style name="Widget.SettingItemTextView" parent="@style/Widget">
-        <item name="android:textSize">@dimen/font_level_4</item>
-        <item name="android:textColor">@color/black</item>
+    <style name="Widget" />
+
+    <style name="TextLabel" parent="AppTheme">
         <item name="android:textColorHint">@color/font_gray4</item>
+        <item name="android:textSize">16sp</item>
+        <item name="colorAccent">@color/primary</item>
+        <item name="colorControlNormal">@color/primary</item>
+        <item name="colorControlActivated">@color/primary</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
     </style>
 
     <style name="Layout.SettingItemLayout" parent="@style/Layout">
@@ -42,20 +47,10 @@
         <item name="android:paddingEnd">14.0dip</item>
     </style>
 
-    <style name="Layout.SettingSimpleTextInputLayout" parent="@style/Layout">
-        <item name="android:background">@color/background_4</item>
-        <item name="android:paddingTop">26.0dip</item>
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:paddingStart">22.0dip</item>
-        <item name="android:paddingEnd">22.0dip</item>
-    </style>
-
-    <style name="Layout.WindowLayout" parent="@style/Layout">
-        <item name="android:layout_width">fill_parent</item>
-        <item name="android:layout_height">fill_parent</item>
-        <item name="android:paddingStart">@dimen/padding_normal</item>
-        <item name="android:paddingEnd">@dimen/padding_normal</item>
+    <style name="Widget.SettingItemTextView" parent="@style/Widget">
+        <item name="android:textSize">@dimen/font_level_4</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textColorHint">@color/font_gray4</item>
     </style>
 
     <style name="Widget.EditTextWithClearButton" parent="@style/Widget">
@@ -69,18 +64,8 @@
         <item name="android:paddingEnd">8.0dip</item>
     </style>
 
-    <style name="Widget.FormSmallLabelView" parent="@android:style/Widget.TextView">
+    <style name="Widget.FormSmallLabel" parent="@android:style/Widget.TextView">
         <item name="android:textSize">@dimen/font_level_2</item>
         <item name="android:textColor">@color/font_khaki</item>
-    </style>
-
-    <style name="TextLabel" parent="TextAppearance.AppCompat">
-        <item name="android:textColorHint">@color/font_gray4</item>
-        <item name="android:textSize">16sp</item>
-        <item name="colorAccent">@color/primary</item>
-        <item name="colorControlNormal">@color/primary</item>
-        <item name="colorControlActivated">@color/primary</item>
-        <item name="android:layout_marginTop">8dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
     </style>
 </resources>

@@ -22,7 +22,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:hint="@string/label.text.id" />
+                android:hint="@string/label_text_id" />
         </android.support.design.widget.TextInputLayout>
 
         <!--  Name Label -->
@@ -46,7 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="text"
-                android:hint="@string/label.text.password"/>
+                android:hint="@string/label_text_password"/>
         </android.support.design.widget.TextInputLayout>
 
         <!-- Signup Button -->

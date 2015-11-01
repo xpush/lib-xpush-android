@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -30,6 +28,7 @@ import butterknife.OnClick;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.network.LoginRequest;
+import io.xpush.chat.network.StringRequest;
 import io.xpush.link.R;
 
 public class LoginActivity extends AppCompatActivity  {
@@ -75,21 +74,61 @@ public class LoginActivity extends AppCompatActivity  {
         progressDialog.setMessage("Authenticating...");
         progressDialog.show();
 
-        String id = mIdText.getText().toString();
-        String password = mPasswordText.getText().toString();
+        final Map<String,String> params = new HashMap<String, String>();
 
-        XPushCore.getInstance().login(id, password, new CallbackEvent() {
-            @Override
-            public void call(Object... args) {
-                if (args == null || args.length == 0) {
-                    progressDialog.dismiss();
-                    onLoginSuccess();
-                } else {
-                    progressDialog.dismiss();
-                    onLoginFailed();
+
+        String url = getString(R.string.stalk_front_url);
+
+        final String id = mIdText.getText().toString();
+        final String password = mPasswordText.getText().toString();
+
+        params.put("email", id);
+        params.put("password", password);
+
+        url = url + "/api/auths/signin";
+
+        StringRequest request = new StringRequest(url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            Log.d(TAG, response.toString());
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                XPushCore.getInstance().login(id, password, new CallbackEvent() {
+                                    @Override
+                                    public void call(Object... args) {
+                                        if (args == null || args.length == 0) {
+                                            progressDialog.dismiss();
+                                            onLoginSuccess();
+                                        } else {
+                                            progressDialog.dismiss();
+                                            onLoginFailed();
+                                        }
+                                    }
+                                });
+                            } else {
+                                if( response.has("message") ){
+
+                                } else {
+
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Login error ======================");
+                        error.printStackTrace();
+                    }
                 }
-            }
-        });
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+        queue.add(request);
     }
 
 
@@ -135,15 +174,15 @@ public class LoginActivity extends AppCompatActivity  {
         String id = mIdText.getText().toString();
         String password = mPasswordText.getText().toString();
 
-        if (id.isEmpty() || id.length() < 4 || id.length() > 10) {
-            mIdText.setError("between 4 and 10 alphanumeric characters");
+        if (id.isEmpty() || id.length() < 4 || id.length() > 20) {
+            mIdText.setError("between 4 and 20 alphanumeric characters");
             valid = false;
         } else {
             mIdText.setError(null);
         }
 
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            mPasswordText.setError("between 4 and 10 alphanumeric characters");
+        if (password.isEmpty() || password.length() < 4 || password.length() > 20) {
+            mPasswordText.setError("between 4 and 20 alphanumeric characters");
             valid = false;
         } else {
             mPasswordText.setError(null);
