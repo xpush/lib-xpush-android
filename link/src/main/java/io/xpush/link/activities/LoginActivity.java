@@ -94,7 +94,7 @@ public class LoginActivity extends AppCompatActivity  {
                         try {
                             Log.d(TAG, response.toString());
                             if( "ok".equalsIgnoreCase(response.getString("status")) ){
-                                XPushCore.getInstance().login(id, password, new CallbackEvent() {
+                                XPushCore.getInstance().login(id, id, new CallbackEvent() {
                                     @Override
                                     public void call(Object... args) {
                                         if (args == null || args.length == 0) {
@@ -107,11 +107,14 @@ public class LoginActivity extends AppCompatActivity  {
                                     }
                                 });
                             } else {
+                                Log.d(TAG, "Login error ======================");
                                 if( response.has("message") ){
 
                                 } else {
 
                                 }
+
+                                progressDialog.dismiss();
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -123,6 +126,7 @@ public class LoginActivity extends AppCompatActivity  {
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, "Login error ======================");
                         error.printStackTrace();
+                        progressDialog.dismiss();
                     }
                 }
         );

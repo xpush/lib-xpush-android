@@ -29,6 +29,8 @@ import com.github.nkzawa.thread.EventThread;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -284,7 +286,11 @@ public class XPushService extends Service {
         IO.Options opts = new IO.Options();
         opts.forceNew = true;
         opts.reconnectionAttempts = 20;
-        opts.query = "A="+appId+"&U="+mXpushSession.getId()+"&TK="+mXpushSession.getToken()+"&D="+mXpushSession.getDeviceId();
+        try {
+            opts.query = "A="+appId+"&U="+ URLEncoder.encode(mXpushSession.getId(), "UTF-8")+"&TK="+mXpushSession.getToken()+"&D="+mXpushSession.getDeviceId();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         mOpts = opts;
         Log.i(TAG, "Connecting with URL: " + url);
