@@ -7,13 +7,11 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FilterQueryProvider;
+import android.widget.CheckBox;
 import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
-import java.util.List;
 
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushUser;
@@ -21,9 +19,23 @@ import io.xpush.chat.models.XPushUser;
 public class UserCursorAdapter extends CursorAdapter implements Filterable {
 
     private final LayoutInflater mInflater;
+    private boolean checkable;
+
+    public enum Mode{
+        NORMAL, CHECKABLE
+    }
 
     public UserCursorAdapter(Context context, Cursor cursor, int flags) {
+        this(context, cursor, flags, Mode.NORMAL);
+    }
+
+    public UserCursorAdapter(Context context, Cursor cursor, int flags, Mode mode) {
         super(context, cursor, flags);
+        if( mode == Mode.CHECKABLE ) {
+            checkable = true;
+        } else {
+            checkable = false;
+        }
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -35,6 +47,11 @@ public class UserCursorAdapter extends CursorAdapter implements Filterable {
         holder.tvName = (TextView) view.findViewById(R.id.tvName);
         holder.tvMessage = (TextView) view.findViewById(R.id.tvMessage);
         holder.thumbNail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
+        holder.checkBox = (CheckBox) view.findViewById(R.id.checkBox);
+        if( checkable ){
+            holder.checkBox.setVisibility(View.VISIBLE);
+        }
+
         view.setTag(holder);
         return view;
     }
@@ -60,5 +77,6 @@ public class UserCursorAdapter extends CursorAdapter implements Filterable {
         private TextView tvName;
         private TextView tvMessage;
         private SimpleDraweeView thumbNail;
+        private CheckBox checkBox;
     }
 }

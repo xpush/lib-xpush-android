@@ -7,23 +7,24 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.models.XPushUser;
 
 public class XPushUtils {
 
     public static String generateChannelId( ArrayList<String> users ){
         if( users.size() > 2 ){
-            return getUniqueKey()+"^"+ XPushCore.getInstance().getAppId();
+            return XPushCore.getInstance().getAppId()+"^"+XPushCore.getInstance().getXpushSession().getId()+"^"+getUniqueKey();
         } else {
             // 1:1 channel = userId concat friendId
             ArrayList<String> temp = users;
             Collections.sort(temp, new NameAscCompare());
-
             return TextUtils.join("$", temp) +"^"+XPushCore.getInstance().getAppId();
         }
     }

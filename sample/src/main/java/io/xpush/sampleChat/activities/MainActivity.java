@@ -55,7 +55,11 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                searchUser();
+                if( mPosition == 0 ) {
+                    searchUser();
+                } else {
+                    selectUser();
+                }
             }
         });
 
@@ -86,11 +90,6 @@ public class MainActivity extends AppCompatActivity {
             public void onPageSelected(int position) {
                 mPosition = position;
                 mToolbar.setTitle(mApdater.getTitle(position));
-                if (position == 0) {
-                    fab.setVisibility(View.VISIBLE);
-                } else {
-                    fab.setVisibility(View.INVISIBLE);
-                }
             }
 
             @Override
@@ -185,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         // 수행을 제대로 한 경우
         if(requestCode == 200 && resultCode == RESULT_OK && data != null) {
             ( (FriendsFragment) mApdater.getItem(0) ).getUsers();
-        }  else if(resultCode == RESULT_CANCELED){
+        }  else if( requestCode == 201 && resultCode == RESULT_CANCELED){
 
         }
     }
@@ -193,5 +192,10 @@ public class MainActivity extends AppCompatActivity {
     public void searchUser(){
         Intent intent = new Intent(MainActivity.this, SearchUserActivity.class);
         startActivityForResult(intent, 200);
+    }
+
+    public void selectUser(){
+        Intent intent = new Intent(MainActivity.this, SelectFriendActivity.class);
+        startActivityForResult(intent, 201);
     }
 }

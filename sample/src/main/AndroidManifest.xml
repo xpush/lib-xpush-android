@@ -61,6 +61,12 @@
         </activity>
 
         <activity
+            android:name="io.xpush.sampleChat.activities.SelectFriendActivity"
+            android:windowSoftInputMode="adjustResize"
+            android:label="@string/action_select_friend">
+        </activity>
+
+        <activity
             android:name="io.xpush.sampleChat.activities.SettingsActivity"
             android:windowSoftInputMode="adjustResize"
             android:label="@string/action_setting">

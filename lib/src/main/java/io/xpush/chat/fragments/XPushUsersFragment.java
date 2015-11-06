@@ -102,8 +102,7 @@ public abstract class XPushUsersFragment extends Fragment implements LoaderManag
             UserTable.KEY_UPDATED
         };
 
-
-        mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
+        createDataAdapter();
 
         final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
@@ -119,6 +118,8 @@ public abstract class XPushUsersFragment extends Fragment implements LoaderManag
 
         getUsers();
     }
+
+    public abstract void createDataAdapter();
 
     public abstract void getUsers();
 

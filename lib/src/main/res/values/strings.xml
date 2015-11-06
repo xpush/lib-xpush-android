@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">XpushAndroidLibrary</string>
 
+    <string name="action_search">Search</string>
     <string name="action_leave">Leave</string>
     <string name="action_send">Send</string>
     <string name="prompt_message">Send message</string>

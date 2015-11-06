@@ -7,19 +7,20 @@ import android.support.v7.widget.Toolbar;
 
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.SearchUserFragment;
+import io.xpush.sampleChat.fragments.SelectFriendFragment;
 
-public class SearchUserActivity extends AppCompatActivity {
+public class SelectFriendActivity extends AppCompatActivity {
 
-    public static final String TAG = SearchUserActivity.class.getSimpleName();
+    public static final String TAG = SelectFriendActivity.class.getSimpleName();
 
-    private SearchUserFragment f;
+    private SelectFriendFragment f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
 
-        f = new SearchUserFragment();
+        f = new SelectFriendFragment();
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.content, f, TAG).commit();

@@ -38,7 +38,10 @@
     <string name="action_profile">Profile</string>
     <string name="action_setting">Setting</string>
     <string name="action_search">Search</string>
+    <string name="action_invite">Invite</string>
     <string name="action_search_user">Search User</string>
+    <string name="action_select_friend">Select Friend</string>
+
     <string name="ready_message_search">검색어를 입력하세요.</string>
 
     <string name="title_text_input_search_user">검색어를 입력하세요.</string>

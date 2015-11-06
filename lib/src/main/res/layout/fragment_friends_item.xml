@@ -40,13 +40,24 @@
             android:typeface="sans" />
 
         <TextView
+            android:id="@+id/tvMessage"
             android:gravity="center_vertical"
             android:maxWidth="360dip"
-            android:id="@+id/tvMessage"
             android:autoLink="none"
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:includeFontPadding="false"/>
     </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:focusable="false"
+        android:clickable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="invisible" />
 </RelativeLayout>
