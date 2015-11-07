@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.xpush.chat.ApplicationController;
@@ -175,6 +176,44 @@ public class ChannelCore {
                 }
             });
         }
+    }
+
+
+    public void channelJoin(ArrayList<String> userIdArrayList, final CallbackEvent callback) {
+
+        JSONArray userArray = new JSONArray();
+        for( String userId : userIdArrayList ){
+            userArray.put(userId);
+        }
+
+        JSONObject data = new JSONObject();
+        try {
+            data.put( "U", userArray );
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, " channel-------join");
+
+        mChannelSocket.emit("channel.join", data, new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString() );
+                if (response.has("status")) {
+                    try {
+                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
+                            callback.call();
+                        } else {
+                            callback.call();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     public void channelLeave(final CallbackEvent callback) {

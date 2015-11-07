@@ -20,7 +20,7 @@ public class XPushUtils {
 
     public static String generateChannelId( ArrayList<String> users ){
         if( users.size() > 2 ){
-            return XPushCore.getInstance().getAppId()+"^"+XPushCore.getInstance().getXpushSession().getId()+"^"+getUniqueKey();
+            return XPushCore.getInstance().getXpushSession().getId()+"^"+getUniqueKey()+"^"+XPushCore.getInstance().getAppId();
         } else {
             // 1:1 channel = userId concat friendId
             ArrayList<String> temp = users;

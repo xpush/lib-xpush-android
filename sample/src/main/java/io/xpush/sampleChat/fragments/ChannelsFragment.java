@@ -3,6 +3,7 @@ package io.xpush.sampleChat.fragments;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -22,6 +23,10 @@ public class ChannelsFragment extends XPushChannelsFragment {
         Cursor cursor = (Cursor) listView.getItemAtPosition(position);
 
         XPushChannel xpushChannel = new XPushChannel(cursor);
+
+        Log.d(TAG, "111111111 1111111111111 ");
+        Log.d(TAG, xpushChannel.getUsers().toString() );
+
         Bundle bundle = xpushChannel.toBundle();
 
         Intent intent = new Intent(mActivity, ChatActivity.class);

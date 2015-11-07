@@ -31,8 +31,6 @@ import io.xpush.chat.util.XPushUtils;
 import io.xpush.chat.view.adapters.UserCursorAdapter;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.activities.ChatActivity;
-import io.xpush.sampleChat.activities.ProfileActivity;
-import io.xpush.sampleChat.activities.SettingsActivity;
 
 public class SelectFriendFragment extends XPushUsersFragment {
 
@@ -41,6 +39,9 @@ public class SelectFriendFragment extends XPushUsersFragment {
     private String mTitle = "";
 
     private HashMap<String, XPushUser> mSelectedUserMap;
+
+    private String mChannelId = "";
+    private ArrayList<String> mCurrentChannelUsers;
 
     @Bind(R.id.layoutSearch)
     View layoutSearch;
@@ -73,6 +74,17 @@ public class SelectFriendFragment extends XPushUsersFragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
+        Bundle args = getArguments();
+        if( args != null ) {
+            mChannelId = args.getString("channelId", "");
+            mCurrentChannelUsers = args.getStringArrayList("channelUsers");
+
+
+            Log.d(TAG, mChannelId );
+            Log.d(TAG, mCurrentChannelUsers.toString() );
+            Log.d(TAG, String.valueOf( mCurrentChannelUsers.size() ) );
+        }
+
         mSelectedUserMap = new HashMap<String, XPushUser>();
 
         layoutSearch.setVisibility(View.VISIBLE);
@@ -95,9 +107,9 @@ public class SelectFriendFragment extends XPushUsersFragment {
                     constraint = "";
                 }
 
-                String selection = UserTable.KEY_NAME + " LIKE '%" + constraint.toString() + "%'"+" OR "+
+                String selection = UserTable.KEY_NAME + " LIKE '%" + constraint.toString() + "%'" + " OR " +
                         UserTable.KEY_ID + " LIKE '%" + constraint.toString() + "%'";
-                Log.d(TAG, selection );
+                Log.d(TAG, selection);
                 Cursor cur = mActivity.getContentResolver().query(XpushContentProvider.USER_CONTENT_URI, projection, selection, null, null);
                 return cur;
             }
@@ -134,41 +146,60 @@ public class SelectFriendFragment extends XPushUsersFragment {
 
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
-        boolean selected;
         if( checkBox.isChecked() ){
             checkBox.setChecked(false);
-            selected = false;
             if( mSelectedUserMap.containsKey(user.getId())) {
                 mSelectedUserMap.remove(user.getId());
             }
         } else {
             checkBox.setChecked(true);
-            selected = true;
             mSelectedUserMap.put(user.getId(), user);
         }
     }
 
     private void invite(){
+
         ArrayList<String> userArray = new ArrayList<String>();
         ArrayList<String> userNameArray = new ArrayList<String>();
 
-        for( String userId : mSelectedUserMap.keySet() ){
+        for (String userId : mSelectedUserMap.keySet()) {
             userArray.add(userId);
-            userNameArray.add( mSelectedUserMap.get(userId).getName() );
+            userNameArray.add(mSelectedUserMap.get(userId).getName());
         }
 
-        userArray.add(XPushCore.getInstance().getXpushSession().getId());
+        if( !"".equals( mChannelId ) && mCurrentChannelUsers != null && mCurrentChannelUsers.size() > 2 ){
 
-        XPushChannel channel = new XPushChannel();
-        channel.setId(XPushUtils.generateChannelId(userArray));
-        channel.setName(TextUtils.join(",", userNameArray) );
-        channel.setUsers(userArray);
-        //channel.setImage(user.getImage());
+            XPushChannel channel = new XPushChannel();
+            channel.setId(mChannelId);
 
-        Bundle bundle = channel.toBundle();
-        Intent intent = new Intent(mActivity, ChatActivity.class);
-        intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
-        startActivity(intent);
-        mActivity.finish();
+            // create new channel;
+            Intent intent = new Intent();
+            intent.putStringArrayListExtra("userArray", userArray);
+            intent.putStringArrayListExtra("userNameArray", userNameArray);
+
+            mActivity.setResult(mActivity.RESULT_OK, intent);
+            mActivity.finish();
+        } else {
+
+            if( mCurrentChannelUsers != null ){
+                userArray.addAll(mCurrentChannelUsers);
+            }
+
+            userArray.add(XPushCore.getInstance().getXpushSession().getId());
+
+            XPushChannel channel = new XPushChannel();
+            channel.setId(XPushUtils.generateChannelId(userArray));
+            channel.setName(TextUtils.join(",", userNameArray) + " (" + userNameArray.size() + ")");
+            channel.setUsers(userArray);
+            //channel.setImage(user.getImage());
+
+            Bundle bundle = channel.toBundle();
+            Intent intent = new Intent(mActivity, ChatActivity.class);
+            intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
+            startActivity(intent);
+
+            mActivity.setResult(mActivity.RESULT_OK, intent);
+            mActivity.finish();
+        }
     }
 }

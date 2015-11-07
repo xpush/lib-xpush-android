@@ -21,6 +21,7 @@ public class SelectFriendActivity extends AppCompatActivity {
         setContentView(R.layout.activity_content);
 
         f = new SelectFriendFragment();
+        f.setArguments(getIntent().getExtras());
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().add(R.id.content, f, TAG).commit();

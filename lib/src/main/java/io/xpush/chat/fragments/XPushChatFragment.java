@@ -78,9 +78,10 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private String mUsername;
 
     private XPushChannel mXpushChannel;
-    private String mChannel;
 
-    private Activity mActivity;
+    protected String mChannel;
+    protected Activity mActivity;
+    protected ArrayList<String> mUsers;
 
     private XPushSession mSession;
 
@@ -95,15 +96,17 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
     private LinearLayoutManager mLayoutManager;
 
-    private ArrayList<String> mUsers;
 
-    private ChannelCore mChannelCore;
+
+    protected ChannelCore mChannelCore;
 
     public XPushChatFragment() {
         super();
     }
 
     private long lastReceiveTime = 0L;
+
+    protected boolean newChannelFlag;
 
     @Override
     public void onAttach(Activity activity) {
@@ -123,7 +126,10 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
         mSession = XPushCore.getInstance().getXpushSession();
 
-        Bundle bundle = getActivity().getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+        Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+
+        newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
+
         mXpushChannel = new XPushChannel(bundle);
 
         mChannel = mXpushChannel.getId();
@@ -151,7 +157,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         super.onResume();
         if( mChannelCore == null || !mChannelCore.connected() ) {
 
-            if (mUsers != null) {
+            if (newChannelFlag) {
                 createChannelAndConnect(mXpushChannel);
             } else {
                 if( mChannelCore != null ) {
@@ -160,14 +166,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                     getChannelAndConnect();
                 }
             }
-        }
-    }
-
-    @Override
-    public void onStop(){
-        super.onStop();
-        if( mChannelCore != null && mChannelCore.connected() ) {
-            disconnect();
         }
     }
 
@@ -291,6 +289,8 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     }
 
     private void connectChannel() {
+
+        Log.d(TAG, "==== connectChannel ==== " );
 
         HashMap<String, Emitter.Listener> events = new HashMap<>();
 
@@ -467,6 +467,11 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onDestroy() {
+
+        if( mChannelCore != null && mChannelCore.connected() ) {
+            disconnect();
+        }
+
         super.onDestroy();
         mDbHelper.close();
         mDatabase.close();
@@ -509,6 +514,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
             values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
             values.put(ChannelTable.KEY_COUNT, 0);
+            values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", mUsers) );
 
             values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
             mActivity.getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
@@ -573,7 +579,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         });
     }
 
-    private void channelLeave(){
+    protected void channelLeave(){
 
         // 1:1 Channel, only delete local data
         if( mUsers.size() == 2 ){

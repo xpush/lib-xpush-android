@@ -427,7 +427,6 @@ public class XPushCore {
 
             for (int inx = 0; inx < result.length(); inx++) {
                 JSONObject json = (JSONObject) result.get(inx);
-                Log.d(TAG, json.toString());
 
                 ContentValues contentValues = new ContentValues();
                 contentValues.put(UserTable.KEY_ID, json.getString("U"));

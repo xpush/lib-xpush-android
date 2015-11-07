@@ -8,6 +8,7 @@ import org.acra.annotation.ReportsCrashes;
 
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.R;
 
 @ReportsCrashes( mailTo = "xpush.io@gmail.com",
         mode = ReportingInteractionMode.NOTIFICATION)

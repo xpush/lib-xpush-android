@@ -2,8 +2,10 @@ package io.xpush.chat.models;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import io.xpush.chat.persist.ChannelTable;
 
@@ -103,6 +105,10 @@ public class XPushChannel {
         this.count= cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE));
         this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
+        String usersStr = cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_USERS));
+        if( usersStr != null && usersStr.indexOf("#!#") > 0 ) {
+            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
+        }
     }
 
     public XPushChannel(Bundle bundle){
