@@ -196,6 +196,7 @@ public class SelectFriendFragment extends XPushUsersFragment {
             Bundle bundle = channel.toBundle();
             Intent intent = new Intent(mActivity, ChatActivity.class);
             intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
+            intent.putExtra("newChannel", true);
             startActivity(intent);
 
             mActivity.setResult(mActivity.RESULT_OK, intent);

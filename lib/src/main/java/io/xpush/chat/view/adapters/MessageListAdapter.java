@@ -32,8 +32,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             layout = R.layout.item_send_message;
         } else if (viewType == XPushMessage.TYPE_RECEIVE_MESSAGE ) {
             layout = R.layout.item_receive_message;
-        } else if( viewType == XPushMessage.TYPE_LOG ) {
-            layout = R.layout.item_log;
         } else if( viewType == XPushMessage.TYPE_ACTION ) {
             layout = R.layout.item_action;
         }

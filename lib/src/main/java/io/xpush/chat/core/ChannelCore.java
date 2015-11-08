@@ -83,6 +83,10 @@ public class ChannelCore {
     }
 
     public void sendMessage(String message) {
+        sendMessage(message, null);
+    }
+
+    public void sendMessage(String message, String type) {
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -95,6 +99,9 @@ public class ChannelCore {
 
             data.put("UO", user);
             data.put("MG", message);
+            if( type != null ) {
+                data.put("TP", type);
+            }
 
             json.put("DT", data);
             json.put("NM", "message");

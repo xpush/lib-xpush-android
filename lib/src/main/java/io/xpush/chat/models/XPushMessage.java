@@ -15,7 +15,7 @@ public class XPushMessage {
     public static final int TYPE_SEND_MESSAGE = 0;
     public static final int TYPE_RECEIVE_MESSAGE = 1;
 
-    public static final int TYPE_LOG = 2;
+    public static final int TYPE_INVITE = 2;
     public static final int TYPE_ACTION = 3;
 
     private String rowId;
@@ -130,6 +130,12 @@ public class XPushMessage {
 
                 if( uo.has("I") ) {
                     this.image = uo.getString("I");
+                }
+            }
+
+            if( data.has("TP") ){
+                if( "IN".equals( data.getString("TP") ) ) {
+                    this.type = 2;
                 }
             }
 

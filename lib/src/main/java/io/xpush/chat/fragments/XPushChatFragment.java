@@ -290,7 +290,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
     private void connectChannel() {
 
-        Log.d(TAG, "==== connectChannel ==== " );
+        Log.d(TAG, "==== connectChannel ==== ");
 
         HashMap<String, Emitter.Listener> events = new HashMap<>();
 
@@ -298,7 +298,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         events.put(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         events.put(Socket.EVENT_CONNECT, onConnectSuccess);
 
-        events.put("message", onNewMessage);
+        events.put("message", onMessage);
 
         mChannelCore.connect(events);
     }
@@ -307,12 +307,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         mXpushMessages.add(xpushMessage);
         mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
         scrollToBottom();
-    }
-
-    private void addLog(String message) {
-        mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_LOG)
-                .message(message).build());
-        mAdapter.notifyDataSetChanged();
     }
 
     private void addTyping(String userId) {
@@ -377,6 +371,13 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
             mActivity.getContentResolver().update(singleUri, values, null, null);
+
+            // Multi Channel. Send Invite Message
+            if( newChannelFlag && mUsers.size() > 2 ){
+                String message = mUsername + " Invite " + mXpushChannel.getName();
+                mChannelCore.sendMessage(message);
+                newChannelFlag = false;
+            }
         }
     };
 
@@ -404,7 +405,15 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         }
     };
 
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+    private Emitter.Listener onMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            JSONObject data = (JSONObject) args[0];
+            saveMessage(data);
+        }
+    };
+
+    private Emitter.Listener onInvite = new Emitter.Listener() {
         @Override
         public void call(final Object... args) {
             JSONObject data = (JSONObject) args[0];
@@ -497,10 +506,14 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         final XPushMessage xpushMessage = new XPushMessage( data );
 
         try {
-            if (mSession.getId().equals(xpushMessage.getSenderId() ) ){
-                xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+            if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
+                xpushMessage.setType(XPushMessage.TYPE_INVITE);
             } else {
-                xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                if (mSession.getId().equals(xpushMessage.getSenderId())) {
+                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                } else {
+                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                }
             }
 
             ContentValues values = new ContentValues();
