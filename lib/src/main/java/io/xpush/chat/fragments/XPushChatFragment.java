@@ -135,6 +135,12 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         mChannel = mXpushChannel.getId();
         mUsers = mXpushChannel.getUsers();
 
+        if( mUsers != null ) {
+            Log.d(TAG, "=== mUsers === : " + mUsers.size());
+        } else {
+            Log.d(TAG, "=== mUsers === : null ");
+        }
+
         mUserId = mSession.getId();
         mUsername = mSession.getName();
 
@@ -375,7 +381,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             // Multi Channel. Send Invite Message
             if( newChannelFlag && mUsers.size() > 2 ){
                 String message = mUsername + " Invite " + mXpushChannel.getName();
-                mChannelCore.sendMessage(message);
+                mChannelCore.sendMessage(message, "IN", mUsers);
                 newChannelFlag = false;
             }
         }
@@ -412,15 +418,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             saveMessage(data);
         }
     };
-
-    private Emitter.Listener onInvite = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            JSONObject data = (JSONObject) args[0];
-            saveMessage(data);
-        }
-    };
-
 
     private void disconnect(){
         if( mChannelCore != null && mChannelCore.connected() ) {
@@ -506,28 +503,27 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         final XPushMessage xpushMessage = new XPushMessage( data );
 
         try {
+            ContentValues values = new ContentValues();
             if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
                 xpushMessage.setType(XPushMessage.TYPE_INVITE);
+
+                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
             } else {
                 if (mSession.getId().equals(xpushMessage.getSenderId())) {
                     xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                    values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
                 } else {
                     xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                    values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                 }
             }
-
-            ContentValues values = new ContentValues();
             values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
             values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
-            if ( xpushMessage.getType() != XPushMessage.TYPE_SEND_MESSAGE ){
-                values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
-            } else {
-                values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
-            }
+
             values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
             values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
             values.put(ChannelTable.KEY_COUNT, 0);
-            values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", mUsers) );
 
             values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
             mActivity.getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);

@@ -1,5 +1,6 @@
 package io.xpush.chat.core;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -83,10 +84,14 @@ public class ChannelCore {
     }
 
     public void sendMessage(String message) {
-        sendMessage(message, null);
+        sendMessage(message, null, null);
     }
 
     public void sendMessage(String message, String type) {
+        sendMessage(message, type, null);
+    }
+
+    public void sendMessage(String message, String type, ArrayList<String> users) {
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -101,6 +106,10 @@ public class ChannelCore {
             data.put("MG", message);
             if( type != null ) {
                 data.put("TP", type);
+            }
+
+            if( users != null ) {
+                data.put("US", TextUtils.join("#!#", users));
             }
 
             json.put("DT", data);

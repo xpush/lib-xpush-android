@@ -38,7 +38,12 @@ public class ChatActivity extends AppCompatActivity{
 
         Bundle bundle = getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
         XPushChannel xpushChannel = new XPushChannel(bundle);
-        toolbar.setTitle(xpushChannel.getName()) ;
+
+        if( xpushChannel.getUsers() != null && xpushChannel.getUsers().size() > 2 ){
+            toolbar.setTitle(xpushChannel.getName()+" (" + xpushChannel.getUsers().size() + ")") ;
+        } else {
+            toolbar.setTitle(xpushChannel.getName()) ;
+        }
         setSupportActionBar(toolbar);
     }
 }

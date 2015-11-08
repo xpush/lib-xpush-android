@@ -1,11 +1,14 @@
 package io.xpush.chat.models;
 
 import android.database.Cursor;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONObject;
 
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.MessageTable;
@@ -28,6 +31,7 @@ public class XPushMessage {
     private String message;
     private int type;
     private long updated;
+    private ArrayList<String> users;
 
     public String getRowId() {
         return rowId;
@@ -110,6 +114,14 @@ public class XPushMessage {
         this.updated = updated;
     }
 
+    public ArrayList<String> getUsers(){
+        return this.users;
+    }
+
+    public void setUsers(ArrayList<String> users){
+        this.users = users;
+    }
+
     public XPushMessage(){
     }
 
@@ -134,9 +146,14 @@ public class XPushMessage {
             }
 
             if( data.has("TP") ){
-                if( "IN".equals( data.getString("TP") ) ) {
+                if( "IN".equals(data.getString("TP")) ) {
                     this.type = 2;
                 }
+            }
+
+            if( data.has("US") ){
+                String usersStr = data.getString("US");
+                this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
             }
 
             this.message = URLDecoder.decode( data.getString("MG"), "UTF-8");

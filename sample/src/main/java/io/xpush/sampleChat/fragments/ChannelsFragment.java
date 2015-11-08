@@ -24,9 +24,6 @@ public class ChannelsFragment extends XPushChannelsFragment {
 
         XPushChannel xpushChannel = new XPushChannel(cursor);
 
-        Log.d(TAG, "111111111 1111111111111 ");
-        Log.d(TAG, xpushChannel.getUsers().toString() );
-
         Bundle bundle = xpushChannel.toBundle();
 
         Intent intent = new Intent(mActivity, ChatActivity.class);

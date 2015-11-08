@@ -346,7 +346,7 @@ public class XPushCore {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Log.d(TAG, "====== search user response ====== " + response.toString() );
+                            Log.d(TAG, "====== search node response ====== " + response.toString() );
 
                             ChannelCore result = null;
                             if( "ok".equalsIgnoreCase(response.getString("status")) ){
@@ -457,8 +457,10 @@ public class XPushCore {
                 valuesToInsert.add(contentValues);
             }
 
-            synchronized (this) {
-                mContext.getContentResolver().bulkInsert(XpushContentProvider.USER_CONTENT_URI, valuesToInsert.toArray(new ContentValues[0]));
+            if( mContext != null) {
+                synchronized (this) {
+                    mContext.getContentResolver().bulkInsert(XpushContentProvider.USER_CONTENT_URI, valuesToInsert.toArray(new ContentValues[0]));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
