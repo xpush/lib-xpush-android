@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -504,12 +505,14 @@ public class XPushService extends Service {
                 if( "NOTIFICATION".equals( json.getString("event") ) ){
                     JSONObject data = json.getJSONObject("DT");
 
+                    Log.d(TAG, "NOTIFICATION");
+                    Log.d(TAG, data.toString());
+
                     XPushMessage xpushMessage = new XPushMessage( data );
+                    ContentValues values = new ContentValues();
 
                     try {
-                        ContentValues values = new ContentValues();
                         values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-                        values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                         values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
                         values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
                         values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
@@ -535,13 +538,27 @@ public class XPushService extends Service {
                             getContentResolver().update(singleUri, values, null, null);
                         } else {
                             values.put(ChannelTable.KEY_COUNT, 1 );
+                            if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
+                                xpushMessage.setType(XPushMessage.TYPE_INVITE);
+                                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                                values.put(ChannelTable.KEY_NAME, TextUtils.join(",", xpushMessage.getUserNames()));
+                                values.remove(ChannelTable.KEY_IMAGE);
+                            } else {
+                                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                                values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
+                            }
+
+                            Log.d(TAG, "====== insert insert insert ======");
+                            Log.d(TAG, values.toString());
                             getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                         }
 
-                        if (mXpushSession.getId().equals(xpushMessage.getSenderId() ) ){
-                            xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
-                        } else {
-                            xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                        if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
+                            if (mXpushSession.getId().equals(xpushMessage.getSenderId())) {
+                                xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                            } else {
+                                xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                            }
                         }
 
                         mDataSource.insert(xpushMessage);

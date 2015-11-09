@@ -16,6 +16,7 @@ public class XPushChannel {
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String USERS = "users";
+    public static final String USER_NAMES = "user_names";
     public static final String IMAGE = "image";
     public static final String COUNT = "count";
     public static final String MESSAGE = "message";
@@ -25,6 +26,8 @@ public class XPushChannel {
     public String id;
     public String name;
     public ArrayList<String> users;
+
+    public ArrayList<String> userNames;
     public String image;
     public int count;
     public String message;
@@ -94,6 +97,14 @@ public class XPushChannel {
         this.updated = updated;
     }
 
+    public ArrayList<String> getUserNames() {
+        return userNames;
+    }
+
+    public void setUserNames(ArrayList<String> userNames) {
+        this.userNames = userNames;
+    }
+
     public XPushChannel(){
     }
 
@@ -115,6 +126,7 @@ public class XPushChannel {
         this.id= bundle.getString(ID);
         this.name= bundle.getString(NAME);
         this.users= bundle.getStringArrayList(USERS);
+        this.userNames= bundle.getStringArrayList(USER_NAMES);
         this.image= bundle.getString(IMAGE);
         this.count= bundle.getInt(COUNT);
         this.message= bundle.getString(MESSAGE);
@@ -126,10 +138,13 @@ public class XPushChannel {
         b.putString(ID, this.id);
         b.putString(NAME, this.name);
         b.putStringArrayList(USERS, this.users);
+        b.putStringArrayList(USER_NAMES, this.userNames);
+
         b.putString(IMAGE, this.image);
         b.putInt(COUNT, this.count);
         b.putString(MESSAGE, this.message);
         b.putLong(UPDATED, this.updated);
+
 
         return b;
     }

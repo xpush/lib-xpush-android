@@ -190,6 +190,7 @@ public class SelectFriendFragment extends XPushUsersFragment {
             XPushChannel channel = new XPushChannel();
             channel.setId(XPushUtils.generateChannelId(userArray));
             channel.setName(TextUtils.join(",", userNameArray));
+            channel.setUserNames(userNameArray);
             channel.setUsers(userArray);
             //channel.setImage(user.getImage());
 

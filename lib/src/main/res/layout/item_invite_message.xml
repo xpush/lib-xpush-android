@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="@dimen/spacing"
             android:paddingRight="@dimen/spacing"
-            android:layout_gravity="bottom"
+            android:layout_gravity="center_horizontal"
             android:text="04:31"
             android:textSize="9dip"
             android:singleLine="true"/>
