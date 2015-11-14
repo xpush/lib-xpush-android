@@ -46,4 +46,17 @@ public class ChatActivity extends AppCompatActivity{
         }
         setSupportActionBar(toolbar);
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        Log.d(TAG, "===== newIntent =====" );
+
+        if (null != intent) {
+            Log.d(TAG, intent.toString());
+            int defaultValue = 0;
+            setIntent(intent);
+        }
+    }
 }

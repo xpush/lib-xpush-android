@@ -72,15 +72,18 @@ public class ChatFragment extends XPushChatFragment {
             ArrayList<String> userArrayList = data.getStringArrayListExtra("userArray");
             ArrayList<String> userNameArray = data.getStringArrayListExtra("userNameArray");
 
-            Log.d(TAG, userArrayList.toString() );
-            Log.d(TAG, userNameArray.toString() );
+            if( userArrayList != null) {
 
-            mChannelCore.channelJoin(userArrayList, new CallbackEvent() {
-                @Override
-                public void call(Object... args) {
+                Log.d(TAG, userArrayList.toString() );
+                Log.d(TAG, userNameArray.toString());
 
-                }
-            });
+                mChannelCore.channelJoin(userArrayList, new CallbackEvent() {
+                    @Override
+                    public void call(Object... args) {
+
+                    }
+                });
+            }
         }
     }
 }

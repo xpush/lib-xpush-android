@@ -119,6 +119,9 @@ public class XPushChannel {
         String usersStr = cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_USERS));
         if( usersStr != null && usersStr.indexOf("#!#") > 0 ) {
             this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
+        } else if( this.id.indexOf("#!#") > -1 ){
+            usersStr = this.id.substring( 0, this.id.lastIndexOf("^") );
+            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
         }
     }
 

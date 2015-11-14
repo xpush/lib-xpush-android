@@ -161,6 +161,8 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onResume(){
         super.onResume();
+        Log.d(TAG, "=== newChannelFlag === " + newChannelFlag);
+
         if( mChannelCore == null || !mChannelCore.connected() ) {
 
             if (newChannelFlag) {
@@ -172,6 +174,8 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                     getChannelAndConnect();
                 }
             }
+        } else {
+            Log.d(TAG, "=== mChannelCore === : " + mChannelCore.connected());
         }
     }
 

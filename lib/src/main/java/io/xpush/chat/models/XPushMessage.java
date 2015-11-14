@@ -166,8 +166,8 @@ public class XPushMessage {
             }
 
             if( data.has("NMS") ) {
-                String usersStr = data.getString("NMS");
-                this.userNames = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
+                String userNamesStr = data.getString("NMS");
+                this.userNames = new ArrayList<String>(Arrays.asList(userNamesStr.split("#!#")));
             }
 
             this.message = URLDecoder.decode( data.getString("MG"), "UTF-8");

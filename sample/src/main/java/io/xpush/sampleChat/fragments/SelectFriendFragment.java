@@ -182,22 +182,28 @@ public class SelectFriendFragment extends XPushUsersFragment {
         } else {
 
             if( mCurrentChannelUsers != null ){
-                userArray.addAll(mCurrentChannelUsers);
+                for( String userId : mCurrentChannelUsers ){
+                    if( userArray.indexOf( userId ) < 0 ){
+                        userArray.add(userId);
+                    }
+                }
             }
 
-            userArray.add(XPushCore.getInstance().getXpushSession().getId());
+            if( userArray.indexOf( XPushCore.getInstance().getXpushSession().getId() ) < 0 ) {
+                userArray.add(XPushCore.getInstance().getXpushSession().getId());
+            }
 
             XPushChannel channel = new XPushChannel();
             channel.setId(XPushUtils.generateChannelId(userArray));
             channel.setName(TextUtils.join(",", userNameArray));
             channel.setUserNames(userNameArray);
             channel.setUsers(userArray);
-            //channel.setImage(user.getImage());
 
             Bundle bundle = channel.toBundle();
             Intent intent = new Intent(mActivity, ChatActivity.class);
             intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
             intent.putExtra("newChannel", true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP );
             startActivity(intent);
 
             mActivity.setResult(mActivity.RESULT_OK, intent);
