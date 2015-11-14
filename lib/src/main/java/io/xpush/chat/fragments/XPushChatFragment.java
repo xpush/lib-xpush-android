@@ -388,6 +388,16 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                 mXpushChannel.getUserNames().add(XPushCore.getInstance().getXpushSession().getName());
                 mChannelCore.sendMessage(message, "IN", mUsers, mXpushChannel.getUserNames());
             }
+
+            mChannelCore.channelGet(new CallbackEvent() {
+                @Override
+                public void call(Object... args) {
+                    if( args != null && args.length > 0 && args[0] != null) {
+                        JSONObject channel = (JSONObject) args[0];
+                        Log.d( TAG, channel.toString());
+                    }
+                }
+            });
         }
     };
 
@@ -592,7 +602,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         mChannelCore.getMessageUnread( lastReceiveTime, new CallbackEvent(){
             @Override
             public void call(Object... args) {
-                if( args != null && args[0] != null) {
+                if( args != null && args.length > 0 && args[0] != null) {
                     JSONArray messages = (JSONArray) args[0];
                     try {
                         for (int inx = 0; inx < messages.length(); inx++) {

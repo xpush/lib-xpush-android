@@ -236,6 +236,31 @@ public class ChannelCore {
         });
     }
 
+    public void channelGet(final CallbackEvent callback) {
+
+        Log.d(TAG, " channel-------get");
+
+        mChannelSocket.emit("channel.get", new Ack() {
+            @Override
+            public void call(Object... args) {
+                JSONObject response = (JSONObject) args[0];
+
+                Log.d(TAG, response.toString() );
+                if (response.has("status")) {
+                    try {
+                        if ("ok".equalsIgnoreCase(response.getString("status"))) {
+                            callback.call(response);
+                        } else {
+                            callback.call();
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
     public void channelLeave(final CallbackEvent callback) {
 
         mChannelSocket.emit("channel.leave", new Ack() {
