@@ -541,7 +541,6 @@ public class XPushService extends Service {
                             if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
                                 xpushMessage.setType(XPushMessage.TYPE_INVITE);
                                 values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
-                                values.put(ChannelTable.KEY_NAME, TextUtils.join(",", xpushMessage.getUserNames()));
                                 values.remove(ChannelTable.KEY_IMAGE);
                             } else {
                                 values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));

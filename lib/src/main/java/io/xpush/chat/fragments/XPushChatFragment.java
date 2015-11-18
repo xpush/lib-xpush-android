@@ -3,6 +3,7 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -95,8 +96,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private RecyclerOnScrollListener mOnScrollListener;
 
     private LinearLayoutManager mLayoutManager;
-
-
 
     protected ChannelCore mChannelCore;
 
@@ -394,7 +393,31 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                 public void call(Object... args) {
                     if( args != null && args.length > 0 && args[0] != null) {
                         JSONObject channel = (JSONObject) args[0];
-                        Log.d( TAG, channel.toString());
+                        Log.d(TAG, channel.toString());
+
+                        if( channel.has("result") ){
+                            try {
+                                JSONArray dts = channel.getJSONObject("result").getJSONArray("DTS");
+
+                                StringBuffer sb = new StringBuffer();
+                                for( int inx = 0 ; inx < dts.length() ; inx++ ){
+                                    if( inx > 0 ){
+                                        sb.append(",");
+                                    }
+                                    sb.append(dts.getJSONObject(inx).getString( "NM" ));
+                                }
+
+                                ContentValues values = new ContentValues();
+                                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mXpushChannel.getId());
+
+                                if( dts.length() > 2 ) {
+                                    values.put(ChannelTable.KEY_NAME, sb.toString());
+                                    mActivity.getContentResolver().update(singleUri, values, null, null);
+                                }
+                            } catch (Exception e ){
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 }
             });

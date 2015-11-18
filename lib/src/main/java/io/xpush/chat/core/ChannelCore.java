@@ -112,10 +112,6 @@ public class ChannelCore {
                 data.put("US", TextUtils.join("#!#", users));
             }
 
-            if( userNames != null ){
-                data.put("NMS", TextUtils.join("#!#", userNames));
-            }
-
             json.put("DT", data);
             json.put("NM", "message");
 

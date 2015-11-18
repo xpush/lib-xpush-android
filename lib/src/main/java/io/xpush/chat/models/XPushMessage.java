@@ -32,7 +32,6 @@ public class XPushMessage {
     private int type;
     private long updated;
     private ArrayList<String> users;
-    public ArrayList<String> userNames;
 
     public String getRowId() {
         return rowId;
@@ -123,14 +122,6 @@ public class XPushMessage {
         this.users = users;
     }
 
-    public ArrayList<String> getUserNames() {
-        return userNames;
-    }
-
-    public void setUserNames(ArrayList<String> userNames) {
-        this.userNames = userNames;
-    }
-
     public XPushMessage(){
     }
 
@@ -163,11 +154,6 @@ public class XPushMessage {
             if( data.has("US") ){
                 String usersStr = data.getString("US");
                 this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
-            }
-
-            if( data.has("NMS") ) {
-                String userNamesStr = data.getString("NMS");
-                this.userNames = new ArrayList<String>(Arrays.asList(userNamesStr.split("#!#")));
             }
 
             this.message = URLDecoder.decode( data.getString("MG"), "UTF-8");
