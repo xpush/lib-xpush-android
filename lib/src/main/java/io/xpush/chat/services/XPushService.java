@@ -22,11 +22,13 @@ import android.util.Log;
 
 import com.github.nkzawa.emitter.Emitter;
 import com.github.nkzawa.engineio.client.EngineIOException;
+import com.github.nkzawa.socketio.client.Ack;
 import com.github.nkzawa.socketio.client.IO;
 import com.github.nkzawa.socketio.client.Socket;
 import com.github.nkzawa.socketio.client.SocketIOException;
 import com.github.nkzawa.thread.EventThread;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -494,13 +496,6 @@ public class XPushService extends Service {
         public void call(final Object... args) {
             JSONObject json = (JSONObject) args[0];
 
-            String username = "";
-            String message;
-            String image = "";
-            String channel;
-
-            long timestamp;
-
             try {
                 if( "NOTIFICATION".equals( json.getString("event") ) ){
                     JSONObject data = json.getJSONObject("DT");
@@ -509,7 +504,7 @@ public class XPushService extends Service {
                     Log.d(TAG, data.toString());
 
                     XPushMessage xpushMessage = new XPushMessage( data );
-                    ContentValues values = new ContentValues();
+                    final ContentValues values = new ContentValues();
 
                     try {
                         values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
@@ -537,7 +532,7 @@ public class XPushService extends Service {
                             values.put(ChannelTable.KEY_COUNT, count + 1 );
                             getContentResolver().update(singleUri, values, null, null);
                         } else {
-                            values.put(ChannelTable.KEY_COUNT, 1 );
+                            values.put(ChannelTable.KEY_COUNT, 1);
                             if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
                                 xpushMessage.setType(XPushMessage.TYPE_INVITE);
                                 values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
@@ -549,6 +544,38 @@ public class XPushService extends Service {
 
                             Log.d(TAG, "====== insert insert insert ======");
                             Log.d(TAG, values.toString());
+
+                            // Multi Channel Message
+                            if( xpushMessage.getUsers().size() > 2 && xpushMessage.getUsers().size() < 5 ) {
+
+                                mClient.emit("channel.get", new JSONObject().put("C", xpushMessage.getChannel()), new Ack() {
+                                    @Override
+                                    public void call(Object... args) {
+                                        JSONObject response = (JSONObject) args[0];
+                                        Log.d(TAG, response.toString());
+                                        if (response.has("result")) {
+                                            StringBuffer sb = new StringBuffer();
+                                            try {
+                                                JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
+                                                for (int inx = 0; inx < dts.length(); inx++) {
+                                                    if (inx > 0) {
+                                                        sb.append(",");
+                                                    }
+                                                    sb.append(dts.getJSONObject(inx).getString("NM"));
+                                                }
+                                                values.put(ChannelTable.KEY_NAME, sb.toString());
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            } finally {
+                                                getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                                            }
+                                        }
+                                    }
+                                });
+                            } else if( xpushMessage.getUsers().size() >= 5 ){
+                                values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
+                            }
+
                             getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                         }
 

@@ -234,8 +234,6 @@ public class ChannelCore {
 
     public void channelGet(final CallbackEvent callback) {
 
-        Log.d(TAG, " channel-------get");
-
         mChannelSocket.emit("channel.get", new Ack() {
             @Override
             public void call(Object... args) {

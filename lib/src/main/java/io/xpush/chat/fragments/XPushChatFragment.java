@@ -55,6 +55,7 @@ import io.xpush.chat.loaders.MessageDataLoader;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
+import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
@@ -91,6 +92,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private DBHelper mDbHelper;
 
     private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
+    private List<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
 
     private MessageDataLoader mDataLoader;
     private RecyclerOnScrollListener mOnScrollListener;
@@ -392,28 +394,18 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                 @Override
                 public void call(Object... args) {
                     if( args != null && args.length > 0 && args[0] != null) {
-                        JSONObject channel = (JSONObject) args[0];
-                        Log.d(TAG, channel.toString());
+                        JSONObject response = (JSONObject) args[0];
 
-                        if( channel.has("result") ){
+                        if( response.has("result") ){
                             try {
-                                JSONArray dts = channel.getJSONObject("result").getJSONArray("DTS");
+                                JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
 
                                 StringBuffer sb = new StringBuffer();
                                 for( int inx = 0 ; inx < dts.length() ; inx++ ){
-                                    if( inx > 0 ){
-                                        sb.append(",");
-                                    }
-                                    sb.append(dts.getJSONObject(inx).getString( "NM" ));
+                                    mXpushUsers.add(new XPushUser(dts.getJSONObject(inx)));
                                 }
 
-                                ContentValues values = new ContentValues();
-                                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mXpushChannel.getId());
-
-                                if( dts.length() > 2 ) {
-                                    values.put(ChannelTable.KEY_NAME, sb.toString());
-                                    mActivity.getContentResolver().update(singleUri, values, null, null);
-                                }
+                                Log.d(TAG, mXpushUsers.toString());
                             } catch (Exception e ){
                                 e.printStackTrace();
                             }

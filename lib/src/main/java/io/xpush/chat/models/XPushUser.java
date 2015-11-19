@@ -3,6 +3,8 @@ package io.xpush.chat.models;
 import android.database.Cursor;
 import android.os.Bundle;
 
+import org.json.JSONObject;
+
 import io.xpush.chat.persist.UserTable;
 
 public class XPushUser {
@@ -88,6 +90,31 @@ public class XPushUser {
         this.image= bundle.getString(IMAGE);
         this.message= bundle.getString(MESSAGE);
         this.updated= bundle.getLong(UPDATED);
+    }
+
+    public XPushUser(JSONObject data){
+
+        try{
+            if( data.has("DT") ) {
+
+                JSONObject dt = data.getJSONObject("DT");
+
+                if( dt.has("NM") ) {
+                    this.name = dt.getString("NM");
+                }
+
+                if( dt.has("I") ) {
+                    this.image = dt.getString("I");
+                }
+            }
+
+            if( data.has("U") ) {
+                this.id = data.getString("U");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public Bundle toBundle() {
