@@ -535,10 +535,10 @@ public class XPushService extends Service {
                             values.put(ChannelTable.KEY_COUNT, 1);
                             if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
                                 xpushMessage.setType(XPushMessage.TYPE_INVITE);
-                                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                                values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
                                 values.remove(ChannelTable.KEY_IMAGE);
                             } else {
-                                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                                values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
                                 values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                             }
 
@@ -561,7 +561,7 @@ public class XPushService extends Service {
                                                     if (inx > 0) {
                                                         sb.append(",");
                                                     }
-                                                    sb.append(dts.getJSONObject(inx).getString("NM"));
+                                                    sb.append(dts.getJSONObject(inx).getJSONObject("DT").getString("NM"));
                                                 }
                                                 values.put(ChannelTable.KEY_NAME, sb.toString());
                                             } catch (Exception e) {
@@ -574,9 +574,8 @@ public class XPushService extends Service {
                                 });
                             } else if( xpushMessage.getUsers().size() >= 5 ){
                                 values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
+                                getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                             }
-
-                            getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
                         }
 
                         if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {

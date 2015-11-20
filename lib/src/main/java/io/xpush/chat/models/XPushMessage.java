@@ -155,10 +155,10 @@ public class XPushMessage {
 
             if( data.has("US") ){
                 String usersStr = data.getString("US");
-                this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
-            }  else if( this.channel != null && this.channel.indexOf("#!#") > -1 && this.channel.lastIndexOf("^") > 0 ){
+                this.users = new ArrayList<String>(Arrays.asList(usersStr.split("@!@")));
+            }  else if( this.channel != null && this.channel.indexOf("@!@") > -1 && this.channel.lastIndexOf("^") > 0 ){
                 String usersStr = this.channel.substring( 0, this.channel.lastIndexOf("^") );
-                this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
+                this.users = new ArrayList<String>(Arrays.asList(usersStr.split("@!@")));
             }
 
             this.message = URLDecoder.decode( data.getString("MG"), "UTF-8");

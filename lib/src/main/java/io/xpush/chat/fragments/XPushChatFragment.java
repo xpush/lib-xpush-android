@@ -69,6 +69,8 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     public static final String TAG = XPushChatFragment.class.getSimpleName();
 
     private static final int TYPING_TIMER_LENGTH = 600;
+    protected static final int INIT_VIEW_COUNT = 16;
+
     private int mViewCount;
 
     private RecyclerView mRecyclerView;
@@ -92,7 +94,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private DBHelper mDbHelper;
 
     private List<XPushMessage> mXpushMessages = new ArrayList<XPushMessage>();
-    private List<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
+    protected ArrayList<XPushUser> mXpushUsers = new ArrayList<XPushUser>();
 
     private MessageDataLoader mDataLoader;
     private RecyclerOnScrollListener mOnScrollListener;
@@ -108,6 +110,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private long lastReceiveTime = 0L;
 
     protected boolean newChannelFlag;
+    protected boolean resetChannelFlag;
 
     @Override
     public void onAttach(Activity activity) {
@@ -118,7 +121,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        mViewCount = 16;
+        mViewCount = INIT_VIEW_COUNT;
         mActivity = getActivity();
 
         mDbHelper = new DBHelper(mActivity);
@@ -162,18 +165,36 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onResume(){
         super.onResume();
+        newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
+        resetChannelFlag  = mActivity.getIntent().getBooleanExtra("resetChannel", false);
         Log.d(TAG, "=== newChannelFlag === " + newChannelFlag);
+        Log.d(TAG, "=== resetChannelFlag === " + resetChannelFlag);
 
-        if( mChannelCore == null || !mChannelCore.connected() ) {
+        if( resetChannelFlag ) {
+            mViewCount = INIT_VIEW_COUNT;
 
-            if (newChannelFlag) {
-                createChannelAndConnect(mXpushChannel);
+            Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+            mXpushChannel = new XPushChannel(bundle);
+
+            mChannel = mXpushChannel.getId();
+            mUsers = mXpushChannel.getUsers();
+
+            mActivity.getIntent().putExtra("resetChannel", false);
+            mXpushMessages.clear();
+
+            String selection = MessageTable.KEY_CHANNEL + "='" + mChannel +"'";
+            String sortOrder = MessageTable.KEY_UPDATED + " DESC LIMIT " + String.valueOf(mViewCount);
+
+            mDataLoader = new MessageDataLoader(mActivity, mDataSource, selection, null, null, null, sortOrder);
+
+            createChannelAndConnect(mXpushChannel);
+        } else if( newChannelFlag ){
+            createChannelAndConnect(mXpushChannel);
+        } else if( mChannelCore == null || !mChannelCore.connected() ) {
+            if( mChannelCore != null ) {
+                connectChannel();
             } else {
-                if( mChannelCore != null ) {
-                    connectChannel();
-                } else {
-                    getChannelAndConnect();
-                }
+                getChannelAndConnect();
             }
         } else {
             Log.d(TAG, "=== mChannelCore === : " + mChannelCore.connected());
@@ -384,10 +405,10 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             mActivity.getContentResolver().update(singleUri, values, null, null);
 
             // Multi Channel. Send Invite Message
-            if( newChannelFlag && mUsers.size() > 2 ){
+            if( (newChannelFlag || resetChannelFlag ) && mUsers.size() > 2 ){
                 String message = mUsername + " Invite " + mXpushChannel.getName();
                 mXpushChannel.getUserNames().add(XPushCore.getInstance().getXpushSession().getName());
-                mChannelCore.sendMessage(message, "IN", mUsers, mXpushChannel.getUserNames());
+                mChannelCore.sendMessage(message, "IN", mUsers);
             }
 
             mChannelCore.channelGet(new CallbackEvent() {
@@ -536,7 +557,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
             if (xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
                 xpushMessage.setType(XPushMessage.TYPE_INVITE);
-                values.put(ChannelTable.KEY_USERS, TextUtils.join("#!#", xpushMessage.getUsers()));
+                values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
 
                 if( newChannelFlag ) {
                     values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
@@ -593,6 +614,9 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             public void call(Object... args) {
                 if( args[0] != null ) {
                     mChannelCore = (ChannelCore) args[0];
+
+                    // newChannelFlag 를 false로
+                    mActivity.getIntent().putExtra("newChannel", false);
                     connectChannel();
                 }
             }

@@ -84,14 +84,14 @@ public class ChannelCore {
     }
 
     public void sendMessage(String message) {
-        sendMessage(message, null, null, null);
+        sendMessage(message, null, null);
     }
 
     public void sendMessage(String message, String type) {
-        sendMessage(message, type, null, null);
+        sendMessage(message, type, null);
     }
 
-    public void sendMessage(String message, String type, ArrayList<String> users, ArrayList<String> userNames) {
+    public void sendMessage(String message, String type, ArrayList<String> users) {
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -109,7 +109,7 @@ public class ChannelCore {
             }
 
             if( users != null ) {
-                data.put("US", TextUtils.join("#!#", users));
+                data.put("US", TextUtils.join("@!@", users));
             }
 
             json.put("DT", data);

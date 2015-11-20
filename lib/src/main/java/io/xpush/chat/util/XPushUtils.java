@@ -25,7 +25,7 @@ public class XPushUtils {
             // 1:1 channel = userId concat friendId
             ArrayList<String> temp = users;
             Collections.sort(temp, new NameAscCompare());
-            return TextUtils.join("#!#", temp) +"^"+XPushCore.getInstance().getAppId();
+            return TextUtils.join("@!@", temp) +"^"+XPushCore.getInstance().getAppId();
         }
     }
 

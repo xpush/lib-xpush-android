@@ -18,6 +18,8 @@ import io.xpush.sampleChat.activities.SelectFriendActivity;
 
 public class ChatFragment extends XPushChatFragment {
 
+    public static final String TAG = ChatFragment.class.getSimpleName();
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_chat_new, menu);
@@ -52,7 +54,7 @@ public class ChatFragment extends XPushChatFragment {
         } else if (id == R.id.action_invite) {
             Intent intent = new Intent(mActivity, SelectFriendActivity.class);
             intent.putExtra("channelId", mChannel);
-            intent.putExtra("channelUsers", mUsers );
+            intent.putParcelableArrayListExtra("channelUsers", mXpushUsers);
             startActivityForResult(intent, 201);
         }
 

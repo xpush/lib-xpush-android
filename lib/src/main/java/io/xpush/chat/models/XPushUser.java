@@ -2,12 +2,14 @@ package io.xpush.chat.models;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import org.json.JSONObject;
 
 import io.xpush.chat.persist.UserTable;
 
-public class XPushUser {
+public class XPushUser implements Parcelable {
 
     public static final String USER_BUNDLE = "USER_BUNDLE";
 
@@ -75,6 +77,10 @@ public class XPushUser {
     public XPushUser(){
     }
 
+    public XPushUser(Parcel in) {
+        readFromParcel(in);
+    }
+
     public XPushUser(Cursor cursor){
         this.rowId= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_ROWID));
         this.id= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_ID));
@@ -139,4 +145,42 @@ public class XPushUser {
                 ", updated='" + updated + '\'' +
                 '}';
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(rowId);
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(image);
+        dest.writeString(message);
+        dest.writeLong(updated);
+    }
+
+    public void readFromParcel(Parcel in) {
+        rowId = in.readString();
+        id = in.readString();
+        name = in.readString();
+        image = in.readString();
+        message = in.readString();
+        updated = in.readLong();
+    }
+
+    @SuppressWarnings("rawtypes")
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public XPushUser createFromParcel(Parcel in) {
+            return new XPushUser(in);
+        }
+
+        @Override
+        public XPushUser[] newArray(int size) {
+            return new XPushUser[size];
+        }
+    };
 }

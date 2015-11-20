@@ -117,11 +117,11 @@ public class XPushChannel {
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE));
         this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
         String usersStr = cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_USERS));
-        if( usersStr != null && usersStr.indexOf("#!#") > 0 ) {
-            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
-        } else if( this.id.indexOf("#!#") > -1 ){
+        if( usersStr != null && usersStr.indexOf("@!@") > 0 ) {
+            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("@!@")));
+        } else if( this.id.indexOf("@!@") > -1 ){
             usersStr = this.id.substring( 0, this.id.lastIndexOf("^") );
-            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("#!#")));
+            this.users = new ArrayList<String>(Arrays.asList(usersStr.split("@!@")));
         }
     }
 

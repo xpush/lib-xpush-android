@@ -13,6 +13,7 @@ import io.xpush.chat.R;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.persist.ChannelTable;
 import io.xpush.sampleChat.fragments.ChatFragment;
 import io.xpush.sampleChat.fragments.FriendsFragment;
 
@@ -20,6 +21,7 @@ public class ChatActivity extends AppCompatActivity{
 
     public static final String TAG = ChatActivity.class.getSimpleName();
     private Activity mActivity;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,28 +36,40 @@ public class ChatActivity extends AppCompatActivity{
             getSupportFragmentManager().beginTransaction().add(R.id.list, f, TAG).commit();
         }
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
 
         Bundle bundle = getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
         XPushChannel xpushChannel = new XPushChannel(bundle);
 
-        if( xpushChannel.getUsers() != null && xpushChannel.getUsers().size() > 2 ){
-            toolbar.setTitle(xpushChannel.getName()+" (" + xpushChannel.getUsers().size() + ")") ;
+        if( xpushChannel.getUsers() != null ){
+            if ( xpushChannel.getUsers().size() > 5 ) {
+                mToolbar.setTitle( getString(R.string.title_text_group_chatting) + " " + xpushChannel.getUsers().size());
+            } else if( xpushChannel.getUsers().size() > 2 ) {
+                mToolbar.setTitle(xpushChannel.getName() + " (" + xpushChannel.getUsers().size() + ")");
+            } else {
+                mToolbar.setTitle(xpushChannel.getName()) ;
+            }
         } else {
-            toolbar.setTitle(xpushChannel.getName()) ;
+            mToolbar.setTitle(xpushChannel.getName()) ;
         }
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mToolbar);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
-        Log.d(TAG, "===== newIntent =====" );
+        Log.d(TAG, "===== newIntent =====");
 
         if (null != intent) {
             Log.d(TAG, intent.toString());
-            int defaultValue = 0;
+
+            Bundle bundle = intent.getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+            XPushChannel xpushChannel = new XPushChannel(bundle);
+            Log.d(TAG, xpushChannel.toString());
+
+            mToolbar.setTitle(xpushChannel.getName()+" (" + xpushChannel.getUsers().size() + ")") ;
+
             setIntent(intent);
         }
     }

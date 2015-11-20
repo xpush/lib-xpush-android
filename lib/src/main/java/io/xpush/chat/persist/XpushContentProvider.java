@@ -169,7 +169,10 @@ public class XpushContentProvider extends ContentProvider {
                 tableName = CHANNEL_TABLE;
 
                 id = uri.getPathSegments().get(1);
-                queryBuilder.appendWhere(ChannelTable.KEY_ID + "='" + id+"'");
+
+                Log.d( TAG, "===== id ====");
+                Log.d( TAG, id);
+                queryBuilder.appendWhere(ChannelTable.KEY_ID + "='" + id + "'");
                 break;
             case ALL_MESSAGES:
                 tableName = MESSAGE_TABLE;

@@ -41,7 +41,7 @@ public class SelectFriendFragment extends XPushUsersFragment {
     private HashMap<String, XPushUser> mSelectedUserMap;
 
     private String mChannelId = "";
-    private ArrayList<String> mCurrentChannelUsers;
+    private ArrayList<XPushUser> mCurrentChannelUsers;
 
     @Bind(R.id.layoutSearch)
     View layoutSearch;
@@ -77,12 +77,11 @@ public class SelectFriendFragment extends XPushUsersFragment {
         Bundle args = getArguments();
         if( args != null ) {
             mChannelId = args.getString("channelId", "");
-            mCurrentChannelUsers = args.getStringArrayList("channelUsers");
+            mCurrentChannelUsers = getActivity().getIntent().getParcelableArrayListExtra("channelUsers");
 
 
             Log.d(TAG, mChannelId );
-            Log.d(TAG, mCurrentChannelUsers.toString() );
-            Log.d(TAG, String.valueOf( mCurrentChannelUsers.size() ) );
+            Log.d(TAG, mCurrentChannelUsers.toString());
         }
 
         mSelectedUserMap = new HashMap<String, XPushUser>();
@@ -182,15 +181,17 @@ public class SelectFriendFragment extends XPushUsersFragment {
         } else {
 
             if( mCurrentChannelUsers != null ){
-                for( String userId : mCurrentChannelUsers ){
-                    if( userArray.indexOf( userId ) < 0 ){
-                        userArray.add(userId);
+                for( XPushUser user : mCurrentChannelUsers ){
+                    if( userArray.indexOf( user.getId() ) < 0 ){
+                        userArray.add(user.getId());
+                        userNameArray.add(user.getName());
                     }
                 }
             }
 
             if( userArray.indexOf( XPushCore.getInstance().getXpushSession().getId() ) < 0 ) {
                 userArray.add(XPushCore.getInstance().getXpushSession().getId());
+                userNameArray.add(XPushCore.getInstance().getXpushSession().getName());
             }
 
             XPushChannel channel = new XPushChannel();
@@ -199,10 +200,12 @@ public class SelectFriendFragment extends XPushUsersFragment {
             channel.setUserNames(userNameArray);
             channel.setUsers(userArray);
 
+            Log.d(TAG, userArray.toString() );
+
             Bundle bundle = channel.toBundle();
             Intent intent = new Intent(mActivity, ChatActivity.class);
             intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
-            intent.putExtra("newChannel", true);
+            intent.putExtra("resetChannel", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP );
             startActivity(intent);
 
