@@ -36,7 +36,7 @@ public class FriendsFragment extends XPushUsersFragment {
     private String mTitle = "";
 
     @Override
-    public void createDataAdapter(){
+    public void initDataAdapter(){
         mDataAdapter = new UserCursorAdapter(mActivity, null, 0);
     }
 

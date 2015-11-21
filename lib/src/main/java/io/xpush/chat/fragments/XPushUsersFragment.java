@@ -93,16 +93,7 @@ public abstract class XPushUsersFragment extends Fragment implements LoaderManag
 
     private void displayListView(View view) {
 
-        String[] columns = new String[]{
-            UserTable.KEY_ROWID,
-            UserTable.KEY_ID,
-            UserTable.KEY_NAME,
-            UserTable.KEY_IMAGE,
-            UserTable.KEY_MESSAGE,
-            UserTable.KEY_UPDATED
-        };
-
-        createDataAdapter();
+        initDataAdapter();
 
         final ListView listView = (ListView) view.findViewById(R.id.listView);
         listView.setAdapter(mDataAdapter);
@@ -119,7 +110,7 @@ public abstract class XPushUsersFragment extends Fragment implements LoaderManag
         getUsers();
     }
 
-    public abstract void createDataAdapter();
+    public abstract void initDataAdapter();
 
     public abstract void getUsers();
 

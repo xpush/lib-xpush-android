@@ -13,6 +13,9 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushUser;
 
@@ -20,22 +23,24 @@ public class UserCursorAdapter extends CursorAdapter implements Filterable {
 
     private final LayoutInflater mInflater;
     private boolean checkable;
+    private HashMap<String, Boolean> mCheckedMap;
 
     public enum Mode{
         NORMAL, CHECKABLE
     }
 
     public UserCursorAdapter(Context context, Cursor cursor, int flags) {
-        this(context, cursor, flags, Mode.NORMAL);
+        this(context, cursor, flags, Mode.NORMAL, null);
     }
 
-    public UserCursorAdapter(Context context, Cursor cursor, int flags, Mode mode) {
+    public UserCursorAdapter(Context context, Cursor cursor, int flags, Mode mode, HashMap<String, Boolean> checkedMap) {
         super(context, cursor, flags);
         if( mode == Mode.CHECKABLE ) {
             checkable = true;
         } else {
             checkable = false;
         }
+        mCheckedMap = checkedMap;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -70,6 +75,13 @@ public class UserCursorAdapter extends CursorAdapter implements Filterable {
             holder.tvMessage.setText(user.getMessage());
         } else {
             holder.tvMessage.setText("");
+        }
+
+        if( checkable ){
+            if( mCheckedMap != null && mCheckedMap.containsKey( user.getId() ) ) {
+                holder.checkBox.setChecked(true);
+                holder.checkBox.setEnabled(false);
+            }
         }
     }
 

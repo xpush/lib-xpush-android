@@ -7,10 +7,13 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -42,6 +45,7 @@ public class SelectFriendFragment extends XPushUsersFragment {
 
     private String mChannelId = "";
     private ArrayList<XPushUser> mCurrentChannelUsers;
+    private HashMap<String, Boolean> mExistUserIdMap;
 
     @Bind(R.id.layoutSearch)
     View layoutSearch;
@@ -50,8 +54,24 @@ public class SelectFriendFragment extends XPushUsersFragment {
     EditText mEditSearch;
 
     @Override
-    public void createDataAdapter(){
-        mDataAdapter = new UserCursorAdapter(mActivity, null, 0, UserCursorAdapter.Mode.CHECKABLE);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Bundle args = getArguments();
+        if( args != null ) {
+            mChannelId = args.getString("channelId", "");
+            mCurrentChannelUsers = getActivity().getIntent().getParcelableArrayListExtra("channelUsers");
+
+            Log.d(TAG, mChannelId );
+            Log.d(TAG, mCurrentChannelUsers.toString());
+
+            // set Checked
+            mExistUserIdMap = new HashMap<>();
+            for( int inx = 0 ; inx < mCurrentChannelUsers.size() ;inx++ ){
+                mExistUserIdMap.put(mCurrentChannelUsers.get(inx).getId(), true );
+            }
+
+            Log.d(TAG, mExistUserIdMap.toString());
+        }
     }
 
     @Override
@@ -70,19 +90,14 @@ public class SelectFriendFragment extends XPushUsersFragment {
     }
 
     @Override
+    public void initDataAdapter(){
+        mDataAdapter = new UserCursorAdapter(mActivity, null, 0, UserCursorAdapter.Mode.CHECKABLE, mExistUserIdMap);
+    }
+
+    @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
-
-        Bundle args = getArguments();
-        if( args != null ) {
-            mChannelId = args.getString("channelId", "");
-            mCurrentChannelUsers = getActivity().getIntent().getParcelableArrayListExtra("channelUsers");
-
-
-            Log.d(TAG, mChannelId );
-            Log.d(TAG, mCurrentChannelUsers.toString());
-        }
 
         mSelectedUserMap = new HashMap<String, XPushUser>();
 
@@ -140,8 +155,14 @@ public class SelectFriendFragment extends XPushUsersFragment {
     @Override
     public void onUserItemClick(AdapterView<?> listView, View view, int position, long id){
 
+
         Cursor cursor = (Cursor) listView.getItemAtPosition(position);
         XPushUser user = new XPushUser(cursor);
+
+        // exist user
+        if( mExistUserIdMap.containsKey( user.getId() ) ){
+            return;
+        }
 
         CheckBox checkBox = (CheckBox) view.findViewById(R.id.checkBox);
 
