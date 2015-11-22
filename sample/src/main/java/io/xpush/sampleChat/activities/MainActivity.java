@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
-import io.xpush.chat.fragments.XPushChannelsFragment;
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ChannelsFragment;

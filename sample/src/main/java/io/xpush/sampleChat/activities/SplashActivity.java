@@ -16,7 +16,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.xpush.chat.ApplicationController;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.services.RegistrationIntentService;

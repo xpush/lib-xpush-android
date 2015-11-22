@@ -3,7 +3,7 @@
     android:layout_height="match_parent"
     android:background="?android:attr/activatedBackgroundIndicator">
 
-    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ListView
         android:id="@+id/listView"
         android:background="@color/white"
         android:dividerHeight="@dimen/divider_height"

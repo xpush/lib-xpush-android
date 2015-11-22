@@ -7,15 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
-import java.util.ArrayList;
-
-import io.xpush.chat.R;
-import io.xpush.chat.core.XPushCore;
-import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.chat.models.XPushChannel;
-import io.xpush.chat.persist.ChannelTable;
+import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ChatFragment;
-import io.xpush.sampleChat.fragments.FriendsFragment;
 
 public class ChatActivity extends AppCompatActivity{
 

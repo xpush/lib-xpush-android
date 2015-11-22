@@ -5,9 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import io.xpush.chat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.link.R;
 
 public class ChatActivity extends AppCompatActivity{
 

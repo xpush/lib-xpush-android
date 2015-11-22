@@ -5,10 +5,6 @@ import android.os.Bundle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
 public class XPushSession {
 
     public static final String ID = "U";

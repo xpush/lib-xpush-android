@@ -1,8 +1,6 @@
 package io.xpush.chat.models;
 
 import android.database.Cursor;
-import android.text.TextUtils;
-import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -10,7 +8,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.MessageTable;
 
 public class XPushMessage {

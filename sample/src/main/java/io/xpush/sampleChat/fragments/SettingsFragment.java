@@ -20,13 +20,10 @@ import io.xpush.sampleChat.R;
 public class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener  {
 
     private String TAG = SettingsFragment.class.getSimpleName();
-    private Context mActivity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
-        mActivity = getActivity();
         addPreferencesFromResource(R.xml.settings);
 
         for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); i++) {
@@ -55,7 +52,6 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
 
         View layout = inflater.inflate(R.layout.activity_settings, container, false);
         if (layout != null) {

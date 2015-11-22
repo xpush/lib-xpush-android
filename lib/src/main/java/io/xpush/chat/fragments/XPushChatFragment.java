@@ -3,7 +3,6 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,10 +31,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.engineio.client.EngineIOException;
-import com.github.nkzawa.socketio.client.Socket;
-import com.github.nkzawa.socketio.client.SocketIOException;
+import io.socket.emitter.Emitter;
+import io.socket.engineio.client.EngineIOException;
+import io.socket.client.Socket;
+import io.socket.client.SocketIOException;
 
 import org.json.JSONArray;
 import org.json.JSONException;

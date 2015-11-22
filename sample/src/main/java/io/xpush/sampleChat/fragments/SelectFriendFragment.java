@@ -7,13 +7,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -39,13 +36,10 @@ public class SelectFriendFragment extends XPushUsersFragment {
 
     private static final String TAG = XPushUsersFragment.class.getSimpleName();
 
-    private String mTitle = "";
-
-    private HashMap<String, XPushUser> mSelectedUserMap;
-
     private String mChannelId = "";
-    private ArrayList<XPushUser> mCurrentChannelUsers;
     private HashMap<String, Boolean> mExistUserIdMap;
+    private ArrayList<XPushUser> mCurrentChannelUsers;
+    private HashMap<String, XPushUser> mSelectedUserMap;
 
     @Bind(R.id.layoutSearch)
     View layoutSearch;
@@ -60,9 +54,6 @@ public class SelectFriendFragment extends XPushUsersFragment {
         if( args != null ) {
             mChannelId = args.getString("channelId", "");
             mCurrentChannelUsers = getActivity().getIntent().getParcelableArrayListExtra("channelUsers");
-
-            Log.d(TAG, mChannelId );
-            Log.d(TAG, mCurrentChannelUsers.toString());
 
             // set Checked
             mExistUserIdMap = new HashMap<>();

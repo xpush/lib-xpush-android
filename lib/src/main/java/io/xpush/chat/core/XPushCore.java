@@ -11,8 +11,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.Socket;
+import io.socket.client.Ack;
+import io.socket.client.Socket;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -357,7 +357,7 @@ public class XPushCore {
                             callbackEvent.call( result );
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            callbackEvent.call( null );
+                            callbackEvent.call();
                         }
                     }
                 },

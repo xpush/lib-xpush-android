@@ -1,8 +1,23 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'
+publish {
+    userOrg = '0nlyoung7'
+    groupId = 'io.xpush'
+    artifactId = 'lib-android-android'
+    publishVersion = '0.0.1'
+    desc = 'XPUSH library for Android - It was inspired by the Adjust UI of Instagram.'
+    website = 'https://github.com/xpush/lib-xpush-android'
+    issueTracker = "${website}/issues"
+    repository = "${website}.git"
+}
 
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
+
+    compileOptions {
+        encoding "UTF-8"
+    }
 
     defaultConfig {
         minSdkVersion 17
@@ -13,6 +28,11 @@ android {
             java.srcDirs = ['src/main/java']
             res.srcDirs = ['src/main/res']
         }
+    }
+
+    lintOptions {
+        abortOnError false
+        disable 'InvalidPackage'
     }
 }
 
@@ -31,13 +51,11 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:+'
 
     //compile 'com.github.nkzawa:engine.io-client:0.5.1'
-    compile 'com.github.nkzawa:socket.io-client:0.5.2'
+    compile 'io.socket:socket.io-client:0.6.2'
 
     //compile 'com.squareup.okhttp:okhttp-ws:2.4.0'
 
     compile 'com.facebook.fresco:fresco:0.6.1+'
 
     compile 'com.jakewharton:butterknife:7.0.1'
-
-    compile 'ch.acra:acra:4.6.2'
 }

@@ -2,7 +2,6 @@ package io.xpush.chat.models;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 
 import io.xpush.chat.core.CallbackEvent;
-import io.xpush.chat.core.ChannelCore;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.sampleChat.activities.SelectFriendActivity;

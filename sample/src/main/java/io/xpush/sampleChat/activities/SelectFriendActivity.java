@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import io.xpush.sampleChat.R;
-import io.xpush.sampleChat.fragments.SearchUserFragment;
 import io.xpush.sampleChat.fragments.SelectFriendFragment;
 
 public class SelectFriendActivity extends AppCompatActivity {

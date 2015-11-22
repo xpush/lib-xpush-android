@@ -20,13 +20,13 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.engineio.client.EngineIOException;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
-import com.github.nkzawa.socketio.client.SocketIOException;
-import com.github.nkzawa.thread.EventThread;
+import io.socket.emitter.Emitter;
+import io.socket.engineio.client.EngineIOException;
+import io.socket.client.Ack;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.client.SocketIOException;
+import io.socket.thread.EventThread;
 
 import org.json.JSONArray;
 import org.json.JSONException;

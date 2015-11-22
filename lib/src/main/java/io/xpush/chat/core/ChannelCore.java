@@ -2,12 +2,6 @@ package io.xpush.chat.core;
 
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
-
-import com.github.nkzawa.emitter.Emitter;
-import com.github.nkzawa.socketio.client.Ack;
-import com.github.nkzawa.socketio.client.IO;
-import com.github.nkzawa.socketio.client.Socket;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,7 +11,10 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.xpush.chat.ApplicationController;
+import io.socket.client.Ack;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 import io.xpush.chat.models.XPushSession;
 
 public class ChannelCore {
@@ -184,10 +181,10 @@ public class ChannelCore {
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();
-                            callback.call(null);
+                            callback.call(new JSONArray());
                         }
                     } else {
-                        callback.call(null);
+                        callback.call(new JSONArray());
                     }
                 }
             });
@@ -208,8 +205,6 @@ public class ChannelCore {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        Log.d(TAG, " channel-------join");
 
         mChannelSocket.emit("channel.join", data, new Ack() {
             @Override
