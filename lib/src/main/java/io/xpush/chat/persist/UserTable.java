@@ -4,14 +4,13 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class UserTable {
 
-    public static final String SEPARATOR = "#$SEP$#";
-
     public static final String KEY_ROWID = "_id";
     public static final String KEY_ID = "id";
     public static final String KEY_NAME = "name";
     public static final String KEY_IMAGE = "image";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_UPDATED = "updated";
+    public static final String KEY_TYPE = "type";
     public static String SQLITE_TABLE;
 
     public static void onCreate(SQLiteDatabase db, String tableName) {
@@ -26,6 +25,7 @@ public class UserTable {
                         KEY_NAME + "," +
                         KEY_IMAGE + "," +
                         KEY_MESSAGE + "," +
+                        KEY_TYPE +" integer," +
                         KEY_UPDATED + " integer );";
 
         db.execSQL(DATABASE_CREATE);

@@ -65,6 +65,7 @@ public abstract class XPushUsersFragment extends Fragment implements LoaderManag
             UserTable.KEY_NAME,
             UserTable.KEY_IMAGE,
             UserTable.KEY_MESSAGE,
+            UserTable.KEY_TYPE,
             UserTable.KEY_UPDATED
         };
 

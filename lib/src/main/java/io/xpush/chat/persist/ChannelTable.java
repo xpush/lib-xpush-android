@@ -4,8 +4,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class ChannelTable {
 
-    public static final String SEPARATOR = "#$SEP$#";
-
     public static final String KEY_ROWID = "_id";
     public static final String KEY_ID = "id";
     public static final String KEY_NAME = "name";

@@ -17,6 +17,7 @@ public class XPushUser implements Parcelable {
     public static final String NAME = "name";
     public static final String IMAGE = "image";
     public static final String MESSAGE = "message";
+    public static final String TYPE = "type";
     public static final String UPDATED = "updated";
 
     public String rowId;
@@ -24,6 +25,7 @@ public class XPushUser implements Parcelable {
     public String name;
     public String image;
     public String message;
+    public int type;
     public long updated;
 
     public String getRowId() {
@@ -66,6 +68,14 @@ public class XPushUser implements Parcelable {
         this.message = message;
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
     public long getUpdated() {
         return updated;
     }
@@ -87,6 +97,7 @@ public class XPushUser implements Parcelable {
         this.name= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_NAME));
         this.image= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_IMAGE));
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(UserTable.KEY_MESSAGE));
+        this.type = cursor.getInt(cursor.getColumnIndexOrThrow(UserTable.KEY_TYPE));
         this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(UserTable.KEY_UPDATED));
     }
 
@@ -95,6 +106,7 @@ public class XPushUser implements Parcelable {
         this.name= bundle.getString(NAME);
         this.image= bundle.getString(IMAGE);
         this.message= bundle.getString(MESSAGE);
+        this.type= bundle.getInt(TYPE);
         this.updated= bundle.getLong(UPDATED);
     }
 
@@ -129,6 +141,7 @@ public class XPushUser implements Parcelable {
         b.putString(NAME, this.name);
         b.putString(IMAGE, this.image);
         b.putString(MESSAGE, this.message);
+        b.putInt(TYPE, this.type);
         b.putLong(UPDATED, this.updated);
 
         return b;
@@ -142,6 +155,7 @@ public class XPushUser implements Parcelable {
                 ", name='" + name + '\'' +
                 ", image='" + image + '\'' +
                 ", message='" + message + '\'' +
+                ", type='" + type + '\'' +
                 ", updated='" + updated + '\'' +
                 '}';
     }
@@ -158,6 +172,7 @@ public class XPushUser implements Parcelable {
         dest.writeString(name);
         dest.writeString(image);
         dest.writeString(message);
+        dest.writeInt(type);
         dest.writeLong(updated);
     }
 
@@ -167,6 +182,7 @@ public class XPushUser implements Parcelable {
         name = in.readString();
         image = in.readString();
         message = in.readString();
+        type = in.readInt();
         updated = in.readLong();
     }
 
