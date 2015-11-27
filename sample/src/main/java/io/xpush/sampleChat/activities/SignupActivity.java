@@ -24,6 +24,8 @@ import java.util.Map;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.xpush.chat.core.CallbackEvent;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.network.StringRequest;
 import io.xpush.sampleChat.R;
 
@@ -64,59 +66,22 @@ public class SignupActivity extends AppCompatActivity {
         progressDialog.setMessage(getString(R.string.progress_message_signup));
         progressDialog.show();
 
-        String name = mNameText.getText().toString();
         String id = mIdText.getText().toString();
+        String name = mNameText.getText().toString();
         String password = mPasswordText.getText().toString();
-        final Map<String,String> params = new HashMap<String, String>();
 
-        JSONObject data = new JSONObject();
-        try {
-            data.put("NM", name);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        params.put("A", getString(R.string.app_id));
-        params.put("U", id);
-        params.put("DT", data.toString());
-        params.put("PW", password);
-        params.put("D", getString(R.string.device_id));
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
-            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
-        }
-        String url = getString(R.string.host_name)+"/user/register";
-
-        StringRequest request = new StringRequest(url, params,
-            new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    Log.d(TAG, response.toString());
-                    try {
-                        if( "ok".equalsIgnoreCase(response.getString("status")) ){
-                            progressDialog.dismiss();
-                            onSignupSuccess();
-                        } else {
-                            progressDialog.dismiss();
-                            onSignupFailed();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            },
-            new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    error.printStackTrace();
+        XPushCore.getInstance().register(id, password, name, new CallbackEvent() {
+            @Override
+            public void call(Object... args) {
+                if (args == null || args.length == 0) {
+                    progressDialog.dismiss();
+                    onSignupSuccess();
+                } else {
                     progressDialog.dismiss();
                     onSignupFailed();
                 }
             }
-        );
-
-        RequestQueue queue = Volley.newRequestQueue(this);
-        queue.add(request);
+        });
     }
 
     public void onSignupSuccess() {

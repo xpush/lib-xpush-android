@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -56,20 +57,20 @@ public class LoginActivity extends AppCompatActivity  {
         progressDialog.setMessage( getString(R.string.progress_message_authenticating));
         progressDialog.show();
 
-        String id = mIdText.getText().toString();
-        String password = mPasswordText.getText().toString();
+        final String id = mIdText.getText().toString();
+        final String password = mPasswordText.getText().toString();
 
-         XPushCore.getInstance().login(id, password, new CallbackEvent() {
+        XPushCore.getInstance().login(id, password, new CallbackEvent() {
              @Override
              public void call(Object... args) {
-                 if ( args == null || args.length == 0 ) {
+                 if (args == null || args.length == 0) {
                      progressDialog.dismiss();
                      onLoginSuccess();
                  } else {
                      progressDialog.dismiss();
                      onLoginFailed();
-                }
-            }
+                 }
+             }
         });
     }
 

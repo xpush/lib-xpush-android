@@ -133,6 +133,70 @@ public class XPushCore {
      *
      *
      */
+    public void register(String id, String password, String name, final CallbackEvent callbackEvent){
+
+        final Map<String,String> params = new HashMap<String, String>();
+
+        if( name != null ) {
+
+            JSONObject data = new JSONObject();
+            try {
+                data.put("NM", name);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            params.put("DT", data.toString());
+        }
+
+        params.put("A", mAppId);
+        params.put("U", id);
+        params.put("PW", password);
+        params.put("D", mDeviceId);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
+            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
+        }
+        String url = mHostname+"/user/register";
+
+        StringRequest request = new StringRequest(url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, response.toString());
+                        try {
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                callbackEvent.call();
+                            } else {
+                                if( response.has("message") ){
+                                    callbackEvent.call(response.getString("status"), response.getString("message") );
+                                } else {
+                                    callbackEvent.call(response.getString("status"));
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        callbackEvent.call( error.getMessage() );
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+        queue.add(request);
+    }
+
+    /**
+     *
+     * Auth start
+     *
+     *
+     */
     public void login(String id, String password, final CallbackEvent callbackEvent){
 
         final Map<String,String> params = new HashMap<String, String>();
@@ -153,7 +217,7 @@ public class XPushCore {
                                 callbackEvent.call();
                             } else {
                                 if( response.has("message") ){
-                                    callbackEvent.call( response.getString("message") );
+                                    callbackEvent.call(response.getString("status"), response.getString("message") );
                                 } else {
                                     callbackEvent.call(response.getString("status"));
                                 }
@@ -166,9 +230,62 @@ public class XPushCore {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, "Login error ======================");
                         error.printStackTrace();
-                        callbackEvent.call();
+                        callbackEvent.call( "SERVER-ERROR", error.getMessage() );
+                    }
+                }
+        );
+
+        RequestQueue queue = Volley.newRequestQueue(getBaseContext());
+        queue.add(request);
+    }
+
+    /**
+     *
+     * Auth start
+     *
+     *
+     */
+    public void addDevice(String id, String password, final CallbackEvent callbackEvent){
+
+        final Map<String,String> params = new HashMap<String, String>();
+
+        params.put("A", mAppId);
+        params.put("U", id);
+        params.put("PW", password);
+        params.put("D", mDeviceId);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
+            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
+        }
+
+        String url = mHostname+"/device/add";
+
+        LoginRequest request = new LoginRequest(getBaseContext(), url, params,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if( "ok".equalsIgnoreCase(response.getString("status")) ){
+                                callbackEvent.call();
+                            } else {
+                                if( response.has("message") ){
+                                    callbackEvent.call(response.getString("status"), response.getString("message") );
+                                } else {
+                                    callbackEvent.call(response.getString("status"));
+                                }
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                        callbackEvent.call( "SERVER-ERROR", error.getMessage() );
                     }
                 }
         );
