@@ -96,6 +96,7 @@ public class ChannelCore {
 
         try {
 
+            user.put("I", xpushSession.getImage());
             user.put("U", xpushSession.getId());
             user.put("NM", xpushSession.getName());
 
