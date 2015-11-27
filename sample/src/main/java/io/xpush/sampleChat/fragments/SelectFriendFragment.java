@@ -51,12 +51,13 @@ public class SelectFriendFragment extends XPushUsersFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
+        mExistUserIdMap = new HashMap<>();
+
+        // set Checked
         if( args != null ) {
             mChannelId = args.getString("channelId", "");
             mCurrentChannelUsers = getActivity().getIntent().getParcelableArrayListExtra("channelUsers");
 
-            // set Checked
-            mExistUserIdMap = new HashMap<>();
             for( int inx = 0 ; inx < mCurrentChannelUsers.size() ;inx++ ){
                 mExistUserIdMap.put(mCurrentChannelUsers.get(inx).getId(), true );
             }
