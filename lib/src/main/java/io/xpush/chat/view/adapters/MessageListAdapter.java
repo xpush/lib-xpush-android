@@ -1,6 +1,7 @@
 package io.xpush.chat.view.adapters;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -46,6 +47,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         viewHolder.setMessage(xpushMessage.getMessage());
         viewHolder.setUsername(xpushMessage.getSenderName());
         viewHolder.setIime(xpushMessage.getUpdated());
+        viewHolder.setImage(xpushMessage.getImage());
     }
 
     @Override
@@ -94,6 +96,11 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         public void setIime(long timestamp) {
             if (null == tvTime) return;
             tvTime.setText(DateUtils.getDate(timestamp, "a h:mm"));
+        }
+
+        public void setImage(String image) {
+            if (null == image || null == thumbNail) return;
+            thumbNail.setImageURI(Uri.parse(image));
         }
     }
 }

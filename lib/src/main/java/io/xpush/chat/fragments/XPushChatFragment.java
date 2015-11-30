@@ -166,8 +166,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         super.onResume();
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
         resetChannelFlag  = mActivity.getIntent().getBooleanExtra("resetChannel", false);
-        Log.d(TAG, "=== newChannelFlag === " + newChannelFlag);
-        Log.d(TAG, "=== resetChannelFlag === " + resetChannelFlag);
 
         if( resetChannelFlag ) {
             mViewCount = INIT_VIEW_COUNT;

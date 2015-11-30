@@ -1,6 +1,7 @@
 package io.xpush.chat.models;
 
 import android.database.Cursor;
+import android.util.Log;
 
 import org.json.JSONObject;
 

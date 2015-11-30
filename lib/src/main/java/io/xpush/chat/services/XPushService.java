@@ -570,11 +570,13 @@ public class XPushService extends Service {
                                         }
                                     }
                                 });
-                            } else if( xpushMessage.getUsers().size() >= 5 ){
-                                values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
-                            }
+                            } else {
+                                if( xpushMessage.getUsers().size() >= 5 ){
+                                    values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
+                                }
 
-                            getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                                getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                            }
                         }
 
                         if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
