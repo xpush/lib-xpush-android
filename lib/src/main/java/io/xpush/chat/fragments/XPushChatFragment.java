@@ -402,7 +402,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             mActivity.getContentResolver().update(singleUri, values, null, null);
 
             // Multi Channel. Send Invite Message
-            if( (newChannelFlag || resetChannelFlag ) && mUsers.size() > 2 ){
+            if( (newChannelFlag || resetChannelFlag ) && ( mUsers != null && mUsers.size()  > 2 ) ){
                 String message = mUsername + " Invite " + mXpushChannel.getName();
                 mXpushChannel.getUserNames().add(XPushCore.getInstance().getXpushSession().getName());
                 mChannelCore.sendMessage(message, "IN", mUsers);
@@ -546,7 +546,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     private void saveMessage( JSONObject data ){
 
         Log.d(TAG, "onMessage : " + data.toString());
-
         final XPushMessage xpushMessage = new XPushMessage( data );
 
         try {
@@ -567,7 +566,9 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                 }
             }
 
-            if( mUsers.size() == 2 ) {
+            if( mUsers != null && mUsers.size() > 2 ) {
+                values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
+            } else {
                 if (XPushMessage.TYPE_SEND_MESSAGE == xpushMessage.getType()) {
                     values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
                     values.put(ChannelTable.KEY_IMAGE, mXpushChannel.getImage());
@@ -575,8 +576,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                     values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                     values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
                 }
-            } else {
-                values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
             }
 
             values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
@@ -655,15 +654,15 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     protected void channelLeave(){
 
         // 1:1 Channel, only delete local data
-        if( mUsers.size() == 2 ){
-            leave();
-        } else {
+        if( mUsers != null && mUsers.size() > 2 ){
             mChannelCore.channelLeave(new CallbackEvent() {
                 @Override
                 public void call(Object... args) {
                     leave();
                 }
             });
+        } else {
+            leave();
         }
     }
 }

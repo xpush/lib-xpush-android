@@ -498,102 +498,108 @@ public class XPushService extends Service {
 
             try {
                 if( "NOTIFICATION".equals( json.getString("event") ) ){
-                    JSONObject data = json.getJSONObject("DT");
-
                     Log.d(TAG, "NOTIFICATION");
-                    Log.d(TAG, data.toString());
+                    Log.d(TAG, json.toString() );
 
-                    XPushMessage xpushMessage = new XPushMessage( data );
-                    final ContentValues values = new ContentValues();
+                    // messsage event
+                    if( "message".equals( json.getString("NM") ) ) {
+                        JSONObject data = json.getJSONObject("DT");
 
-                    try {
-                        values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
-                        values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
-                        values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
-                        values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
+                        XPushMessage xpushMessage = new XPushMessage( data );
+                        final ContentValues values = new ContentValues();
 
-                        String[] projection = {
-                            ChannelTable.KEY_ROWID,
-                            ChannelTable.KEY_ID,
-                            ChannelTable.KEY_NAME,
-                            ChannelTable.KEY_USERS,
-                            ChannelTable.KEY_IMAGE,
-                            ChannelTable.KEY_COUNT,
-                            ChannelTable.KEY_MESSAGE,
-                            ChannelTable.KEY_UPDATED
-                        };
+                        try {
+                            values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
+                            values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
+                            values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+                            values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
 
-                        Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-                        Cursor cursor = getContentResolver().query(singleUri, projection, null, null, null);
-                        if (cursor != null && cursor.getCount() > 0) {
-                            cursor.moveToFirst();
+                            String[] projection = {
+                                ChannelTable.KEY_ROWID,
+                                ChannelTable.KEY_ID,
+                                ChannelTable.KEY_NAME,
+                                ChannelTable.KEY_USERS,
+                                ChannelTable.KEY_IMAGE,
+                                ChannelTable.KEY_COUNT,
+                                ChannelTable.KEY_MESSAGE,
+                                ChannelTable.KEY_UPDATED
+                            };
 
-                            int count = cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
-                            values.put(ChannelTable.KEY_COUNT, count + 1 );
-                            getContentResolver().update(singleUri, values, null, null);
-                        } else {
-                            values.put(ChannelTable.KEY_COUNT, 1);
-                            if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
-                                xpushMessage.setType(XPushMessage.TYPE_INVITE);
-                                values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
-                                values.remove(ChannelTable.KEY_IMAGE);
+                            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
+                            Cursor cursor = getContentResolver().query(singleUri, projection, null, null, null);
+                            if (cursor != null && cursor.getCount() > 0) {
+                                cursor.moveToFirst();
+
+                                int count = cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
+                                values.put(ChannelTable.KEY_COUNT, count + 1 );
+                                getContentResolver().update(singleUri, values, null, null);
                             } else {
-                                values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
-                                values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
-                                values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
-                            }
-
-                            // Multi Channel Message
-                            if( xpushMessage.getUsers().size() > 2 && xpushMessage.getUsers().size() < 5 ) {
-
-                                mClient.emit("channel.get", new JSONObject().put("C", xpushMessage.getChannel()), new Ack() {
-                                    @Override
-                                    public void call(Object... args) {
-                                        JSONObject response = (JSONObject) args[0];
-                                        Log.d(TAG, response.toString());
-                                        if (response.has("result")) {
-                                            StringBuffer sb = new StringBuffer();
-                                            try {
-                                                JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
-                                                for (int inx = 0; inx < dts.length(); inx++) {
-                                                    if (inx > 0) {
-                                                        sb.append(",");
-                                                    }
-                                                    sb.append(dts.getJSONObject(inx).getJSONObject("DT").getString("NM"));
-                                                }
-                                                values.put(ChannelTable.KEY_NAME, sb.toString());
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            } finally {
-                                                getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
-                                            }
-                                        }
-                                    }
-                                });
-                            } else {
-                                if( xpushMessage.getUsers().size() >= 5 ){
-                                    values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
+                                values.put(ChannelTable.KEY_COUNT, 1);
+                                if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
+                                    xpushMessage.setType(XPushMessage.TYPE_INVITE);
+                                    values.remove(ChannelTable.KEY_IMAGE);
+                                } else {
+                                    values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
+                                    values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
                                 }
 
-                                getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                                if( null != xpushMessage.getUsers() ) {
+                                    values.put(ChannelTable.KEY_USERS, TextUtils.join("@!@", xpushMessage.getUsers()));
+                                }
+
+                                // Multi Channel Message
+                                if( null != xpushMessage.getUsers() && xpushMessage.getUsers().size() > 2 && xpushMessage.getUsers().size() < 5 ) {
+
+                                    mClient.emit("channel.get", new JSONObject().put("C", xpushMessage.getChannel()), new Ack() {
+                                        @Override
+                                        public void call(Object... args) {
+                                            JSONObject response = (JSONObject) args[0];
+                                            Log.d(TAG, response.toString());
+                                            if (response.has("result")) {
+                                                StringBuffer sb = new StringBuffer();
+                                                try {
+                                                    JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
+                                                    for (int inx = 0; inx < dts.length(); inx++) {
+                                                        if (inx > 0) {
+                                                            sb.append(",");
+                                                        }
+                                                        sb.append(dts.getJSONObject(inx).getJSONObject("DT").getString("NM"));
+                                                    }
+                                                    values.put(ChannelTable.KEY_NAME, sb.toString());
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                } finally {
+                                                    getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                                                }
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    if( null != xpushMessage.getUsers() && xpushMessage.getUsers().size() >= 5 ){
+                                        values.put(ChannelTable.KEY_NAME, getString(R.string.title_text_group_chatting) + " " + xpushMessage.getUsers().size());
+                                    }
+
+                                    getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
+                                }
                             }
+
+                            if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
+                                if (mXpushSession.getId().equals(xpushMessage.getSenderId())) {
+                                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                                } else {
+                                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                                }
+                            }
+
+                            mDataSource.insert(xpushMessage);
+
+                        } catch (Exception e ){
+                            e.printStackTrace();
                         }
 
-                        if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
-                            if (mXpushSession.getId().equals(xpushMessage.getSenderId())) {
-                                xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
-                            } else {
-                                xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
-                            }
-                        }
+                        broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getSenderName(), xpushMessage.getMessage() );
 
-                        mDataSource.insert(xpushMessage);
-
-                    } catch (Exception e ){
-                        e.printStackTrace();
                     }
-
-                    broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getSenderName(), xpushMessage.getMessage() );
                 } else {
 
                 }
