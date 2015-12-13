@@ -26,4 +26,10 @@
         android:title="@string/action_setting"
         app:showAsAction="collapseActionView"></item>
 
+    <item
+        android:id="@+id/action_signout"
+        android:orderInCategory="500"
+        android:title="@string/action_signout"
+        app:showAsAction="collapseActionView"></item>
+
 </menu>

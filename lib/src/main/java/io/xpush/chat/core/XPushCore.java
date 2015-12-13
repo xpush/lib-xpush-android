@@ -42,6 +42,7 @@ import io.xpush.chat.network.StringRequest;
 import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.services.XPushService;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.chat.util.XPushUtils;
 
@@ -52,7 +53,6 @@ public class XPushCore {
     private static final String TAG = XPushCore.class.getSimpleName();
 
     public static XPushCore sInstance;
-    private XPushSession xpushSession;
 
     private String mHostname;
     private String mAppId;
@@ -87,7 +87,7 @@ public class XPushCore {
 
     public void init(){
         if( getBaseContext() != null ) {
-            xpushSession = restoreXpushSession();
+            mXpushSession = restoreXpushSession();
             this.mHostname = getBaseContext().getString(R.string.host_name);
             this.mAppId = getBaseContext().getString(R.string.app_id);
             this.mDeviceId = getBaseContext().getString(R.string.device_id);
@@ -242,7 +242,24 @@ public class XPushCore {
 
     /**
      *
-     * Auth start
+     * logout
+     *
+     *
+     */
+    public void logout(){
+        mXpushSession = null;
+        XPushService.actionStop(baseContext);
+        sInstance = null;
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = pref.edit();
+        editor.remove("XPUSH_SESSION");
+        editor.commit();
+    }
+
+    /**
+     *
+     * Add device start
      *
      *
      */
@@ -426,8 +443,6 @@ public class XPushCore {
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
 
-                Log.d(TAG, "==== response =====");
-                Log.d(TAG, response.toString());
                 if (response.has("status")) {
                     try {
                         Log.d(TAG, response.getString("status"));
@@ -463,8 +478,6 @@ public class XPushCore {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
-                            Log.d(TAG, "====== search node response ====== " + response.toString() );
-
                             ChannelCore result = null;
                             if( "ok".equalsIgnoreCase(response.getString("status")) ){
                                 JSONObject serverInfo = response.getJSONObject("result").getJSONObject("server");

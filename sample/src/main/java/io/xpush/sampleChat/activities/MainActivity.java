@@ -1,6 +1,7 @@
 package io.xpush.sampleChat.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.fragments.ChannelsFragment;
@@ -172,6 +175,32 @@ public class MainActivity extends AppCompatActivity {
         } else if( item.getItemId() == R.id.action_profile ){
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
             startActivity(intent);
+        } else if( item.getItemId() == R.id.action_signout ){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getApplicationContext().getString(R.string.action_signout))
+                    .setMessage(getApplicationContext().getString(R.string.title_text_confirm_signout_message))
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            XPushCore.getInstance().logout();
+                            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            dialog.cancel();
+                        }
+
+                    });
+
+            AlertDialog dialog = builder.create();    // 알림창 객체 생성
+            dialog.show();    // 알림창 띄우기
         }
 
         return super.onOptionsItemSelected(item);

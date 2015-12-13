@@ -38,6 +38,9 @@
     <string name="action_profile">Profile</string>
     <string name="action_setting">Setting</string>
     <string name="action_search">Search</string>
+    <string name="action_signout">Sign Out</string>
+    <string name="title_text_confirm_signout_message">Are you sure you would like to sign out?</string>
+
     <string name="action_invite">Invite</string>
     <string name="action_search_user">Search User</string>
     <string name="action_select_friend">Select Friend</string>

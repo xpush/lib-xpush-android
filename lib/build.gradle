@@ -4,7 +4,7 @@ publish {
     userOrg = '0nlyoung7'
     groupId = 'io.xpush'
     artifactId = 'lib-xpush-android'
-    publishVersion = '0.0.2'
+    publishVersion = '0.0.3'
     desc = 'XPUSH library for Android - It was inspired by the Adjust UI of Instagram.'
     website = 'https://github.com/xpush/lib-xpush-android'
     issueTracker = "${website}/issues"
