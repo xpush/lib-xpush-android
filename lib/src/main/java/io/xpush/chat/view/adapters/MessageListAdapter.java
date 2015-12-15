@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
@@ -79,7 +78,6 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
         @Override
         public void onClick(View view) {
-            Toast.makeText(view.getContext(), "position = " + getPosition(), Toast.LENGTH_SHORT).show();
         }
 
 

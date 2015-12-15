@@ -2,11 +2,15 @@ package io.xpush.sampleChat.fragments;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
 
@@ -19,9 +23,33 @@ public class ChatFragment extends XPushChatFragment {
 
     public static final String TAG = ChatFragment.class.getSimpleName();
 
+    private ImageView mChatPlus;
+    private RelativeLayout mHiddenPannel;
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_chat_new, menu);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mChatPlus = (ImageView) view.findViewById(R.id.action_chat_plus);
+
+        mHiddenPannel = (RelativeLayout) view.findViewById(R.id.hidden_panel);
+
+        mChatPlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if( mHiddenPannel.getVisibility() == View.GONE ){
+                    mHiddenPannel.setVisibility(View.VISIBLE);
+                } else {
+                    mHiddenPannel.setVisibility(View.GONE);
+                }
+
+            }
+        });
     }
 
     @Override
