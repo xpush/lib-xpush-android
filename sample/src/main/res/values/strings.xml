@@ -63,4 +63,9 @@
     <string name="title_text_edit_status_message">상태 메시지를 입력해주세요.</string>
 
     <string name="label_search_user">ID or Name</string>
+
+
+    <!-- ChatActivity -->
+    <string name="action_select_photo">사진선택</string>
+    <string name="action_take_photo">사진 촬영</string>
 </resources>
