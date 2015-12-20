@@ -560,9 +560,17 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                 }
             } else {
                 if (mSession.getId().equals(xpushMessage.getSenderId())) {
-                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                    if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {
+                        xpushMessage.setType(XPushMessage.TYPE_SEND_IMAGE);
+                    } else {
+                        xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                    }
                 } else {
-                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                    if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {
+                        xpushMessage.setType(XPushMessage.TYPE_RECEIVE_IMAGE);
+                    } else {
+                        xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                    }
                 }
             }
 

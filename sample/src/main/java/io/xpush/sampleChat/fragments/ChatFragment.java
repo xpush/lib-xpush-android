@@ -3,6 +3,8 @@ package io.xpush.sampleChat.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
@@ -13,15 +15,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.GridLayoutAnimationController;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
+import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.sampleChat.activities.SelectFriendActivity;
@@ -56,12 +65,21 @@ public class ChatFragment extends XPushChatFragment {
         mChatPlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if( mHiddenPannel.getVisibility() == View.GONE ){
+                if (mHiddenPannel.getVisibility() == View.GONE) {
                     mHiddenPannel.setVisibility(View.VISIBLE);
                 } else {
                     mHiddenPannel.setVisibility(View.GONE);
                 }
 
+            }
+        });
+
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
+                if( position == 0 ){
+                    openGallery();
+                }
             }
         });
     }
@@ -96,7 +114,7 @@ public class ChatFragment extends XPushChatFragment {
             Intent intent = new Intent(mActivity, SelectFriendActivity.class);
             intent.putExtra("channelId", mChannel);
             intent.putParcelableArrayListExtra("channelUsers", mXpushUsers);
-            startActivityForResult(intent, 201);
+            startActivityForResult(intent, Constants.REQUEST_INVITE_USER);
         }
 
         return super.onOptionsItemSelected(item);
@@ -107,22 +125,64 @@ public class ChatFragment extends XPushChatFragment {
         super.onActivityResult(requestCode, resultCode, data);
 
         // 수행을 제대로 한 경우
-        if( requestCode == 201 && resultCode == mActivity.RESULT_OK){
-            Log.d(TAG, " =========== invite Result =========== ");
-            ArrayList<String> userArrayList = data.getStringArrayListExtra("userArray");
-            ArrayList<String> userNameArray = data.getStringArrayListExtra("userNameArray");
+        if( resultCode == mActivity.RESULT_OK){
+            if( requestCode == Constants.REQUEST_INVITE_USER  ) {
+                Log.d(TAG, " =========== invite Result =========== ");
+                ArrayList<String> userArrayList = data.getStringArrayListExtra("userArray");
+                ArrayList<String> userNameArray = data.getStringArrayListExtra("userNameArray");
 
-            if( userArrayList != null) {
+                if( userArrayList != null) {
 
-                Log.d(TAG, userArrayList.toString() );
-                Log.d(TAG, userNameArray.toString());
+                    Log.d(TAG, userArrayList.toString() );
+                    Log.d(TAG, userNameArray.toString());
 
-                mChannelCore.channelJoin(userArrayList, new CallbackEvent() {
-                    @Override
-                    public void call(Object... args) {
+                    mChannelCore.channelJoin(userArrayList, new CallbackEvent() {
+                        @Override
+                        public void call(Object... args) {
 
-                    }
-                });
+                        }
+                    });
+                }
+            } else if ( requestCode == Constants.REQUEST_EDIT_IMAGE ){
+                Uri selectedImageUri = data.getData();
+                UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
+                imageUpload.execute();
+            }
+        }
+    }
+
+    public void openGallery(){
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select file to use profile"), Constants.REQUEST_EDIT_IMAGE);
+    }
+
+    private class UploadImageTask extends AsyncTask<Void, Void, String> {
+        Uri mUri;
+
+        public UploadImageTask( Uri uri ){
+            this.mUri = uri;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            String downloadUrl = XPushCore.getInstance().uploadImage(mUri);
+            return downloadUrl;
+        }
+
+        @Override
+        protected  void onPostExecute(final String imageUrl){
+            super.onPostExecute(imageUrl);
+            if( imageUrl != null ){
+                //updateProfile();
+
+                Log.d(TAG, " Upload result imageUrl ");
+                Log.d(TAG, imageUrl );
+
+                if( mChannelCore != null ){
+                    mChannelCore.sendMessage( imageUrl, "IM" );
+                }
             }
         }
     }
@@ -173,5 +233,4 @@ public class ChatFragment extends XPushChatFragment {
             tvTitle = (TextView) item.findViewById(R.id.thumbTitle);
         }
     }
-
 }

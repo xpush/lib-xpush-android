@@ -19,6 +19,10 @@ public class XPushMessage {
     public static final int TYPE_INVITE = 2;
     public static final int TYPE_ACTION = 3;
 
+    public static final int TYPE_IMAGE = 4;
+    public static final int TYPE_SEND_IMAGE = 5;
+    public static final int TYPE_RECEIVE_IMAGE = 6;
+
     private String rowId;
     private String id;
     private String channel;
@@ -145,7 +149,9 @@ public class XPushMessage {
 
             if( data.has("TP") ){
                 if( "IN".equals(data.getString("TP")) ) {
-                    this.type = 2;
+                    this.type = TYPE_INVITE;
+                } else if( "IM".equals(data.getString("TP")) ) {
+                    this.type = TYPE_IMAGE;
                 }
             }
 
