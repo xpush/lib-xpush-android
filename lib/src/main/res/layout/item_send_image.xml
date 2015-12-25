@@ -1,5 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -27,7 +28,12 @@
         <LinearLayout
             android:gravity="center_vertical"
             android:orientation="vertical" android:id="@+id/bubble" android:clickable="true" android:longClickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" android:background="@drawable/message_bubble_me">
-            <TextView android:gravity="center_vertical" android:maxWidth="360dip" android:id="@+id/vMessage" android:autoLink="none" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="fill_parent" android:includeFontPadding="false"/>
+
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/vMessage"
+                android:maxWidth="200.0dip" android:maxHeight="200.0dip" android:minWidth="180.0dip" android:minHeight="180.0dip"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                fresco:actualImageScaleType="focusCrop" />
         </LinearLayout>
     </LinearLayout>
 

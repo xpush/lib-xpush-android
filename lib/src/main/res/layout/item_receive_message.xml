@@ -31,7 +31,7 @@
         <LinearLayout
             android:gravity="center_vertical"
             android:orientation="vertical" android:id="@+id/bubble" android:clickable="true" android:longClickable="true" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" android:background="@drawable/message_bubble_you">
-            <TextView android:gravity="center_vertical" android:maxWidth="360dip" android:id="@+id/tvMessage" android:autoLink="none" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="fill_parent" android:includeFontPadding="false"/>
+            <TextView android:gravity="center_vertical" android:maxWidth="360dip" android:id="@+id/vMessage" android:autoLink="none" android:layout_gravity="center_vertical" android:layout_width="wrap_content" android:layout_height="fill_parent" android:includeFontPadding="false"/>
         </LinearLayout>
     </LinearLayout>
 

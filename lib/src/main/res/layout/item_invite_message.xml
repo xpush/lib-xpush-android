@@ -28,7 +28,7 @@
             android:gravity="center_vertical"
             android:orientation="vertical" android:id="@+id/bubble" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="2dp" android:background="@drawable/message_bubble_log">
             <TextView
-                android:id="@+id/tvMessage"
+                android:id="@+id/vMessage"
                 android:gravity="center_vertical"
                 android:maxWidth="360dip"
                 android:autoLink="none"
