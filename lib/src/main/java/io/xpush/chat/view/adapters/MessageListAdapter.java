@@ -39,7 +39,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         } else if (viewType == XPushMessage.TYPE_SEND_IMAGE ) {
             layout = R.layout.item_send_image;
         } else if (viewType == XPushMessage.TYPE_RECEIVE_IMAGE ) {
-            layout = R.layout.item_invite_message;
+            layout = R.layout.item_receive_image;
         }
 
         View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
@@ -96,13 +96,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
         public void setMessage(String message, int type) {
 
-            Log.d("TAG", "33333");
-
             if (null == vMessage) return;
             if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ) {
-
-                Log.d("TAG", "2222222");
-                Log.d("TAG", Uri.parse(message).toString());
                 ( (ImageView) vMessage ).setImageURI(Uri.parse(message));
             } else {
                 ( (TextView) vMessage ).setText(message);
