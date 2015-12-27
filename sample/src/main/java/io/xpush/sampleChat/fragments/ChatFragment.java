@@ -28,6 +28,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
@@ -39,9 +41,14 @@ public class ChatFragment extends XPushChatFragment {
 
     public static final String TAG = ChatFragment.class.getSimpleName();
 
-    private ImageView mChatPlus;
-    private RelativeLayout mHiddenPannel;
-    private GridView mGridView;
+    @Bind(R.id.action_chat_plus)
+    ImageView mChatPlus;
+
+    @Bind(R.id.hidden_panel)
+    RelativeLayout mHiddenPannel;
+
+    @Bind(R.id.grid_chat_plus)
+    GridView mGridView;
 
     private Integer[] mThumbIds = { R.drawable.ic_photo_black, R.drawable.ic_camera_black };
     private Integer[] mTitles = { R.string.action_select_photo, R.string.action_take_photo };
@@ -54,12 +61,8 @@ public class ChatFragment extends XPushChatFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        ButterKnife.bind(this, view);
 
-        mChatPlus = (ImageView) view.findViewById(R.id.action_chat_plus);
-
-        mHiddenPannel = (RelativeLayout) view.findViewById(R.id.hidden_panel);
-
-        mGridView = (GridView) view.findViewById(R.id.grid_chat_plus);
         mGridView.setAdapter(new ChatMenuAdapter());
 
         mChatPlus.setOnClickListener(new View.OnClickListener() {
@@ -67,12 +70,16 @@ public class ChatFragment extends XPushChatFragment {
             public void onClick(View view) {
                 if (mHiddenPannel.getVisibility() == View.GONE) {
                     mHiddenPannel.setVisibility(View.VISIBLE);
+                    mChatPlus.setImageResource(R.drawable.ic_close_black);
                 } else {
                     mHiddenPannel.setVisibility(View.GONE);
+                    mChatPlus.setImageResource(R.drawable.ic_add_black);
                 }
 
             }
         });
+
+        mGridView.setNumColumns(mTitles.length);
 
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -127,14 +134,10 @@ public class ChatFragment extends XPushChatFragment {
         // 수행을 제대로 한 경우
         if( resultCode == mActivity.RESULT_OK){
             if( requestCode == Constants.REQUEST_INVITE_USER  ) {
-                Log.d(TAG, " =========== invite Result =========== ");
                 ArrayList<String> userArrayList = data.getStringArrayListExtra("userArray");
                 ArrayList<String> userNameArray = data.getStringArrayListExtra("userNameArray");
 
                 if( userArrayList != null) {
-
-                    Log.d(TAG, userArrayList.toString() );
-                    Log.d(TAG, userNameArray.toString());
 
                     mChannelCore.channelJoin(userArrayList, new CallbackEvent() {
                         @Override
@@ -175,10 +178,8 @@ public class ChatFragment extends XPushChatFragment {
         protected  void onPostExecute(final String imageUrl){
             super.onPostExecute(imageUrl);
             if( imageUrl != null ){
-                //updateProfile();
 
-                Log.d(TAG, " Upload result imageUrl ");
-                Log.d(TAG, imageUrl );
+                Log.d(TAG, " Upload result imageUrl : " + imageUrl );
 
                 if( mChannelCore != null ){
                     mChannelCore.sendMessage( imageUrl, "IM" );
