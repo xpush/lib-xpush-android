@@ -728,7 +728,8 @@ public class XPushCore {
     public String uploadImage(Uri uri){
 
         String downloadUrl = null;
-        String url = mXpushSession.getServerUrl()+"/upload";
+        //String url = mXpushSession.getServerUrl()+"/upload";
+        String url = "http://54.178.160.166:8000/upload";
         JSONObject userData = new JSONObject();
 
         try {
