@@ -466,7 +466,7 @@ public class XPushService extends Service {
     }
 
     // 수신 메세지 noti
-    private void broadcastReceivedMessage(String channel, String name, String message) {
+    private void broadcastReceivedMessage(String channel, String name, String message, int type) {
 
         Intent broadcastIntent = new Intent(getApplicationContext(), PushMsgReceiver.class);
         broadcastIntent.setAction("io.xpush.chat.MGRECVD");
@@ -474,6 +474,7 @@ public class XPushService extends Service {
         broadcastIntent.putExtra("rcvd.C", channel);
         broadcastIntent.putExtra("rcvd.NM", name);
         broadcastIntent.putExtra("rcvd.MG", message);
+        broadcastIntent.putExtra("rcvd.TP", type);
 
         sendBroadcast(broadcastIntent);
     }
@@ -584,10 +585,19 @@ public class XPushService extends Service {
                             }
 
                             if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
+
                                 if (mXpushSession.getId().equals(xpushMessage.getSenderId())) {
-                                    xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                                    if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {
+                                        xpushMessage.setType(XPushMessage.TYPE_SEND_IMAGE);
+                                    } else {
+                                        xpushMessage.setType(XPushMessage.TYPE_SEND_MESSAGE);
+                                    }
                                 } else {
-                                    xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                                    if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {
+                                        xpushMessage.setType(XPushMessage.TYPE_RECEIVE_IMAGE);
+                                    } else {
+                                        xpushMessage.setType(XPushMessage.TYPE_RECEIVE_MESSAGE);
+                                    }
                                 }
                             }
 
@@ -597,7 +607,7 @@ public class XPushService extends Service {
                             e.printStackTrace();
                         }
 
-                        broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getSenderName(), xpushMessage.getMessage() );
+                        broadcastReceivedMessage( xpushMessage.getChannel(), xpushMessage.getSenderName(), xpushMessage.getMessage(), xpushMessage.getType() );
 
                     }
                 } else {

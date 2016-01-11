@@ -3,6 +3,7 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
@@ -134,14 +135,16 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
 
         mXpushChannel = new XPushChannel(bundle);
-
         mChannel = mXpushChannel.getId();
-        mUsers = mXpushChannel.getUsers();
 
-        if( mUsers != null ) {
-            Log.d(TAG, "=== mUsers === : " + mUsers.size());
-        } else {
-            Log.d(TAG, "=== mUsers === : null ");
+        if( null ==  mXpushChannel.getName() ){
+
+            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel);
+            Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                mXpushChannel = new XPushChannel(cursor);
+            }
         }
 
         mUserId = mSession.getId();
@@ -159,7 +162,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_chat, container, false);
     }
-
 
     @Override
     public void onResume(){
@@ -577,10 +579,10 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             if( mUsers != null && mUsers.size() > 2 ) {
                 values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
             } else {
-                if (XPushMessage.TYPE_SEND_MESSAGE == xpushMessage.getType()) {
+                if (XPushMessage.TYPE_SEND_MESSAGE == xpushMessage.getType() || XPushMessage.TYPE_SEND_IMAGE == xpushMessage.getType() ) {
                     values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
                     values.put(ChannelTable.KEY_IMAGE, mXpushChannel.getImage());
-                } else if (XPushMessage.TYPE_RECEIVE_MESSAGE == xpushMessage.getType()) {
+                } else if (XPushMessage.TYPE_RECEIVE_MESSAGE == xpushMessage.getType() || XPushMessage.TYPE_RECEIVE_IMAGE == xpushMessage.getType() ) {
                     values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
                     values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
                 }

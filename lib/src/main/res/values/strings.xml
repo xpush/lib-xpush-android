@@ -39,4 +39,7 @@
     <string name="crash_dialog_text">Crahed !!!</string>
 
     <string name="title_text_group_chatting">Group Chatting</string>
+
+
+    <string name="title_for_image_type">Photo</string>
 </resources>

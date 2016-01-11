@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushMessage;
 
 public class PushMsgReceiver extends BroadcastReceiver {
 
@@ -39,7 +40,9 @@ public class PushMsgReceiver extends BroadcastReceiver {
                 String channel = intent.getStringExtra("rcvd.C");
                 String name = intent.getStringExtra("rcvd.NM");
                 String message = intent.getStringExtra("rcvd.MG");
-                showNotification(mContext, name, channel, message);
+                int type= intent.getIntExtra("rcvd.TP", XPushMessage.TYPE_RECEIVE_MESSAGE);
+
+                showNotification(mContext, name, channel, message, type);
             }else if("com.google.android.c2dm.intent.RECEIVE".equals(action)) {    // gcm msg receive
                 if (!extras.isEmpty()) {
                     Log.d(TAG, extras.toString());
@@ -54,7 +57,11 @@ public class PushMsgReceiver extends BroadcastReceiver {
         }
     }
 
-    public void showNotification(Context mContext, String name, String channel, String message) {
+    public void showNotification(Context mContext, String name, String channel, String message){
+        showNotification( mContext, name, channel, message, XPushMessage.TYPE_RECEIVE_MESSAGE );
+    }
+
+    public void showNotification(Context mContext, String name, String channel, String message, int type) {
         Log.d(TAG, "showNotification");
 
         String startActivity = null;
@@ -82,7 +89,13 @@ public class PushMsgReceiver extends BroadcastReceiver {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(mContext);
         mBuilder.setSmallIcon(R.drawable.ic_launcher);//required
         mBuilder.setContentTitle(name);//required
-        mBuilder.setContentText(message);//required
+
+        // IMAGE TYPE인 경우 사진이라고만 표시함
+        if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ){
+            mBuilder.setContentText( mContext.getString(R.string.title_for_image_type) );//required
+        } else {
+            mBuilder.setContentText(message);//required
+        }
         mBuilder.setTicker( mContext.getString(R.string.app_id));//optional
         mBuilder.setAutoCancel(true);
         mBuilder.setContentIntent(contentIntent);

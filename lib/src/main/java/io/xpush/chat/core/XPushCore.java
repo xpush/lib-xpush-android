@@ -728,8 +728,7 @@ public class XPushCore {
     public String uploadImage(Uri uri){
 
         String downloadUrl = null;
-        //String url = mXpushSession.getServerUrl()+"/upload";
-        String url = "http://54.178.160.166:8000/upload";
+        String url = mXpushSession.getServerUrl()+"/upload";
         JSONObject userData = new JSONObject();
 
         try {
@@ -771,6 +770,8 @@ public class XPushCore {
             }
 
             JSONObject res = new JSONObject( response.body().string() );
+            Log.d(TAG,  res.toString() );
+
             if( "ok".equals(res.getString("status")) ) {
                 JSONObject result = res.getJSONObject("result");
 

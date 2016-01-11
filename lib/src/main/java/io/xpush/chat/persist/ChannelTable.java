@@ -14,6 +14,17 @@ public class ChannelTable {
     public static final String KEY_UPDATED = "updated";
     public static String SQLITE_TABLE;
 
+    public static final String[] ALL_PROJECTION = {
+        KEY_ROWID,
+        KEY_ID,
+        KEY_NAME,
+        KEY_USERS,
+        KEY_IMAGE,
+        KEY_COUNT,
+        KEY_MESSAGE,
+        KEY_UPDATED
+    };
+
     public static void onCreate(SQLiteDatabase db, String tableName) {
         SQLITE_TABLE = tableName;
 
