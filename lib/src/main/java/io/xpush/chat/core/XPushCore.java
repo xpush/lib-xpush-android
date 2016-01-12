@@ -739,7 +739,6 @@ public class XPushCore {
         }
 
         String realPath = RealPathUtil.getRealPath(getBaseContext(), uri);
-
         File aFile = new File(realPath);
 
         RequestBody requestBody = new MultipartBuilder()

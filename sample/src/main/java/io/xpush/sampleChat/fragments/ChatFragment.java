@@ -3,9 +3,12 @@ package io.xpush.sampleChat.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +29,11 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -52,6 +59,8 @@ public class ChatFragment extends XPushChatFragment {
 
     private Integer[] mThumbIds = { R.drawable.ic_photo_black, R.drawable.ic_camera_black };
     private Integer[] mTitles = { R.string.action_select_photo, R.string.action_take_photo };
+
+    private String mCurrentPhotoPath;
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -84,8 +93,10 @@ public class ChatFragment extends XPushChatFragment {
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view, int position, long id) {
-                if( position == 0 ){
+                if (position == 0) {
                     openGallery();
+                } else if (position == 1) {
+                    takePicture();
                 }
             }
         });
@@ -146,9 +157,13 @@ public class ChatFragment extends XPushChatFragment {
                         }
                     });
                 }
-            } else if ( requestCode == Constants.REQUEST_EDIT_IMAGE ){
+            } else if ( requestCode == Constants.REQUEST_IMAGE_SELECT ){
                 Uri selectedImageUri = data.getData();
                 UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
+                imageUpload.execute();
+            } else if ( requestCode == Constants.REQUEST_IMAGE_CAPTURE ){
+                galleryAddPic();
+                UploadImageTask imageUpload = new UploadImageTask(Uri.parse(mCurrentPhotoPath));
                 imageUpload.execute();
             }
         }
@@ -158,7 +173,53 @@ public class ChatFragment extends XPushChatFragment {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select file to use profile"), Constants.REQUEST_EDIT_IMAGE);
+        startActivityForResult(Intent.createChooser(intent, "Select file to use profile"), Constants.REQUEST_IMAGE_SELECT);
+    }
+
+    private void takePicture(){
+        Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+        if (intent.resolveActivity(mActivity.getPackageManager()) != null) {
+
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                intent.putExtra(MediaStore.EXTRA_OUTPUT,
+                        Uri.fromFile(photoFile));
+                startActivityForResult(intent,  Constants.REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        return image;
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        mActivity.sendBroadcast(mediaScanIntent);
     }
 
     private class UploadImageTask extends AsyncTask<Void, Void, String> {

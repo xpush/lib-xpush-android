@@ -74,20 +74,25 @@ public class RealPathUtil {
     public static String getRealPath(Context context, Uri uri){
         String realPath = null;
 
-        // SDK < API11
-        if (Build.VERSION.SDK_INT < 11) {
-            realPath = RealPathUtil.getRealPathFromURI_BelowAPI11(context, uri);
-
-            // SDK >= 11 && SDK < 19
-        } else if (Build.VERSION.SDK_INT < 19) {
-            realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
-
-            // SDK > 19 (Android 4.4)
+        if( uri.toString().startsWith("file:")){
+            realPath = uri.toString().replace("file:", "");
         } else {
-            if (String.valueOf(uri).contains("documents")) {
-                realPath = RealPathUtil.getRealPathFromURI_API19(context, uri);
-            } else {
+
+            // SDK < API11
+            if (Build.VERSION.SDK_INT < 11) {
+                realPath = RealPathUtil.getRealPathFromURI_BelowAPI11(context, uri);
+
+                // SDK >= 11 && SDK < 19
+            } else if (Build.VERSION.SDK_INT < 19) {
                 realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
+
+                // SDK > 19 (Android 4.4)
+            } else {
+                if (String.valueOf(uri).contains("documents")) {
+                    realPath = RealPathUtil.getRealPathFromURI_API19(context, uri);
+                } else {
+                    realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
+                }
             }
         }
 
