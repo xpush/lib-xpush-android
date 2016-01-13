@@ -28,17 +28,6 @@ public abstract class XPushChannelsFragment extends Fragment implements LoaderMa
     protected ChannelCursorAdapter mDataAdapter;
     private TextView mEmptyMsg;
 
-    protected String[] mProjection = {
-        ChannelTable.KEY_ROWID,
-                ChannelTable.KEY_ID,
-                ChannelTable.KEY_NAME,
-                ChannelTable.KEY_USERS,
-                ChannelTable.KEY_IMAGE,
-                ChannelTable.KEY_COUNT,
-                ChannelTable.KEY_MESSAGE,
-                ChannelTable.KEY_UPDATED
-    };
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -67,7 +56,7 @@ public abstract class XPushChannelsFragment extends Fragment implements LoaderMa
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         CursorLoader cursorLoader = new CursorLoader(getActivity(),
-                XpushContentProvider.CHANNEL_CONTENT_URI, mProjection, null, null, null);
+                XpushContentProvider.CHANNEL_CONTENT_URI, ChannelTable.ALL_PROJECTION, null, null, null);
         return cursorLoader;
     }
 
@@ -89,17 +78,6 @@ public abstract class XPushChannelsFragment extends Fragment implements LoaderMa
     }
 
     private void displayListView(View view) {
-
-        String[] columns = new String[]{
-            ChannelTable.KEY_ROWID,
-            ChannelTable.KEY_ID,
-            ChannelTable.KEY_NAME,
-            ChannelTable.KEY_USERS,
-            ChannelTable.KEY_IMAGE,
-            ChannelTable.KEY_COUNT,
-            ChannelTable.KEY_MESSAGE,
-            ChannelTable.KEY_UPDATED
-        };
 
         mActivity = getActivity();
         mDataAdapter = new ChannelCursorAdapter(mActivity, null, 0);

@@ -64,7 +64,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
     @Override
     public List<XPushMessage> read() {
 
-        Cursor cursor = mDatabase.query(mTableName, getAllColumns(), null,
+        Cursor cursor = mDatabase.query(mTableName, MessageTable.ALL_PROJECTION, null,
                 null, null, null, null);
         List messages = new ArrayList();
         if (cursor != null && cursor.moveToFirst()) {
@@ -84,7 +84,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
         Cursor cursor = null;
 
         if( "".equals( mUserTableName ) || mUserTableName == null ){
-            cursor = mDatabase.query(mTableName, getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+            cursor = mDatabase.query(mTableName, MessageTable.ALL_PROJECTION, selection, selectionArgs, groupBy, having, orderBy);
         } else {
             String messageTableAlias = "a";
             String userTableAlias = "b";
@@ -135,18 +135,6 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
         mCount.close();
 
         return count;
-    }
-
-    public String[] getAllColumns() {
-        return new String[] { MessageTable.KEY_ROWID,
-                MessageTable.KEY_CHANNEL,
-                MessageTable.KEY_ID,
-                MessageTable.KEY_SENDER ,
-                MessageTable.KEY_IMAGE ,
-                MessageTable.KEY_COUNT ,
-                MessageTable.KEY_MESSAGE ,
-                MessageTable.KEY_TYPE ,
-                MessageTable.KEY_UPDATED };
     }
 
     public XPushMessage generateObjectFromCursor(Cursor cursor) {

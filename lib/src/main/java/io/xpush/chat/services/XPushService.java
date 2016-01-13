@@ -514,20 +514,10 @@ public class XPushService extends Service {
                             values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
                             values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
                             values.put(ChannelTable.KEY_IMAGE, xpushMessage.getImage());
-
-                            String[] projection = {
-                                ChannelTable.KEY_ROWID,
-                                ChannelTable.KEY_ID,
-                                ChannelTable.KEY_NAME,
-                                ChannelTable.KEY_USERS,
-                                ChannelTable.KEY_IMAGE,
-                                ChannelTable.KEY_COUNT,
-                                ChannelTable.KEY_MESSAGE,
-                                ChannelTable.KEY_UPDATED
-                            };
+                            values.put(ChannelTable.KEY_MESSAGE_TYPE, xpushMessage.getType());
 
                             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
-                            Cursor cursor = getContentResolver().query(singleUri, projection, null, null, null);
+                            Cursor cursor = getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
                             if (cursor != null && cursor.getCount() > 0) {
                                 cursor.moveToFirst();
 

@@ -20,6 +20,7 @@ public class XPushChannel {
     public static final String IMAGE = "image";
     public static final String COUNT = "count";
     public static final String MESSAGE = "message";
+    public static final String MESSAGE_TYPE = "message_type";
     public static final String UPDATED = "updated";
 
     public String rowId;
@@ -31,6 +32,7 @@ public class XPushChannel {
     public String image;
     public int count;
     public String message;
+    public int messageType;
     public long updated;
 
     public String getRowId() {
@@ -97,6 +99,14 @@ public class XPushChannel {
         this.updated = updated;
     }
 
+    public int getMessageType(){
+        return messageType;
+    }
+
+    public void setMessageType(int messageType){
+        this.messageType = messageType;
+    }
+
     public ArrayList<String> getUserNames() {
         return userNames;
     }
@@ -116,6 +126,7 @@ public class XPushChannel {
         this.count= cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE));
         this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(ChannelTable.KEY_UPDATED));
+        this.messageType = cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_MESSAGE_TYPE));
         String usersStr = cursor.getString(cursor.getColumnIndexOrThrow(ChannelTable.KEY_USERS));
 
         if( usersStr != null && usersStr.indexOf("@!@") > 0 ) {
@@ -134,6 +145,7 @@ public class XPushChannel {
         this.image= bundle.getString(IMAGE);
         this.count= bundle.getInt(COUNT);
         this.message= bundle.getString(MESSAGE);
+        this.messageType= bundle.getInt(MESSAGE_TYPE);
         this.updated= bundle.getLong(UPDATED);
     }
 
@@ -147,8 +159,8 @@ public class XPushChannel {
         b.putString(IMAGE, this.image);
         b.putInt(COUNT, this.count);
         b.putString(MESSAGE, this.message);
+        b.putInt(MESSAGE_TYPE, this.messageType);
         b.putLong(UPDATED, this.updated);
-
 
         return b;
     }
@@ -163,6 +175,7 @@ public class XPushChannel {
                 ", image='" + image + '\'' +
                 ", count='" + count + '\'' +
                 ", message='" + message + '\'' +
+                ", messageType='" + messageType + '\'' +
                 ", updated='" + updated + '\'' +
                 '}';
     }

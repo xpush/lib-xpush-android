@@ -18,6 +18,16 @@ public class MessageTable {
     public static final String KEY_UPDATED = "received";
     public static String SQLITE_TABLE;
 
+    public static final String[] ALL_PROJECTION = {
+        MessageTable.KEY_CHANNEL,
+        MessageTable.KEY_ID,
+        MessageTable.KEY_SENDER ,
+        MessageTable.KEY_IMAGE ,
+        MessageTable.KEY_COUNT ,
+        MessageTable.KEY_MESSAGE ,
+        MessageTable.KEY_TYPE ,
+        MessageTable.KEY_UPDATED };
+
     public static void onCreate(SQLiteDatabase db, String tableName) {
         SQLITE_TABLE = tableName;
 

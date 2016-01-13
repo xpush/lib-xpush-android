@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.widget.CursorAdapter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import java.util.List;
 
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.util.DateUtils;
 
 public class ChannelCursorAdapter extends CursorAdapter implements Filterable {
@@ -52,7 +54,11 @@ public class ChannelCursorAdapter extends CursorAdapter implements Filterable {
             thumbNail.setImageURI(Uri.parse(xpushChannel.getImage()));
         }
 
-        tvMessage.setText(xpushChannel.getMessage());
+        if( xpushChannel.getMessageType() == XPushMessage.TYPE_RECEIVE_IMAGE ||xpushChannel.getMessageType() == XPushMessage.TYPE_SEND_IMAGE  ) {
+            tvMessage.setText( context.getString(R.string.title_for_image_type_in_channel));
+        } else {
+            tvMessage.setText(xpushChannel.getMessage());
+        }
 
         if( xpushChannel.getCount() > 0 ) {
             tvCount.setText(String.valueOf(xpushChannel.getCount()));
@@ -61,7 +67,7 @@ public class ChannelCursorAdapter extends CursorAdapter implements Filterable {
             tvCount.setText(String.valueOf(xpushChannel.getCount()));
             tvCount.setVisibility(View.INVISIBLE);
         }
-        tvDate.setText(DateUtils.getTimeString(date) );
+        tvDate.setText(DateUtils.getTimeString(date));
 
         tvTitle.setText(title);
     }

@@ -11,6 +11,7 @@ public class ChannelTable {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_COUNT = "count";
     public static final String KEY_MESSAGE = "message";
+    public static final String KEY_MESSAGE_TYPE = "message_type";
     public static final String KEY_UPDATED = "updated";
     public static String SQLITE_TABLE;
 
@@ -22,6 +23,7 @@ public class ChannelTable {
         KEY_IMAGE,
         KEY_COUNT,
         KEY_MESSAGE,
+        KEY_MESSAGE_TYPE,
         KEY_UPDATED
     };
 
@@ -39,6 +41,7 @@ public class ChannelTable {
                         KEY_IMAGE + "," +
                         KEY_COUNT + " integer ," +
                         KEY_MESSAGE + "," +
+                        KEY_MESSAGE_TYPE + " integer ,"+
                         KEY_UPDATED + " integer );";
 
         db.execSQL(DATABASE_CREATE);

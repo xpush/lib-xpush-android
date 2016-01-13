@@ -590,6 +590,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
             values.put(ChannelTable.KEY_ID, xpushMessage.getChannel());
             values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
+            values.put(ChannelTable.KEY_MESSAGE_TYPE, xpushMessage.getType());
             values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
             values.put(ChannelTable.KEY_COUNT, 0);
 
