@@ -3,11 +3,9 @@ package io.xpush.chat.view.adapters;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -98,7 +96,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
             if (null == vMessage) return;
             if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ) {
-                ( (ImageView) vMessage ).setImageURI(Uri.parse(message));
+
+                /** TODO Set actual image size
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 200);
+                ((SimpleDraweeView) vMessage ).setLayoutParams(layoutParams);
+                 */
+
+                ( (SimpleDraweeView) vMessage ).setImageURI(Uri.parse(message));
             } else {
                 ( (TextView) vMessage ).setText(message);
             }
