@@ -9,8 +9,15 @@ import android.os.Build;
 import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class RealPathUtil {
+
+    private static final String[] sArrays = {"png","jpg","jpeg","bmp","gif"};
+    private static final ArrayList<String> imageExtList = new ArrayList<String>(Arrays.asList(sArrays));
 
     @SuppressLint("NewApi")
     public static String getRealPathFromURI_API19(Context context, Uri uri){
@@ -97,5 +104,18 @@ public class RealPathUtil {
         }
 
         return realPath;
+    }
+
+
+    public static boolean isImagePath(String path){
+
+        boolean result = false;
+        if( path.indexOf(".") > -1 ) {
+            String ext = path.substring(path.lastIndexOf(".") + 1);
+            if (imageExtList.indexOf(ext) > -1) {
+                result = true;
+            }
+        }
+        return result;
     }
 }

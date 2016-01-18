@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,6 +41,7 @@ import butterknife.ButterKnife;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.util.RealPathUtil;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.sampleChat.activities.SelectFriendActivity;
@@ -158,10 +160,25 @@ public class ChatFragment extends XPushChatFragment {
                     });
                 }
             } else if ( requestCode == Constants.REQUEST_IMAGE_SELECT ){
+
+                mHiddenPannel.setVisibility(View.GONE);
+                mChatPlus.setImageResource(R.drawable.ic_add_black);
+
                 Uri selectedImageUri = data.getData();
-                UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
-                imageUpload.execute();
+
+                String realPath = RealPathUtil.getRealPath(mActivity, selectedImageUri);
+                if( RealPathUtil.isImagePath( realPath ) ) {
+                    UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
+                    imageUpload.execute();
+                } else {
+                    Toast.makeText(mActivity, getString(R.string.success_message_signup), Toast.LENGTH_SHORT).show();
+                }
+
             } else if ( requestCode == Constants.REQUEST_IMAGE_CAPTURE ){
+
+                mHiddenPannel.setVisibility(View.GONE);
+                mChatPlus.setImageResource(R.drawable.ic_add_black);
+
                 galleryAddPic();
                 UploadImageTask imageUpload = new UploadImageTask(Uri.parse(mCurrentPhotoPath));
                 imageUpload.execute();
@@ -190,8 +207,7 @@ public class ChatFragment extends XPushChatFragment {
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                        Uri.fromFile(photoFile));
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                 startActivityForResult(intent,  Constants.REQUEST_IMAGE_CAPTURE);
             }
         }

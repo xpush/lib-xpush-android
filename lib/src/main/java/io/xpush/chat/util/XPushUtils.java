@@ -1,6 +1,7 @@
 package io.xpush.chat.util;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

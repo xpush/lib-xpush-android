@@ -68,4 +68,5 @@
     <!-- ChatActivity -->
     <string name="action_select_photo">사진선택</string>
     <string name="action_take_photo">사진 촬영</string>
+    <string name="valid_message_image_upload">이미지 파일만 선택해주세요.</string>
 </resources>
