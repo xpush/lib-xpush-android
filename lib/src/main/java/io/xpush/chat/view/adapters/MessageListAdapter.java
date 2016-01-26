@@ -1,8 +1,10 @@
 package io.xpush.chat.view.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +18,12 @@ import io.xpush.chat.R;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.util.DateUtils;
 
-
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.ViewHolder> {
 
     private List<XPushMessage> mXPushMessages;
+    private static MessageOnClickListener mMessageOnClickListener;
 
-    public MessageListAdapter(Context context, List<XPushMessage> xpushMessages) {
+    public MessageListAdapter(List<XPushMessage> xpushMessages) {
         mXPushMessages = xpushMessages;
     }
 
@@ -70,6 +72,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         private TextView tvTime;
         private SimpleDraweeView thumbNail;
         private View vMessage;
+        private View vClickableView;
 
         private ViewHolder(View itemView) {
             super(itemView);
@@ -78,14 +81,15 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             tvUser = (TextView) itemView.findViewById(R.id.tvUser);
             thumbNail = (SimpleDraweeView) itemView.findViewById(R.id.thumbnail);
             vMessage = (View) itemView.findViewById(R.id.vMessage);
-
-            itemView.setOnClickListener(this);
+            vClickableView = (View)itemView.findViewById(R.id.bubble);
+            vClickableView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            int position  = ViewHolder.super.getAdapterPosition();
+            mMessageOnClickListener.onMessageClick(mXPushMessages.get(position).getMessage(), mXPushMessages.get(position).getType());
         }
-
 
         public void setUsername(String username) {
             if (null == tvUser) return;
@@ -117,5 +121,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             if (null == image || null == thumbNail) return;
             thumbNail.setImageURI(Uri.parse(image));
         }
+    }
+
+    public void setOnItemClickListener(MessageOnClickListener clickListener) {
+        MessageListAdapter.mMessageOnClickListener = clickListener;
+    }
+
+    public interface MessageOnClickListener  {
+        public void onMessageClick(String message, int type);
     }
 }

@@ -3,6 +3,7 @@ package io.xpush.sampleChat.fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -41,9 +42,11 @@ import butterknife.ButterKnife;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
+import io.xpush.sampleChat.activities.ChatActivity;
 import io.xpush.sampleChat.activities.SelectFriendActivity;
 
 public class ChatFragment extends XPushChatFragment {
@@ -310,5 +313,10 @@ public class ChatFragment extends XPushChatFragment {
             ivIcon = (ImageView) item.findViewById(R.id.thumbImage);
             tvTitle = (TextView) item.findViewById(R.id.thumbTitle);
         }
+    }
+
+    @Override
+    public void onMessageClick(String message, int type) {
+        Log.d(TAG, message);
     }
 }

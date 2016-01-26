@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -64,7 +65,7 @@ import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 
-public class XPushChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
+public abstract class XPushChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
     public static final String TAG = XPushChatFragment.class.getSimpleName();
 
@@ -75,7 +76,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
     private RecyclerView mRecyclerView;
     private EditText mInputMessageView;
-    private RecyclerView.Adapter mAdapter;
+    private MessageListAdapter mAdapter;
     private boolean mTyping = false;
 
     private String mUserId;
@@ -115,7 +116,14 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageListAdapter(activity, mXpushMessages);
+        mAdapter = new MessageListAdapter(mXpushMessages);
+
+        mAdapter.setOnItemClickListener(new MessageListAdapter.MessageOnClickListener() {
+            @Override
+            public void onMessageClick(String message, int type) {
+                Log.d(TAG, "clicked : " + message );
+            }
+        });
     }
 
     @Override
@@ -619,7 +627,7 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
         XPushCore.getInstance().createChannel(xpushChannel, new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                if( args[0] != null ) {
+                if (args[0] != null) {
                     mChannelCore = (ChannelCore) args[0];
 
                     // newChannelFlag 를 false로
@@ -645,10 +653,10 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
 
     //add unread message
     private void messageUnread(){
-        mChannelCore.getMessageUnread( lastReceiveTime, new CallbackEvent(){
+        mChannelCore.getMessageUnread(lastReceiveTime, new CallbackEvent() {
             @Override
             public void call(Object... args) {
-                if( args != null && args.length > 0 && args[0] != null) {
+                if (args != null && args.length > 0 && args[0] != null) {
                     JSONArray messages = (JSONArray) args[0];
                     try {
                         for (int inx = 0; inx < messages.length(); inx++) {
@@ -676,4 +684,6 @@ public class XPushChatFragment extends Fragment implements LoaderManager.LoaderC
             leave();
         }
     }
+
+    public abstract void onMessageClick(String message,int type);
 }
