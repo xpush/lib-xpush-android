@@ -118,10 +118,17 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         super.onAttach(activity);
         mAdapter = new MessageListAdapter(mXpushMessages);
 
-        mAdapter.setOnItemClickListener(new MessageListAdapter.MessageOnClickListener() {
+        mAdapter.setOnItemClickListener(new MessageListAdapter.MessageClickListener() {
             @Override
             public void onMessageClick(String message, int type) {
                 Log.d(TAG, "clicked : " + message );
+                //onMessageClick(message, type);
+            }
+
+            @Override
+            public void onMessageLongClick(String message, int type) {
+                Log.d(TAG, "long clicked : " + message );
+                //onMessageLongClick(message, type);
             }
         });
     }
@@ -686,4 +693,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     }
 
     public abstract void onMessageClick(String message,int type);
+
+    public abstract void onMessageLongClick(String message,int type);
 }

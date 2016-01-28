@@ -9,7 +9,7 @@ import io.xpush.chat.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "xpush.db";
-    private static final int DATABASE_VERSION = 0;
+    private static final int DATABASE_VERSION = 2;
     private String CHANNEL_TABLE_NAME;
     private String MESSAGE_TABLE_NAME;
     private String USER_TABLE_NAME;

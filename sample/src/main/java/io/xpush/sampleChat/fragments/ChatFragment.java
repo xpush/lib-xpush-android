@@ -319,4 +319,9 @@ public class ChatFragment extends XPushChatFragment {
     public void onMessageClick(String message, int type) {
         Log.d(TAG, message);
     }
+
+    @Override
+    public void onMessageLongClick(String message, int type) {
+        Log.d(TAG, message);
+    }
 }

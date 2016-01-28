@@ -21,7 +21,7 @@ import io.xpush.chat.util.DateUtils;
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.ViewHolder> {
 
     private List<XPushMessage> mXPushMessages;
-    private static MessageOnClickListener mMessageOnClickListener;
+    private static MessageClickListener mMessageClickListener;
 
     public MessageListAdapter(List<XPushMessage> xpushMessages) {
         mXPushMessages = xpushMessages;
@@ -66,7 +66,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         return mXPushMessages.get(position).getType();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private TextView tvUser;
 
         private TextView tvTime;
@@ -83,12 +83,20 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             vMessage = (View) itemView.findViewById(R.id.vMessage);
             vClickableView = (View)itemView.findViewById(R.id.bubble);
             vClickableView.setOnClickListener(this);
+            vClickableView.setOnLongClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
             int position  = ViewHolder.super.getAdapterPosition();
-            mMessageOnClickListener.onMessageClick(mXPushMessages.get(position).getMessage(), mXPushMessages.get(position).getType());
+            mMessageClickListener.onMessageClick(mXPushMessages.get(position).getMessage(), mXPushMessages.get(position).getType());
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            int position  = ViewHolder.super.getAdapterPosition();
+            mMessageClickListener.onMessageLongClick(mXPushMessages.get(position).getMessage(), mXPushMessages.get(position).getType());
+            return true;
         }
 
         public void setUsername(String username) {
@@ -123,11 +131,13 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         }
     }
 
-    public void setOnItemClickListener(MessageOnClickListener clickListener) {
-        MessageListAdapter.mMessageOnClickListener = clickListener;
+    public void setOnItemClickListener(MessageClickListener clickListener) {
+        MessageListAdapter.mMessageClickListener = clickListener;
     }
 
-    public interface MessageOnClickListener  {
+    public interface MessageClickListener  {
         public void onMessageClick(String message, int type);
+
+        public void onMessageLongClick(String message, int type);
     }
 }

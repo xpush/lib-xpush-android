@@ -98,6 +98,7 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
             query.append(MessageTable.KEY_COUNT).append(", ");
             query.append(messageTableAlias+"."+MessageTable.KEY_MESSAGE).append(", ");
             query.append(messageTableAlias+"."+MessageTable.KEY_TYPE).append(", ");
+            query.append(messageTableAlias+"."+MessageTable.KEY_METADATA).append(", ");
             query.append(messageTableAlias+"."+MessageTable.KEY_UPDATED).append(" ");
             query.append(" from " + mTableName + " " + messageTableAlias + " LEFT outer join " + mUserTableName + " " + userTableAlias);
             query.append(" on " + messageTableAlias + "." + MessageTable.KEY_SENDER + "=" + userTableAlias + "." + UserTable.KEY_ID);
@@ -158,6 +159,9 @@ public class XPushMessageDataSource extends DataSource<XPushMessage> {
         values.put(MessageTable.KEY_MESSAGE, entity.getMessage());
         values.put(MessageTable.KEY_TYPE, entity.getType());
         values.put(MessageTable.KEY_UPDATED, entity.getUpdated());
+        if( entity.getMetadata() != null ){
+            values.put(MessageTable.KEY_METADATA, entity.getMetadata().toString());
+        }
         return values;
     }
 }

@@ -15,6 +15,7 @@ public class MessageTable {
     public static final String KEY_COUNT = "count";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_TYPE = "type";
+    public static final String KEY_METADATA = "metadata";
     public static final String KEY_UPDATED = "received";
     public static String SQLITE_TABLE;
 
@@ -26,6 +27,7 @@ public class MessageTable {
         MessageTable.KEY_COUNT ,
         MessageTable.KEY_MESSAGE ,
         MessageTable.KEY_TYPE ,
+        MessageTable.KEY_METADATA ,
         MessageTable.KEY_UPDATED };
 
     public static void onCreate(SQLiteDatabase db, String tableName) {
@@ -42,7 +44,8 @@ public class MessageTable {
                         KEY_IMAGE + "," +
                         KEY_COUNT + " integer ," +
                         KEY_MESSAGE + "," +
-                        KEY_TYPE + " integer ," +
+                        KEY_TYPE + " integer , " +
+                        KEY_METADATA + " ,"+
                         KEY_UPDATED + " integer );";
 
         db.execSQL(DATABASE_CREATE);

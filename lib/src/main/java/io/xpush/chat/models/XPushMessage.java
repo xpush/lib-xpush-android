@@ -3,6 +3,7 @@ package io.xpush.chat.models;
 import android.database.Cursor;
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URLDecoder;
@@ -32,6 +33,7 @@ public class XPushMessage {
     private String count;
     private String message;
     private int type;
+    private JSONObject metadata;
     private long updated;
     private ArrayList<String> users;
 
@@ -66,7 +68,6 @@ public class XPushMessage {
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
-
 
     public String getSenderName() {
         return senderName;
@@ -124,6 +125,14 @@ public class XPushMessage {
         this.users = users;
     }
 
+    public JSONObject getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(JSONObject metadata) {
+        this.metadata = metadata;
+    }
+
     public XPushMessage(){
     }
 
@@ -147,12 +156,18 @@ public class XPushMessage {
                 }
             }
 
+            // Message Type
             if( data.has("TP") ){
                 if( "IN".equals(data.getString("TP")) ) {
                     this.type = TYPE_INVITE;
                 } else if( "IM".equals(data.getString("TP")) ) {
                     this.type = TYPE_IMAGE;
                 }
+            }
+
+            // Message Metadata
+            if( data.has("MD") ){
+                this.metadata = data.getJSONObject("MD");
             }
 
             this.channel = data.getString("C");
@@ -183,6 +198,15 @@ public class XPushMessage {
         this.message= cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_MESSAGE));
         this.type= cursor.getInt(cursor.getColumnIndexOrThrow(MessageTable.KEY_TYPE));
         this.updated= cursor.getLong(cursor.getColumnIndexOrThrow(MessageTable.KEY_UPDATED));
+
+        String metadata = cursor.getString(cursor.getColumnIndexOrThrow(MessageTable.KEY_METADATA));
+        if( metadata != null ){
+            try {
+                this.metadata = new JSONObject(metadata);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public static class Builder {
