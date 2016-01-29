@@ -91,6 +91,10 @@
             android:label="@string/label_text_status_message">
         </activity>
 
+        <activity
+            android:name=".activities.ImageViewerActivity"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
 
         <receiver
             android:name="io.xpush.chat.services.PushMsgReceiver"

@@ -1,5 +1,6 @@
 package io.xpush.sampleChat.fragments;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,10 +44,14 @@ import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.util.RealPathUtil;
+import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.sampleChat.R;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.sampleChat.activities.ChatActivity;
+import io.xpush.sampleChat.activities.ImageViewerActivity;
+import io.xpush.sampleChat.activities.MainActivity;
 import io.xpush.sampleChat.activities.SelectFriendActivity;
 
 public class ChatFragment extends XPushChatFragment {
@@ -66,6 +71,28 @@ public class ChatFragment extends XPushChatFragment {
     private Integer[] mTitles = { R.string.action_select_photo, R.string.action_take_photo };
 
     private String mCurrentPhotoPath;
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        super.mAdapter.setOnItemClickListener(new MessageListAdapter.MessageClickListener() {
+            @Override
+            public void onMessageClick(String message, int type) {
+                Log.d(TAG, "clicked : " + message );
+                if( type == XPushMessage.TYPE_RECEIVE_IMAGE || type == XPushMessage.TYPE_SEND_IMAGE ){
+                    Intent intent = new Intent(mActivity, ImageViewerActivity.class);
+                    intent.putExtra("imageUri", message);
+
+                    mActivity.startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onMessageLongClick(String message, int type) {
+                Log.d(TAG, "long clicked : " + message );
+            }
+        });
+    }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -313,15 +340,5 @@ public class ChatFragment extends XPushChatFragment {
             ivIcon = (ImageView) item.findViewById(R.id.thumbImage);
             tvTitle = (TextView) item.findViewById(R.id.thumbTitle);
         }
-    }
-
-    @Override
-    public void onMessageClick(String message, int type) {
-        Log.d(TAG, message);
-    }
-
-    @Override
-    public void onMessageLongClick(String message, int type) {
-        Log.d(TAG, message);
     }
 }

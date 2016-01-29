@@ -76,7 +76,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     private RecyclerView mRecyclerView;
     private EditText mInputMessageView;
-    private MessageListAdapter mAdapter;
+    protected MessageListAdapter mAdapter;
     private boolean mTyping = false;
 
     private String mUserId;
@@ -117,20 +117,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mAdapter = new MessageListAdapter(mXpushMessages);
-
-        mAdapter.setOnItemClickListener(new MessageListAdapter.MessageClickListener() {
-            @Override
-            public void onMessageClick(String message, int type) {
-                Log.d(TAG, "clicked : " + message );
-                //onMessageClick(message, type);
-            }
-
-            @Override
-            public void onMessageLongClick(String message, int type) {
-                Log.d(TAG, "long clicked : " + message );
-                //onMessageLongClick(message, type);
-            }
-        });
     }
 
     @Override
@@ -691,8 +677,4 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             leave();
         }
     }
-
-    public abstract void onMessageClick(String message,int type);
-
-    public abstract void onMessageLongClick(String message,int type);
 }

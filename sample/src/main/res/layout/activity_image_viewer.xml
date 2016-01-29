@@ -1,23 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<RelativeLayout
     android:background="@color/white"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:title="@string/action_channel"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+
+    </android.support.design.widget.AppBarLayout>
+
     <android.support.v4.view.ViewPager
+        android:layout_below="@id/app_bar"
         android:id="@+id/viewPager"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <LinearLayout
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30.0dip">
-        <ImageView android:id="@+id/dot1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@drawable/page_off" />
-        <ImageView android:id="@+id/dot2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="15.0dip" android:src="@drawable/page_off" />
-        <ImageView android:id="@+id/dot3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="15.0dip" android:src="@drawable/page_off" />
-        <ImageView android:id="@+id/dot4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="15.0dip" android:src="@drawable/page_off" />
-    </LinearLayout>
-</FrameLayout>
+        android:layout_height="fill_parent" />
+</RelativeLayout>
