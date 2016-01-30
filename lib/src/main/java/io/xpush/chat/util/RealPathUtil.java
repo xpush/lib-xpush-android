@@ -24,6 +24,8 @@ public class RealPathUtil {
         String filePath = "";
         String wholeID = DocumentsContract.getDocumentId(uri);
 
+        Log.d( "RealPathUtil", wholeID );
+
         // Split at colon, use second item in the array
         String id = wholeID.split(":")[1];
 

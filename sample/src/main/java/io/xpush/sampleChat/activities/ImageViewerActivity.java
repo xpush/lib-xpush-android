@@ -1,5 +1,6 @@
 package io.xpush.sampleChat.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -12,15 +13,20 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.InputStream;
@@ -77,6 +83,25 @@ public class ImageViewerActivity extends AppCompatActivity {
         this.viewPager.addOnPageChangeListener(this.onPageChangeListener);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_image_viewer, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_close) {
+            this.finish();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     public static class ImageFragmentPagerAdapter extends FragmentPagerAdapter {
         public ImageFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -102,10 +127,12 @@ public class ImageViewerActivity extends AppCompatActivity {
             Bundle bundle = getArguments();
             int position = bundle.getInt("position");
 
-            Log.d(TAG, mUriList.get(position));
-            //imageView.setImageURI(Uri.parse(mUriList.get(position)));
-            //imageView.setImageResource(R.drawable.intro_eagle);
-            new DownloadImageTask( imageView  ).execute( mUriList.get(position) );
+            Glide.with(this)
+                    .load(mUriList.get(position))
+                    .fitCenter()
+                    .placeholder(R.drawable.ic_person)
+                    .crossFade()
+                    .into(imageView);
 
             return swipeView;
         }
@@ -116,31 +143,6 @@ public class ImageViewerActivity extends AppCompatActivity {
             bundle.putInt("position", position);
             swipeFragment.setArguments(bundle);
             return swipeFragment;
-        }
-    }
-
-    static class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
-        ImageView bmImage;
-
-        public DownloadImageTask(ImageView bmImage) {
-            this.bmImage = bmImage;
-        }
-
-        protected Bitmap doInBackground(String... urls) {
-            String urldisplay = urls[0];
-            Bitmap mIcon11 = null;
-            try {
-                InputStream in = new java.net.URL(urldisplay).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
-                Log.e("Error", e.getMessage());
-                e.printStackTrace();
-            }
-            return mIcon11;
-        }
-
-        protected void onPostExecute(Bitmap result) {
-            bmImage.setImageBitmap(result);
         }
     }
 }

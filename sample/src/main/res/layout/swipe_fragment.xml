@@ -5,22 +5,10 @@
     android:layout_height="match_parent"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/white">
-
-    <!--
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/imageView"
-        android:width="600.0dip" android:height="600.0dip"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        fresco:placeholderImage="@drawable/ic_launcher"
-        fresco:actualImageScaleType="centerCrop" />
-
-    -->
-
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:id="@+id/imageView"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentTop="true"
+        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
 </RelativeLayout>

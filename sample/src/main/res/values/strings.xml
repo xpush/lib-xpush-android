@@ -69,4 +69,5 @@
     <string name="title_photo">사진</string>
     <string name="action_select_photo">사진선택</string>
     <string name="action_take_photo">사진 촬영</string>
+    <string name="action_close">닫기</string>
 </resources>

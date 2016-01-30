@@ -67,4 +67,5 @@
     <string name="action_select_photo">Select a picture</string>
     <string name="action_take_photo">Take a photo</string>
     <string name="valid_message_image_upload">Please select image file only</string>
+    <string name="action_close">Close</string>
 </resources>
