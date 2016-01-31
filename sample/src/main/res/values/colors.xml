@@ -23,4 +23,5 @@
 
     <color name="font_khaki">#ff71712a</color>
     <color name="font_gray4">#ff999999</color>
+    <color name="translucent_black" >#66000000</color>
 </resources>
