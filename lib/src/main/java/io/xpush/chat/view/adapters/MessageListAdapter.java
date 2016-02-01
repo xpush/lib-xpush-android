@@ -2,6 +2,7 @@ package io.xpush.chat.view.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
@@ -10,10 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.List;
@@ -115,17 +119,59 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             if (null == vMessage) return;
             if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ) {
 
-                /** TODO Set actual image size
-                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(400, 200);
-                ((SimpleDraweeView) vMessage ).setLayoutParams(layoutParams);
-                 */
+                final ImageView imageView = ((ImageView) vMessage);
 
-                //( (SimpleDraweeView) vMessage ).setImageURI(Uri.parse(message));
                 Glide.with(mContext)
-                        .load(Uri.parse(message))
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .fitCenter()
-                        .into((ImageView)vMessage);
+                    .load(Uri.parse(message))
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .fitCenter()
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                            int originalWidth = bitmap.getWidth();
+                            int originalHeight =  bitmap.getHeight();
+
+                            double ratio = (double) originalWidth / (double) originalHeight;
+
+                            double w = 0;
+                            double h = 0;
+
+                            boolean isMaxWidth = false;
+                            int maxWidth = 400;
+                            if( maxWidth > originalWidth ) {
+                                w =  originalWidth;
+                            } else {
+                                isMaxWidth = true;
+                                w = maxWidth;
+                            }
+
+                            boolean isMaxHeight = false;
+                            int maxHeight = 400;
+                            if( maxHeight  > originalHeight ){
+                                h = originalHeight;
+                            } else {
+                                isMaxHeight = true;
+                                h = maxHeight;
+                            }
+
+                            if( isMaxWidth && isMaxHeight ){
+                                if( w > h ){
+                                    w = w / ratio;
+                                } else {
+                                    w = h * ratio;
+                                }
+                            } else if( isMaxWidth ){
+                                h = w / ratio;
+                            } else if ( isMaxHeight ){
+                                w = h * ratio;
+                            }
+
+                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int)w, (int)h);
+                            imageView.setLayoutParams(layoutParams);
+                            imageView.setImageBitmap(bitmap);
+                        }
+                    });
             } else {
                 ( (TextView) vMessage ).setText(message);
             }

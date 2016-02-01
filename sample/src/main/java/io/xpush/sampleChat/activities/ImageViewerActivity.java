@@ -1,60 +1,36 @@
 package io.xpush.sampleChat.activities;
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Matrix;
-import android.graphics.PointF;
+import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.FloatMath;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.davemorrissey.labs.subscaleview.ImageSource;
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import io.xpush.sampleChat.R;
 
 public class ImageViewerActivity extends AppCompatActivity {
 
     private static final String TAG = ImageViewerActivity.class.getSimpleName();
-
-    ImageFragmentPagerAdapter imageFragmentPagerAdapter;
-    ViewPager viewPager;
-    static ArrayList<String> mUriList = new ArrayList<String>();
+    
+    ViewPager mViewPager;
+    static ArrayList<String> mImageList;
     ImageView mBtnClose;
-
-    private String mCurrentUrl;
-
-    ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
-        public void onPageScrollStateChanged(int paramAnonymousInt) {
-            if (paramAnonymousInt == 0) {
-                ImageViewerActivity.this.updateState();
-            }
-        }
-
-        public void onPageScrolled(int paramAnonymousInt1, float paramAnonymousFloat, int paramAnonymousInt2) {}
-
-        public void onPageSelected(int paramAnonymousInt) {
-        }
-    };
-
-    void updateState() {
-        Log.d(TAG, String.valueOf(this.viewPager.getCurrentItem()));
-        Fragment f = imageFragmentPagerAdapter.getItem( this.viewPager.getCurrentItem() );
-    }
+    private GalleryPagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,14 +39,16 @@ public class ImageViewerActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String imageUri = intent.getStringExtra("imageUri");
-        if( mUriList.indexOf( imageUri  ) < 0 ) {
-            mUriList.add(imageUri);
+        mImageList = new ArrayList<String>();
+        if( mImageList.indexOf( imageUri  ) < 0 ) {
+            mImageList.add(imageUri);
         }
 
-        imageFragmentPagerAdapter = new ImageFragmentPagerAdapter(getSupportFragmentManager());
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
-        viewPager.setAdapter(imageFragmentPagerAdapter);
-        this.viewPager.addOnPageChangeListener(this.onPageChangeListener);
+        mViewPager = (ViewPager) findViewById(R.id.viewPager);
+
+        mAdapter = new GalleryPagerAdapter(this);
+        mViewPager.setAdapter(mAdapter);
+        mViewPager.setOffscreenPageLimit(4);
 
         mBtnClose = (ImageView) findViewById(R.id.btnClose);
         mBtnClose.setOnClickListener(new View.OnClickListener() {
@@ -81,173 +59,50 @@ public class ImageViewerActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        String mUrl = getIntent().getStringExtra("imageUri");
-    }
+    class GalleryPagerAdapter extends PagerAdapter {
 
-    public static class ImageFragmentPagerAdapter extends FragmentPagerAdapter {
+        Context _context;
+        LayoutInflater _inflater;
 
-        private HashMap<Integer, Fragment> mFragments = new HashMap<>();
-
-        public ImageFragmentPagerAdapter(FragmentManager fm) {
-            super(fm);
+        public GalleryPagerAdapter(Context context) {
+            _context = context;
+            _inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public int getCount() {
-            return mUriList.size();
+            return mImageList.size();
         }
 
         @Override
-        public Fragment getItem(int position) {
-            if (mFragments.get(position) == null) {
-                Fragment f = SwipeFragment.newInstance(position);
-                mFragments.put( position, f );
-            }
-
-            return mFragments.get(position);
+        public boolean isViewFromObject(View view, Object object) {
+            return view == ((LinearLayout) object);
         }
-    }
-
-    public static class SwipeFragment extends Fragment implements View.OnTouchListener {
-        // These matrices will be used to scale points of the image
-        Matrix matrix = new Matrix();
-        Matrix savedMatrix = new Matrix();
-        Matrix mMinScaleMatrix = new Matrix();
-
-        // The 3 states (events) which the user is trying to perform
-        static final int NONE = 0;
-        static final int DRAG = 1;
-        static final int ZOOM = 2;
-        int mode = NONE;
-
-        // these PointF objects are used to record the point(s) the user is touching
-        PointF start = new PointF();
-        PointF mid = new PointF();
-        float oldDist = 1f;
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View swipeView = inflater.inflate(R.layout.swipe_fragment, container, false);
-            final ImageView imageView = (ImageView) swipeView.findViewById(R.id.imageView);
+        public Object instantiateItem(ViewGroup container, final int position) {
+            View itemView = _inflater.inflate(R.layout.item_image_viewer, container, false);
+            container.addView(itemView);
 
-            imageView.setOnTouchListener(this);
-            Bundle bundle = getArguments();
-            final int position = bundle.getInt("position");
+            final SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) itemView.findViewById(R.id.image);
 
-            Glide.with(this)
-                    .load(mUriList.get(position))
-                    .fitCenter()
-                    .crossFade()
-                    .into(new GlideDrawableImageViewTarget(imageView) {
+            // Asynchronously load the image and set the thumbnail and pager view
+            Glide.with(_context)
+                    .load(mImageList.get(position))
+                    .asBitmap()
+                    .into(new SimpleTarget<Bitmap>() {
                         @Override
-                        public void onResourceReady(GlideDrawable drawable, GlideAnimation anim) {
-                            super.onResourceReady(drawable, anim);
-                            if (position == 0) {
-                                mMinScaleMatrix = new Matrix(imageView.getImageMatrix());
-                            }
+                        public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                            imageView.setImage(ImageSource.bitmap(bitmap));
                         }
                     });
 
-            return swipeView;
-        }
-
-        static SwipeFragment newInstance(int position) {
-            SwipeFragment swipeFragment = new SwipeFragment();
-            Bundle bundle = new Bundle();
-            bundle.putInt("position", position);
-            swipeFragment.setArguments(bundle);
-            return swipeFragment;
+            return itemView;
         }
 
         @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            ImageView view = (ImageView) v;
-            view.setScaleType(ImageView.ScaleType.MATRIX);
-
-            float scale;
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                case MotionEvent.ACTION_DOWN:   // first finger down only
-                    savedMatrix.set(matrix);
-                    start.set(event.getX(), event.getY());
-                    mode = DRAG;
-                    break;
-
-                case MotionEvent.ACTION_UP: // first finger lifted
-                    float resScale = getMatrixScale(matrix);
-                    if ( Math.round( resScale )  <= 1 ) {
-                        matrix = new Matrix(mMinScaleMatrix);
-                    } else {
-                        break;
-                    }
-                    break;
-
-                case MotionEvent.ACTION_POINTER_UP: // second finger lifted
-
-                    mode = NONE;
-                    resScale = getMatrixScale(matrix);
-                    if (resScale < 1.0) {
-                        matrix = new Matrix(mMinScaleMatrix);
-                    } else {
-                        break;
-                    }
-
-                    break;
-
-                case MotionEvent.ACTION_POINTER_DOWN: // first and second finger down
-
-                    oldDist = spacing(event);
-                    Log.d(TAG, "oldDist=" + oldDist);
-                    if (oldDist > 5f) {
-                        savedMatrix.set(matrix);
-                        midPoint(mid, event);
-                        mode = ZOOM;
-                        Log.d(TAG, "mode=ZOOM");
-                    }
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-
-                    if (mode == DRAG) {
-                        matrix.set(savedMatrix);
-                        matrix.postTranslate(event.getX() - start.x, event.getY() - start.y); // create the transformation in the matrix  of points
-                    } else if (mode == ZOOM) {
-                        // pinch zooming
-                        float newDist = spacing(event);
-                        Log.d(TAG, "newDist=" + newDist);
-                        if (newDist > 5f) {
-                            matrix.set(savedMatrix);
-                            scale = newDist / oldDist; // setting the scaling of the
-                            matrix.postScale(scale, scale, mid.x, mid.y);
-                        }
-                    }
-                    break;
-            }
-
-            view.setImageMatrix(matrix); // display the transformation on screen
-            return true; // indicate event was handled
-        }
-
-        private float spacing(MotionEvent event) {
-            float x = event.getX(0) - event.getX(1);
-            float y = event.getY(0) - event.getY(1);
-            return FloatMath.sqrt(x * x + y * y);
-        }
-
-        private void midPoint(PointF point, MotionEvent event) {
-            float x = event.getX(0) + event.getX(1);
-            float y = event.getY(0) + event.getY(1);
-            point.set(x / 2, y / 2);
-        }
-
-        float[] mTmpValues = new float[9];
-
-        private float getMatrixScale(Matrix matrix) {
-            matrix.getValues(mTmpValues);
-            return mTmpValues[Matrix.MSCALE_X];
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            container.removeView((LinearLayout) object);
         }
     }
 }
