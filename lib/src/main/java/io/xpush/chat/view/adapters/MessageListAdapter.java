@@ -2,14 +2,18 @@ package io.xpush.chat.view.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.List;
@@ -22,8 +26,10 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
 
     private List<XPushMessage> mXPushMessages;
     private static MessageClickListener mMessageClickListener;
+    private Context mContext;
 
-    public MessageListAdapter(List<XPushMessage> xpushMessages) {
+    public MessageListAdapter(Context context, List<XPushMessage> xpushMessages) {
+        mContext = context;
         mXPushMessages = xpushMessages;
     }
 
@@ -114,7 +120,12 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                 ((SimpleDraweeView) vMessage ).setLayoutParams(layoutParams);
                  */
 
-                ( (SimpleDraweeView) vMessage ).setImageURI(Uri.parse(message));
+                //( (SimpleDraweeView) vMessage ).setImageURI(Uri.parse(message));
+                Glide.with(mContext)
+                        .load(Uri.parse(message))
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .fitCenter()
+                        .into((ImageView)vMessage);
             } else {
                 ( (TextView) vMessage ).setText(message);
             }

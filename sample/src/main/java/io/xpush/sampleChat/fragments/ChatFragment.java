@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -19,18 +17,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.GridLayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,15 +36,12 @@ import butterknife.ButterKnife;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
-import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.util.RealPathUtil;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.sampleChat.R;
-import io.xpush.chat.fragments.XPushChatFragment;
-import io.xpush.sampleChat.activities.ChatActivity;
 import io.xpush.sampleChat.activities.ImageViewerActivity;
-import io.xpush.sampleChat.activities.MainActivity;
 import io.xpush.sampleChat.activities.SelectFriendActivity;
 
 public class ChatFragment extends XPushChatFragment {
@@ -82,7 +72,7 @@ public class ChatFragment extends XPushChatFragment {
                 if( type == XPushMessage.TYPE_RECEIVE_IMAGE || type == XPushMessage.TYPE_SEND_IMAGE ){
                     Intent intent = new Intent(mActivity, ImageViewerActivity.class);
                     intent.putExtra("imageUri", message);
-
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     mActivity.startActivity(intent);
                 }
             }

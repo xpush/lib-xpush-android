@@ -116,7 +116,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        mAdapter = new MessageListAdapter(mXpushMessages);
+        mAdapter = new MessageListAdapter(activity, mXpushMessages);
     }
 
     @Override

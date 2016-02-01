@@ -23,6 +23,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import io.xpush.sampleChat.R;
 
@@ -35,6 +36,8 @@ public class ImageViewerActivity extends AppCompatActivity {
     static ArrayList<String> mUriList = new ArrayList<String>();
     ImageView mBtnClose;
 
+    private String mCurrentUrl;
+
     ViewPager.OnPageChangeListener onPageChangeListener = new ViewPager.OnPageChangeListener() {
         public void onPageScrollStateChanged(int paramAnonymousInt) {
             if (paramAnonymousInt == 0) {
@@ -45,12 +48,12 @@ public class ImageViewerActivity extends AppCompatActivity {
         public void onPageScrolled(int paramAnonymousInt1, float paramAnonymousFloat, int paramAnonymousInt2) {}
 
         public void onPageSelected(int paramAnonymousInt) {
-            Log.d(TAG, String.valueOf(paramAnonymousInt));
         }
     };
 
     void updateState() {
         Log.d(TAG, String.valueOf(this.viewPager.getCurrentItem()));
+        Fragment f = imageFragmentPagerAdapter.getItem( this.viewPager.getCurrentItem() );
     }
 
     @Override
@@ -67,11 +70,9 @@ public class ImageViewerActivity extends AppCompatActivity {
         imageFragmentPagerAdapter = new ImageFragmentPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.viewPager);
         viewPager.setAdapter(imageFragmentPagerAdapter);
-
         this.viewPager.addOnPageChangeListener(this.onPageChangeListener);
 
         mBtnClose = (ImageView) findViewById(R.id.btnClose);
-
         mBtnClose.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -80,7 +81,16 @@ public class ImageViewerActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        String mUrl = getIntent().getStringExtra("imageUri");
+    }
+
     public static class ImageFragmentPagerAdapter extends FragmentPagerAdapter {
+
+        private HashMap<Integer, Fragment> mFragments = new HashMap<>();
+
         public ImageFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -92,15 +102,16 @@ public class ImageViewerActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            return SwipeFragment.newInstance(position);
+            if (mFragments.get(position) == null) {
+                Fragment f = SwipeFragment.newInstance(position);
+                mFragments.put( position, f );
+            }
+
+            return mFragments.get(position);
         }
     }
 
     public static class SwipeFragment extends Fragment implements View.OnTouchListener {
-
-        @SuppressWarnings("unused")
-        private static final float MIN_ZOOM = 1f,MAX_ZOOM = 1f;
-
         // These matrices will be used to scale points of the image
         Matrix matrix = new Matrix();
         Matrix savedMatrix = new Matrix();
@@ -130,13 +141,12 @@ public class ImageViewerActivity extends AppCompatActivity {
             Glide.with(this)
                     .load(mUriList.get(position))
                     .fitCenter()
-                    .placeholder(R.drawable.ic_person)
                     .crossFade()
                     .into(new GlideDrawableImageViewTarget(imageView) {
                         @Override
                         public void onResourceReady(GlideDrawable drawable, GlideAnimation anim) {
                             super.onResourceReady(drawable, anim);
-                            if( position == 0 ) {
+                            if (position == 0) {
                                 mMinScaleMatrix = new Matrix(imageView.getImageMatrix());
                             }
                         }
@@ -167,11 +177,18 @@ public class ImageViewerActivity extends AppCompatActivity {
                     break;
 
                 case MotionEvent.ACTION_UP: // first finger lifted
+                    float resScale = getMatrixScale(matrix);
+                    if ( Math.round( resScale )  <= 1 ) {
+                        matrix = new Matrix(mMinScaleMatrix);
+                    } else {
+                        break;
+                    }
+                    break;
 
                 case MotionEvent.ACTION_POINTER_UP: // second finger lifted
 
                     mode = NONE;
-                    float resScale = getMatrixScale(matrix);
+                    resScale = getMatrixScale(matrix);
                     if (resScale < 1.0) {
                         matrix = new Matrix(mMinScaleMatrix);
                     } else {
