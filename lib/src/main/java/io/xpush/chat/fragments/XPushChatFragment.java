@@ -3,6 +3,7 @@ package io.xpush.chat.fragments;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
@@ -112,6 +113,9 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     protected boolean newChannelFlag;
     protected boolean resetChannelFlag;
+    protected boolean restartLoader;
+
+    private Bundle mChannelBundle;
 
     @Override
     public void onAttach(Activity activity) {
@@ -121,45 +125,50 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
+        mViewCount = INIT_VIEW_COUNT;
+        mActivity = getActivity();
 
-        if( savedInstanceState == null ) {
+        mDbHelper = new DBHelper(mActivity);
+        mDatabase = mDbHelper.getWritableDatabase();
+        mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
 
-            mViewCount = INIT_VIEW_COUNT;
-            mActivity = getActivity();
+        mSession = XPushCore.getInstance().getXpushSession();
+        newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
 
-            mDbHelper = new DBHelper(mActivity);
-            mDatabase = mDbHelper.getWritableDatabase();
-            mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
-
-            mSession = XPushCore.getInstance().getXpushSession();
-
-            Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
-
-            newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
-
-            mXpushChannel = new XPushChannel(bundle);
-            mChannel = mXpushChannel.getId();
-
-            if (null == mXpushChannel.getName()) {
-
-                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel);
-                Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
-                if (cursor != null && cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    mXpushChannel = new XPushChannel(cursor);
-                }
+        if( savedInstanceState == null ){
+            mChannelBundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+        } else {
+            mChannelBundle = savedInstanceState.getBundle(XPushChannel.CHANNEL_BUNDLE);
+            mViewCount = savedInstanceState.getInt("mViewCount");
+            if( mDataLoader == null  ){
+                resetChannelFlag = true;
+                restartLoader = true;
             }
-
-            mUserId = mSession.getId();
-            mUsername = mSession.getName();
-
-            super.onCreate(savedInstanceState);
-            setHasOptionsMenu(true);
-
-            mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-            getLoaderManager().initLoader(0, null, this);
         }
+
+        mXpushChannel = new XPushChannel(mChannelBundle);
+        mChannel = mXpushChannel.getId();
+
+        if (null == mXpushChannel.getName()) {
+
+            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel);
+            Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
+            if (cursor != null && cursor.getCount() > 0) {
+                cursor.moveToFirst();
+                mXpushChannel = new XPushChannel(cursor);
+            }
+        }
+
+        mUserId = mSession.getId();
+        mUsername = mSession.getName();
+
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+
+        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -172,16 +181,15 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     public void onResume(){
         super.onResume();
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
-        resetChannelFlag  = mActivity.getIntent().getBooleanExtra("resetChannel", false);
-
-        Log.d(TAG, "newChannelFlag : " + newChannelFlag );
-        Log.d(TAG, "resetChannelFlag : " + resetChannelFlag );
+        if( !resetChannelFlag ) {
+            resetChannelFlag = mActivity.getIntent().getBooleanExtra("resetChannel", false);
+        }
 
         if( resetChannelFlag ) {
             mViewCount = INIT_VIEW_COUNT;
 
-            Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
-            mXpushChannel = new XPushChannel(bundle);
+            mChannelBundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+            mXpushChannel = new XPushChannel(mChannelBundle);
 
             mChannel = mXpushChannel.getId();
             mUsers = mXpushChannel.getUsers();
@@ -194,10 +202,18 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
             mDataLoader = new MessageDataLoader(mActivity, mDataSource, selection, null, null, null, sortOrder);
 
-            createChannelAndConnect(mXpushChannel);
+            if( restartLoader ) {
+                mXpushMessages.clear();
+                mAdapter.notifyDataSetChanged();
+                getLoaderManager().restartLoader(0, null, this);
+                getChannelAndConnect();
+            } else {
+                createChannelAndConnect(mXpushChannel);
+            }
         } else if( newChannelFlag ){
             createChannelAndConnect(mXpushChannel);
         } else if( mChannelCore == null || !mChannelCore.connected() ) {
+
             if( mChannelCore != null ) {
                 connectChannel();
             } else {
@@ -205,6 +221,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             }
         } else {
             Log.d(TAG, "=== mChannelCore === : " + mChannelCore.connected());
+            refreshContent();
         }
     }
 
@@ -694,5 +711,14 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         }
         Log.d(TAG, images.toString());
         return images;
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle savedState) {
+        super.onSaveInstanceState(savedState);
+
+        savedState.putInt("mViewCount", mViewCount);
+        savedState.putBundle(XPushChannel.CHANNEL_BUNDLE, mChannelBundle);
     }
 }

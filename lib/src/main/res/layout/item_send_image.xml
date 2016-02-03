@@ -30,8 +30,8 @@
 
             <ImageView
                 android:id="@+id/vMessage"
-                android:maxWidth="400.0dip" android:maxHeight="400.0dip"
-                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxWidth="240.0dip" android:maxHeight="240.0dip"
+                android:layout_width="wrap_content" android:layout_height="240.0dip"
                 android:adjustViewBounds= "true" />
         </LinearLayout>
     </LinearLayout>

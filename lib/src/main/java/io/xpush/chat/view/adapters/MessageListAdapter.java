@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,7 +139,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             double h = 0;
 
                             boolean isMaxWidth = false;
-                            int maxWidth = 400;
+                            int maxWidth = 240;
                             if( maxWidth > originalWidth ) {
                                 w =  originalWidth;
                             } else {
@@ -147,7 +148,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             }
 
                             boolean isMaxHeight = false;
-                            int maxHeight = 400;
+                            int maxHeight = 240;
                             if( maxHeight  > originalHeight ){
                                 h = originalHeight;
                             } else {
@@ -167,7 +168,10 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                                 w = h * ratio;
                             }
 
-                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams((int)w, (int)h);
+                            final int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int)w, mContext.getResources().getDisplayMetrics());
+                            final int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int)h, mContext.getResources().getDisplayMetrics());
+
+                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
                             imageView.setLayoutParams(layoutParams);
                             imageView.setImageBitmap(bitmap);
                         }

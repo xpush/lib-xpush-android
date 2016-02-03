@@ -76,7 +76,9 @@
 
         <activity
             android:name="io.xpush.sampleChat.activities.ChatActivity"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            >
         </activity>
 
         <activity

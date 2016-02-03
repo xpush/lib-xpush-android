@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -20,22 +21,40 @@ import com.davemorrissey.labs.subscaleview.ImageSource;
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.xpush.sampleChat.R;
 
 public class ImageViewerActivity extends AppCompatActivity {
 
     private static final String TAG = ImageViewerActivity.class.getSimpleName();
-    
-    ViewPager mViewPager;
-    static ArrayList<String> mImageList;
-    ImageView mBtnClose;
+
+    ArrayList<String> mImageList;
     private GalleryPagerAdapter mAdapter;
+    private int mCurrentIndex;
+
+    @Bind(R.id.tvIndicator)
+    TextView mTvIndicator;
+
+    @Bind(R.id.btnClose)
+    ImageView mBtnClose;
+
+    @Bind(R.id.viewPager)
+    ViewPager mViewPager;
+
+    @OnClick(R.id.btnClose)
+    void close() {
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_viewer);
+        ButterKnife.bind(this);
 
         Intent intent = getIntent();
         String selectedImage = intent.getStringExtra("selectedImage");
@@ -48,24 +67,40 @@ public class ImageViewerActivity extends AppCompatActivity {
             }
         }
 
-        mViewPager = (ViewPager) findViewById(R.id.viewPager);
-
         mAdapter = new GalleryPagerAdapter(this);
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOffscreenPageLimit(4);
 
-        //init current
-        if (mImageList.indexOf(selectedImage) > -1){
-            mViewPager.setCurrentItem(mImageList.indexOf(selectedImage));
-        }
-
-        mBtnClose = (ImageView) findViewById(R.id.btnClose);
-        mBtnClose.setOnClickListener(new View.OnClickListener() {
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onClick(View view) {
-                finish();
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mCurrentIndex  = position ;
+                setIndicatior();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
         });
+
+        //init current
+        if (mImageList.indexOf(selectedImage) > -1){
+            mCurrentIndex = mImageList.indexOf(selectedImage);
+            mViewPager.setCurrentItem( mCurrentIndex );
+        }
+
+        setIndicatior();
+    }
+
+    private void setIndicatior(){
+        String text = String.format(Locale.US, "%1$d/%2$d", new Object[] { mCurrentIndex+1, mImageList.size() });
+        mTvIndicator.setText( text );
     }
 
     class GalleryPagerAdapter extends PagerAdapter {
@@ -94,8 +129,6 @@ public class ImageViewerActivity extends AppCompatActivity {
             container.addView(itemView);
 
             final SubsamplingScaleImageView imageView = (SubsamplingScaleImageView) itemView.findViewById(R.id.image);
-
-            // Asynchronously load the image and set the thumbnail and pager view
             Glide.with(_context)
                     .load(mImageList.get(position))
                     .asBitmap()

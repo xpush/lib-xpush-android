@@ -302,7 +302,7 @@ public class XPushCore {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
-                        callbackEvent.call( "SERVER-ERROR", error.getMessage() );
+                        callbackEvent.call("SERVER-ERROR", error.getMessage());
                     }
                 }
         );
