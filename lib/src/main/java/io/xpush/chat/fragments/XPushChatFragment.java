@@ -122,40 +122,44 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        mViewCount = INIT_VIEW_COUNT;
-        mActivity = getActivity();
 
-        mDbHelper = new DBHelper(mActivity);
-        mDatabase = mDbHelper.getWritableDatabase();
-        mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
+        if( savedInstanceState == null ) {
 
-        mSession = XPushCore.getInstance().getXpushSession();
+            mViewCount = INIT_VIEW_COUNT;
+            mActivity = getActivity();
 
-        Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+            mDbHelper = new DBHelper(mActivity);
+            mDatabase = mDbHelper.getWritableDatabase();
+            mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
 
-        newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
+            mSession = XPushCore.getInstance().getXpushSession();
 
-        mXpushChannel = new XPushChannel(bundle);
-        mChannel = mXpushChannel.getId();
+            Bundle bundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
 
-        if( null ==  mXpushChannel.getName() ){
+            newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
 
-            Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel);
-            Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
-            if (cursor != null && cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                mXpushChannel = new XPushChannel(cursor);
+            mXpushChannel = new XPushChannel(bundle);
+            mChannel = mXpushChannel.getId();
+
+            if (null == mXpushChannel.getName()) {
+
+                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel);
+                Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
+                if (cursor != null && cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    mXpushChannel = new XPushChannel(cursor);
+                }
             }
+
+            mUserId = mSession.getId();
+            mUsername = mSession.getName();
+
+            super.onCreate(savedInstanceState);
+            setHasOptionsMenu(true);
+
+            mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+            getLoaderManager().initLoader(0, null, this);
         }
-
-        mUserId = mSession.getId();
-        mUsername = mSession.getName();
-
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-
-        mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -169,6 +173,9 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         super.onResume();
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
         resetChannelFlag  = mActivity.getIntent().getBooleanExtra("resetChannel", false);
+
+        Log.d(TAG, "newChannelFlag : " + newChannelFlag );
+        Log.d(TAG, "resetChannelFlag : " + resetChannelFlag );
 
         if( resetChannelFlag ) {
             mViewCount = INIT_VIEW_COUNT;
@@ -302,6 +309,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
 
     private void refreshContent(){
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -321,8 +329,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     }
 
     private void connectChannel() {
-
-        Log.d(TAG, "==== connectChannel ==== ");
 
         HashMap<String, Emitter.Listener> events = new HashMap<>();
 
@@ -426,7 +432,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                                     mXpushUsers.add(new XPushUser(dts.getJSONObject(inx)));
                                 }
 
-                                Log.d(TAG, mXpushUsers.toString());
                             } catch (Exception e ){
                                 e.printStackTrace();
                             }
@@ -676,5 +681,18 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         } else {
             leave();
         }
+    }
+
+    protected ArrayList<String> getImageList(){
+        String selection = MessageTable.KEY_CHANNEL + "='" + mChannel + "' and " + "a."+MessageTable.KEY_TYPE + " IN ("+XPushMessage.TYPE_RECEIVE_IMAGE+","+XPushMessage.TYPE_SEND_IMAGE+" ) ";
+        String sortOrder = MessageTable.KEY_UPDATED;
+
+        ArrayList<String> images = new ArrayList<String>();
+        List<XPushMessage> messages = mDataSource.read(selection, null, null, null, sortOrder);
+        for( XPushMessage message : messages  ){
+            images.add( message.getMessage() );
+        }
+        Log.d(TAG, images.toString());
+        return images;
     }
 }

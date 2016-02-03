@@ -68,10 +68,11 @@ public class ChatFragment extends XPushChatFragment {
         super.mAdapter.setOnItemClickListener(new MessageListAdapter.MessageClickListener() {
             @Override
             public void onMessageClick(String message, int type) {
-                Log.d(TAG, "clicked : " + message );
                 if( type == XPushMessage.TYPE_RECEIVE_IMAGE || type == XPushMessage.TYPE_SEND_IMAGE ){
                     Intent intent = new Intent(mActivity, ImageViewerActivity.class);
-                    intent.putExtra("imageUri", message);
+
+                    intent.putExtra("selectedImage", message);
+                    intent.putStringArrayListExtra("imageList", getImageList() );
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                     mActivity.startActivity(intent);
                 }

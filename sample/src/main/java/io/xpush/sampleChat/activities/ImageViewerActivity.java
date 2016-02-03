@@ -38,10 +38,14 @@ public class ImageViewerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_image_viewer);
 
         Intent intent = getIntent();
-        String imageUri = intent.getStringExtra("imageUri");
-        mImageList = new ArrayList<String>();
-        if( mImageList.indexOf( imageUri  ) < 0 ) {
-            mImageList.add(imageUri);
+        String selectedImage = intent.getStringExtra("selectedImage");
+        mImageList = intent.getStringArrayListExtra("imageList");
+
+        if( mImageList == null ) {
+            mImageList = new ArrayList<String>();
+            if (mImageList.indexOf(selectedImage) < 0) {
+                mImageList.add(selectedImage);
+            }
         }
 
         mViewPager = (ViewPager) findViewById(R.id.viewPager);
@@ -49,6 +53,11 @@ public class ImageViewerActivity extends AppCompatActivity {
         mAdapter = new GalleryPagerAdapter(this);
         mViewPager.setAdapter(mAdapter);
         mViewPager.setOffscreenPageLimit(4);
+
+        //init current
+        if (mImageList.indexOf(selectedImage) > -1){
+            mViewPager.setCurrentItem(mImageList.indexOf(selectedImage));
+        }
 
         mBtnClose = (ImageView) findViewById(R.id.btnClose);
         mBtnClose.setOnClickListener(new View.OnClickListener() {

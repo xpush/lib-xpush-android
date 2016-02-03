@@ -170,8 +170,6 @@ public class XpushContentProvider extends ContentProvider {
 
                 id = uri.getPathSegments().get(1);
 
-                Log.d( TAG, "===== id ====");
-                Log.d( TAG, id);
                 queryBuilder.appendWhere(ChannelTable.KEY_ID + "='" + id + "'");
                 break;
             case ALL_MESSAGES:
