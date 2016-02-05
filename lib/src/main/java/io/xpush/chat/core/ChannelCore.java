@@ -81,14 +81,32 @@ public class ChannelCore {
     }
 
     public void sendMessage(String message) {
-        sendMessage(message, null, null);
+        sendMessage(message, null, null, null);
     }
 
     public void sendMessage(String message, String type) {
-        sendMessage(message, type, null);
+        sendMessage(message, type, null, null);
+    }
+
+    public void sendImage(String message, int width, int height){
+        JSONObject metaData = new JSONObject();
+
+        try {
+
+            metaData.put("W", width);
+            metaData.put("H", height);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        sendMessage(message, "IM", metaData, null );
     }
 
     public void sendMessage(String message, String type, ArrayList<String> users) {
+        sendMessage(message, type, null, users);
+    }
+
+    public void sendMessage(String message, String type, JSONObject metaData, ArrayList<String> users) {
 
         JSONObject json = new JSONObject();
         JSONObject data = new JSONObject();
@@ -108,6 +126,10 @@ public class ChannelCore {
 
             if( users != null ) {
                 data.put("US", TextUtils.join("@!@", users));
+            }
+
+            if( metaData != null ){
+                data.put("MD", metaData);
             }
 
             json.put("DT", data);

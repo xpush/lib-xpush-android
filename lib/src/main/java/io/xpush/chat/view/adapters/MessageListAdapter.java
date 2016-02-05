@@ -21,11 +21,14 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import org.json.JSONObject;
+
 import java.util.List;
 
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.util.DateUtils;
+import io.xpush.chat.util.RealPathUtil;
 
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.ViewHolder> {
 
@@ -64,7 +67,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         viewHolder.setUsername(xpushMessage.getSenderName());
         viewHolder.setIime(xpushMessage.getUpdated());
         viewHolder.setImage(xpushMessage.getImage());
-        viewHolder.setMessage(xpushMessage.getMessage(), xpushMessage.getType());
+        viewHolder.setMessage(xpushMessage.getMessage(), xpushMessage.getType(), xpushMessage.getMetadata());
     }
 
     @Override
@@ -115,7 +118,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             tvUser.setText(username);
         }
 
-        public void setMessage(String message, int type) {
+        public void setMessage(String message, int type, JSONObject metatdata) {
 
             if (null == vMessage) return;
             if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ) {
@@ -133,45 +136,8 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             int originalWidth = bitmap.getWidth();
                             int originalHeight =  bitmap.getHeight();
 
-                            double ratio = (double) originalWidth / (double) originalHeight;
-
-                            double w = 0;
-                            double h = 0;
-
-                            boolean isMaxWidth = false;
-                            int maxWidth = 240;
-                            if( maxWidth > originalWidth ) {
-                                w =  originalWidth;
-                            } else {
-                                isMaxWidth = true;
-                                w = maxWidth;
-                            }
-
-                            boolean isMaxHeight = false;
-                            int maxHeight = 240;
-                            if( maxHeight  > originalHeight ){
-                                h = originalHeight;
-                            } else {
-                                isMaxHeight = true;
-                                h = maxHeight;
-                            }
-
-                            if( isMaxWidth && isMaxHeight ){
-                                if( w > h ){
-                                    w = w / ratio;
-                                } else {
-                                    w = h * ratio;
-                                }
-                            } else if( isMaxWidth ){
-                                h = w / ratio;
-                            } else if ( isMaxHeight ){
-                                w = h * ratio;
-                            }
-
-                            final int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int)w, mContext.getResources().getDisplayMetrics());
-                            final int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int)h, mContext.getResources().getDisplayMetrics());
-
-                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(width, height);
+                            int results[] = RealPathUtil.getActualImageSize(originalWidth, originalHeight, mContext);
+                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
                             imageView.setLayoutParams(layoutParams);
                             imageView.setImageBitmap(bitmap);
                         }

@@ -160,13 +160,13 @@ public class ProfileFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... voids) {
-            String downloadUrl = XPushCore.getInstance().uploadImage(mUri);
+            String[] downloadUrl = XPushCore.getInstance().uploadImage(mUri);
             try {
-                mJsonUserData.put("I", downloadUrl);
+                mJsonUserData.put("I", downloadUrl[0]);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return downloadUrl;
+            return downloadUrl[0];
         }
 
         @Override

@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.TypedValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,8 +24,6 @@ public class RealPathUtil {
     public static String getRealPathFromURI_API19(Context context, Uri uri){
         String filePath = "";
         String wholeID = DocumentsContract.getDocumentId(uri);
-
-        Log.d( "RealPathUtil", wholeID );
 
         // Split at colon, use second item in the array
         String id = wholeID.split(":")[1];
@@ -119,5 +118,52 @@ public class RealPathUtil {
             }
         }
         return result;
+    }
+
+    public static int[] getActualImageSize(int originalWidth , int originalHeight, Context context ){
+        int[] results = new int[2];
+
+        double ratio = (double) originalWidth / (double) originalHeight;
+
+        double w = 0;
+        double h = 0;
+
+        boolean isMaxWidth = false;
+        int maxWidth = 240;
+        if( maxWidth > originalWidth ) {
+            w =  originalWidth;
+        } else {
+            isMaxWidth = true;
+            w = maxWidth;
+        }
+
+        boolean isMaxHeight = false;
+        int maxHeight = 240;
+        if( maxHeight  > originalHeight ){
+            h = originalHeight;
+        } else {
+            isMaxHeight = true;
+            h = maxHeight;
+        }
+
+        if( isMaxWidth && isMaxHeight ){
+            if( w > h ){
+                w = w / ratio;
+            } else {
+                w = h * ratio;
+            }
+        } else if( isMaxWidth ){
+            h = w / ratio;
+        } else if ( isMaxHeight ){
+            w = h * ratio;
+        }
+
+        int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int) w, context.getResources().getDisplayMetrics());
+        int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (int)h, context.getResources().getDisplayMetrics());
+
+        results[0] = width;
+        results[1] = height;
+
+        return results;
     }
 }

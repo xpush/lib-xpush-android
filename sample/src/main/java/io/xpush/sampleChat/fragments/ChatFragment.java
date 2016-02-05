@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -188,11 +189,13 @@ public class ChatFragment extends XPushChatFragment {
                 Uri selectedImageUri = data.getData();
 
                 String realPath = RealPathUtil.getRealPath(mActivity, selectedImageUri);
+
                 if( RealPathUtil.isImagePath( realPath ) ) {
+
                     UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
                     imageUpload.execute();
                 } else {
-                    Toast.makeText(mActivity, getString(R.string.success_message_signup), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(mActivity, getString(R.string.message), Toast.LENGTH_SHORT).show();
                 }
 
             } else if ( requestCode == Constants.REQUEST_IMAGE_CAPTURE ){
@@ -259,28 +262,30 @@ public class ChatFragment extends XPushChatFragment {
         mActivity.sendBroadcast(mediaScanIntent);
     }
 
-    private class UploadImageTask extends AsyncTask<Void, Void, String> {
+    private class UploadImageTask extends AsyncTask<Void, Void, String[]> {
         Uri mUri;
 
-        public UploadImageTask( Uri uri ){
+        public UploadImageTask( Uri uri){
             this.mUri = uri;
         }
 
         @Override
-        protected String doInBackground(Void... voids) {
-            String downloadUrl = XPushCore.getInstance().uploadImage(mUri);
-            return downloadUrl;
+        protected String[] doInBackground(Void... voids) {
+            String[] uploadResults = XPushCore.getInstance().uploadImage(mUri);
+            return uploadResults;
         }
 
         @Override
-        protected  void onPostExecute(final String imageUrl){
-            super.onPostExecute(imageUrl);
-            if( imageUrl != null ){
+        protected  void onPostExecute(final String[] uploadResults){
+            super.onPostExecute(uploadResults);
+            if( uploadResults != null ){
 
-                Log.d(TAG, " Upload result imageUrl : " + imageUrl );
+                Log.d(TAG, " Upload result imageUrl : " + uploadResults );
 
                 if( mChannelCore != null ){
-                    mChannelCore.sendMessage( imageUrl, "IM" );
+                    int width = Integer.parseInt(uploadResults[1]);
+                    int height = Integer.parseInt(uploadResults[2]);
+                    mChannelCore.sendImage(uploadResults[0], width, height );
                 }
             }
         }

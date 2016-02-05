@@ -3,6 +3,7 @@ package io.xpush.chat.core;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -725,7 +726,9 @@ public class XPushCore {
         queue.add(request);
     }
 
-    public String uploadImage(Uri uri){
+    public String[] uploadImage(Uri uri){
+
+        String[] results = new String[3];
 
         String downloadUrl = null;
         String url = mXpushSession.getServerUrl()+"/upload";
@@ -740,6 +743,13 @@ public class XPushCore {
 
         String realPath = RealPathUtil.getRealPath(getBaseContext(), uri);
         File aFile = new File(realPath);
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(realPath, options);
+
+        int imageWidth = options.outWidth;
+        int imageHeight = options.outHeight;
 
         RequestBody requestBody = new MultipartBuilder()
                 .type(MultipartBuilder.FORM)
@@ -782,12 +792,18 @@ public class XPushCore {
                 Log.d(TAG, downloadUrl );
             }
 
+
+            results[0] = downloadUrl;
+            results[1] = String.valueOf(imageWidth);
+            results[2] = String.valueOf(imageHeight);
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return downloadUrl;
+
+        return results;
     }
 }
