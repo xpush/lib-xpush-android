@@ -147,8 +147,8 @@ public class RealPathUtil {
         }
 
         if( isMaxWidth && isMaxHeight ){
-            if( w > h ){
-                w = w / ratio;
+            if( originalWidth > originalHeight ){
+                h = w / ratio;
             } else {
                 w = h * ratio;
             }

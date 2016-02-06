@@ -221,7 +221,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             }
         } else {
             Log.d(TAG, "=== mChannelCore === : " + mChannelCore.connected());
-            refreshContent();
         }
     }
 

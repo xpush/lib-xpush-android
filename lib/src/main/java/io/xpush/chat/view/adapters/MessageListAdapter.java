@@ -21,6 +21,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -118,12 +119,27 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             tvUser.setText(username);
         }
 
-        public void setMessage(String message, int type, JSONObject metatdata) {
+        public void setMessage(String message, int type, final JSONObject metatdata) {
 
             if (null == vMessage) return;
             if( type == XPushMessage.TYPE_SEND_IMAGE || type == XPushMessage.TYPE_RECEIVE_IMAGE ) {
 
+
                 final ImageView imageView = ((ImageView) vMessage);
+                if( metatdata != null ){
+                    try {
+                        int metaWidth = metatdata.getInt("W");
+                        int metaHeight = metatdata.getInt("H");
+
+                        if( metaWidth > 0 && metaHeight > 0 ) {
+                            int results[] = RealPathUtil.getActualImageSize(metaWidth, metaHeight, mContext);
+                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
+                            imageView.setLayoutParams(layoutParams);
+                        }
+                    } catch ( JSONException e ){
+                        e.printStackTrace();
+                    }
+                }
 
                 Glide.with(mContext)
                     .load(Uri.parse(message))
@@ -136,9 +152,11 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             int originalWidth = bitmap.getWidth();
                             int originalHeight =  bitmap.getHeight();
 
-                            int results[] = RealPathUtil.getActualImageSize(originalWidth, originalHeight, mContext);
-                            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
-                            imageView.setLayoutParams(layoutParams);
+                            if( metatdata == null ) {
+                                //int results[] = RealPathUtil.getActualImageSize(originalWidth, originalHeight, mContext);
+                                //LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
+                                //imageView.setLayoutParams(layoutParams);
+                            }
                             imageView.setImageBitmap(bitmap);
                         }
                     });
