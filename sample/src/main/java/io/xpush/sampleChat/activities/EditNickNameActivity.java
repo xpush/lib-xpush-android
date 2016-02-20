@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
 
@@ -27,7 +28,7 @@ public class EditNickNameActivity extends FragmentActivity implements TextWatche
         mTextCount = ((TextView)findViewById(R.id.text_count));
 
         mUserName.setText(XPushCore.getInstance().getXpushSession().getName() );
-        mTextCount.setText( XPushUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getName(), 20) );
+        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getName(), 20) );
         mUserName.setSelection(mUserName.getText().length());
 
         mUserName.addTextChangedListener(this);
@@ -59,7 +60,7 @@ public class EditNickNameActivity extends FragmentActivity implements TextWatche
 
     @Override
     public void afterTextChanged(Editable editable) {
-        String strLen = XPushUtils.getInputStringLength( editable.toString(), 20 );
+        String strLen = ContentUtils.getInputStringLength(editable.toString(), 20);
         mTextCount.setText( strLen );
     }
 }

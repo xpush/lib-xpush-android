@@ -33,7 +33,7 @@ public class FriendsFragment extends XPushUsersFragment {
 
     private static final String TAG = FriendsFragment.class.getSimpleName();
 
-    private String mTitle = "";
+    private String mTitle;
 
     @Override
     public void initDataAdapter(){

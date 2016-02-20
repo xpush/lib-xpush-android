@@ -14,15 +14,12 @@ import io.xpush.sampleChat.fragments.ChatFragment;
 public class ChatActivity extends AppCompatActivity{
 
     public static final String TAG = ChatActivity.class.getSimpleName();
-    private Activity mActivity;
     private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
-
-        mActivity = this;
 
         ChatFragment f = new ChatFragment();
 
@@ -52,8 +49,6 @@ public class ChatActivity extends AppCompatActivity{
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
-        Log.d(TAG, "===== newIntent =====");
 
         if (null != intent) {
             Log.d(TAG, intent.toString());

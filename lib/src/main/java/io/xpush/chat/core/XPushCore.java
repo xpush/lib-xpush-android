@@ -44,7 +44,7 @@ import io.xpush.chat.persist.ChannelTable;
 import io.xpush.chat.persist.UserTable;
 import io.xpush.chat.persist.XpushContentProvider;
 import io.xpush.chat.services.XPushService;
-import io.xpush.chat.util.RealPathUtil;
+import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.util.XPushUtils;
 
 public class XPushCore {
@@ -741,7 +741,7 @@ public class XPushCore {
             e.printStackTrace();
         }
 
-        String realPath = RealPathUtil.getRealPath(getBaseContext(), uri);
+        String realPath = ContentUtils.getRealPath(getBaseContext(), uri);
         File aFile = new File(realPath);
 
         BitmapFactory.Options options = new BitmapFactory.Options();

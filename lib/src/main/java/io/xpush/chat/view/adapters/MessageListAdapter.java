@@ -1,13 +1,9 @@
 package io.xpush.chat.view.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +24,8 @@ import java.util.List;
 
 import io.xpush.chat.R;
 import io.xpush.chat.models.XPushMessage;
+import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.util.DateUtils;
-import io.xpush.chat.util.RealPathUtil;
 
 public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.ViewHolder> {
 
@@ -132,7 +128,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                         int metaHeight = metatdata.getInt("H");
 
                         if( metaWidth > 0 && metaHeight > 0 ) {
-                            int results[] = RealPathUtil.getActualImageSize(metaWidth, metaHeight, mContext);
+                            int results[] = ContentUtils.getActualImageSize(metaWidth, metaHeight, mContext);
                             LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
                             imageView.setLayoutParams(layoutParams);
                         }
@@ -153,7 +149,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
                             int originalHeight =  bitmap.getHeight();
 
                             if( metatdata == null ) {
-                                //int results[] = RealPathUtil.getActualImageSize(originalWidth, originalHeight, mContext);
+                                //int results[] = ContentUtils.getActualImageSize(originalWidth, originalHeight, mContext);
                                 //LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(results[0], results[1]);
                                 //imageView.setLayoutParams(layoutParams);
                             }

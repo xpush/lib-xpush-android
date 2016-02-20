@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import io.socket.emitter.Emitter;
 import io.socket.engineio.client.EngineIOException;
@@ -69,8 +70,6 @@ import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 public abstract class XPushChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<XPushMessage>>{
 
     public static final String TAG = XPushChatFragment.class.getSimpleName();
-
-    private static final int TYPING_TIMER_LENGTH = 600;
     protected static final int INIT_VIEW_COUNT = 16;
 
     private int mViewCount;
@@ -219,8 +218,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             } else {
                 getChannelAndConnect();
             }
-        } else {
-            Log.d(TAG, "=== mChannelCore === : " + mChannelCore.connected());
         }
     }
 
@@ -269,8 +266,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         mRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-
-                // Keyboard Popup
                 if (mInputMessageView.hasFocus() && oldBottom > bottom) {
                     mRecyclerView.scrollBy(0, oldBottom - bottom);
                 }
@@ -288,7 +283,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         inflater.inflate(R.menu.menu_chat, menu);
     }
 
@@ -351,7 +345,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         events.put(Socket.EVENT_CONNECT_ERROR, onConnectError);
         events.put(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
         events.put(Socket.EVENT_CONNECT, onConnectSuccess);
-
         events.put("message", onMessage);
 
         mChannelCore.connect(events);
@@ -361,22 +354,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         mXpushMessages.add(xpushMessage);
         mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
         scrollToBottom();
-    }
-
-    private void addTyping(String userId) {
-        mXpushMessages.add(new XPushMessage.Builder(XPushMessage.TYPE_ACTION)
-                .username(userId).build());
-        mAdapter.notifyItemInserted(mXpushMessages.size() - 1);
-    }
-
-    private void removeTyping(String userId) {
-        for (int i = mXpushMessages.size() - 1; i >= 0; i--) {
-            XPushMessage xpushMessage = mXpushMessages.get(i);
-            if (xpushMessage.getType() == XPushMessage.TYPE_ACTION && xpushMessage.getSenderId().equals(userId)) {
-                mXpushMessages.remove(i);
-                mAdapter.notifyItemRemoved(i);
-            }
-        }
     }
 
     private void attemptSend() {
@@ -443,7 +420,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                             try {
                                 JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
 
-                                StringBuffer sb = new StringBuffer();
                                 for( int inx = 0 ; inx < dts.length() ; inx++ ){
                                     mXpushUsers.add(new XPushUser(dts.getJSONObject(inx)));
                                 }
@@ -476,7 +452,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             mActivity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    //Toast.makeText(mActivity, R.string.error_connect, Toast.LENGTH_LONG).show();
+                    Toast.makeText(mActivity, R.string.error_connect, Toast.LENGTH_LONG).show();
                 }
             });
         }

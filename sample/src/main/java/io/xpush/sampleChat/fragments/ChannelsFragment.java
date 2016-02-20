@@ -3,7 +3,6 @@ package io.xpush.sampleChat.fragments;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -13,10 +12,6 @@ import io.xpush.sampleChat.activities.ChatActivity;
 
 
 public class ChannelsFragment extends XPushChannelsFragment {
-
-    private static final String TAG = ChannelsFragment.class.getSimpleName();
-
-    private String mTitle = "";
 
     @Override
     public void onChannelItemClick(AdapterView<?> listView, View view, int position, long id) {
