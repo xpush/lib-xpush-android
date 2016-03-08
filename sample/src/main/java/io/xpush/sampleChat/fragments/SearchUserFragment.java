@@ -73,9 +73,7 @@ public class SearchUserFragment extends Fragment  {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mActivity = getActivity();
 
         View view = inflater.inflate(R.layout.fragment_search_users, container, false);

@@ -1,10 +1,11 @@
 package io.xpush.sampleChat.fragments;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,7 +40,7 @@ import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.fragments.XPushChatFragment;
 import io.xpush.chat.models.XPushMessage;
-import io.xpush.chat.util.RealPathUtil;
+import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.sampleChat.R;
 import io.xpush.sampleChat.activities.ImageViewerActivity;
@@ -65,6 +66,7 @@ public class ChatFragment extends XPushChatFragment {
 
     @Override
     public void onAttach(Activity activity) {
+
         super.onAttach(activity);
         super.mAdapter.setOnItemClickListener(new MessageListAdapter.MessageClickListener() {
             @Override
@@ -82,6 +84,13 @@ public class ChatFragment extends XPushChatFragment {
             @Override
             public void onMessageLongClick(String message, int type) {
                 Log.d(TAG, "long clicked : " + message );
+                if( type == XPushMessage.TYPE_RECEIVE_MESSAGE || type == XPushMessage.TYPE_SEND_MESSAGE ){
+                    ClipboardManager cm = (ClipboardManager)mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+
+                    ClipData clip = ClipData.newPlainText( " Chat Message : ",  message );
+                    cm.setPrimaryClip(clip);
+                    Toast.makeText(mActivity, "Copied to clipboard", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -108,7 +117,6 @@ public class ChatFragment extends XPushChatFragment {
                     mHiddenPannel.setVisibility(View.GONE);
                     mChatPlus.setImageResource(R.drawable.ic_add_black);
                 }
-
             }
         });
 
@@ -188,9 +196,9 @@ public class ChatFragment extends XPushChatFragment {
 
                 Uri selectedImageUri = data.getData();
 
-                String realPath = RealPathUtil.getRealPath(mActivity, selectedImageUri);
+                String realPath = ContentUtils.getRealPath(mActivity, selectedImageUri);
 
-                if( RealPathUtil.isImagePath( realPath ) ) {
+                if( ContentUtils.isImagePath(realPath) ) {
 
                     UploadImageTask imageUpload = new UploadImageTask(selectedImageUri);
                     imageUpload.execute();
@@ -279,8 +287,6 @@ public class ChatFragment extends XPushChatFragment {
         protected  void onPostExecute(final String[] uploadResults){
             super.onPostExecute(uploadResults);
             if( uploadResults != null ){
-
-                Log.d(TAG, " Upload result imageUrl : " + uploadResults );
 
                 if( mChannelCore != null ){
                     int width = Integer.parseInt(uploadResults[1]);

@@ -41,11 +41,4 @@ public class XPushUtils {
             return arg0.compareTo( arg1 );
         }
     }
-
-    public static String getInputStringLength(String paramString, int paramInt){
-        if (paramString == null) {
-            return null;
-        }
-        return String.format(Locale.US, "%1$d/%2$d", new Object[] { Integer.valueOf(paramString.length()), Integer.valueOf(paramInt) });
-    }
 }

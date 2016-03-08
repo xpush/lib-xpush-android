@@ -1,7 +1,6 @@
 package io.xpush.chat.models;
 
 import android.database.Cursor;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -206,47 +205,6 @@ public class XPushMessage {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        }
-    }
-
-    public static class Builder {
-        private final int mType;
-        private String mUserId;
-        private String mUsername;
-        private String mMessage;
-        private long mTimestamp;
-
-        public Builder(int type) {
-            mType = type;
-        }
-
-        public Builder userId(String mUserId) {
-            mUserId = mUserId;
-            return this;
-        }
-
-        public Builder username(String username) {
-            mUsername = username;
-            return this;
-        }
-
-        public Builder message(String message) {
-            mMessage = message;
-            return this;
-        }
-
-        public Builder timestamp(long timestamp) {
-            mTimestamp = timestamp;
-            return this;
-        }
-
-        public XPushMessage build() {
-            XPushMessage xpushMessage = new XPushMessage();
-            xpushMessage.type = mType;
-            xpushMessage.senderName= mUsername;
-            xpushMessage.message = mMessage;
-            xpushMessage.updated = mTimestamp;
-            return xpushMessage;
         }
     }
 

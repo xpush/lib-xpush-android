@@ -39,7 +39,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushMessage;

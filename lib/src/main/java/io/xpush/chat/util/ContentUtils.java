@@ -9,13 +9,13 @@ import android.os.Build;
 import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.util.TypedValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 
-public class RealPathUtil {
+public class ContentUtils {
 
     private static final String[] sArrays = {"png","jpg","jpeg","bmp","gif"};
     private static final ArrayList<String> imageExtList = new ArrayList<String>(Arrays.asList(sArrays));
@@ -88,18 +88,18 @@ public class RealPathUtil {
 
             // SDK < API11
             if (Build.VERSION.SDK_INT < 11) {
-                realPath = RealPathUtil.getRealPathFromURI_BelowAPI11(context, uri);
+                realPath = ContentUtils.getRealPathFromURI_BelowAPI11(context, uri);
 
                 // SDK >= 11 && SDK < 19
             } else if (Build.VERSION.SDK_INT < 19) {
-                realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
+                realPath = ContentUtils.getRealPathFromURI_API11to18(context, uri);
 
                 // SDK > 19 (Android 4.4)
             } else {
                 if (String.valueOf(uri).contains("documents")) {
-                    realPath = RealPathUtil.getRealPathFromURI_API19(context, uri);
+                    realPath = ContentUtils.getRealPathFromURI_API19(context, uri);
                 } else {
-                    realPath = RealPathUtil.getRealPathFromURI_API11to18(context, uri);
+                    realPath = ContentUtils.getRealPathFromURI_API11to18(context, uri);
                 }
             }
         }
@@ -165,5 +165,12 @@ public class RealPathUtil {
         results[1] = height;
 
         return results;
+    }
+
+    public static String getInputStringLength(String paramString, int paramInt){
+        if (paramString == null) {
+            return null;
+        }
+        return String.format(Locale.US, "%1$d/%2$d", new Object[] { Integer.valueOf(paramString.length()), Integer.valueOf(paramInt) });
     }
 }

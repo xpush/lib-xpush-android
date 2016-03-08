@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import io.xpush.chat.core.XPushCore;
+import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.util.XPushUtils;
 import io.xpush.sampleChat.R;
 
@@ -27,7 +28,7 @@ public class EditStatusMessageActivity extends FragmentActivity implements TextW
         mTextCount = ((TextView)findViewById(R.id.text_count));
 
         mStatusMessage.setText(XPushCore.getInstance().getXpushSession().getMessage() );
-        mTextCount.setText( XPushUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getMessage(), 20) );
+        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getMessage(), 20) );
         mStatusMessage.setSelection(mStatusMessage.getText().length());
 
         mStatusMessage.addTextChangedListener(this);
@@ -59,7 +60,7 @@ public class EditStatusMessageActivity extends FragmentActivity implements TextW
 
     @Override
     public void afterTextChanged(Editable editable) {
-        String strLen = XPushUtils.getInputStringLength( editable.toString(), 20 );
+        String strLen = ContentUtils.getInputStringLength(editable.toString(), 20);
         mTextCount.setText( strLen );
     }
 }
