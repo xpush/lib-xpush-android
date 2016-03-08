@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -49,18 +50,18 @@ import io.xpush.chat.util.XPushUtils;
 
 public class XPushCore {
 
-    private XPushSession mXpushSession;
+    private static XPushSession mXpushSession;
 
     private static final String TAG = XPushCore.class.getSimpleName();
 
     public static XPushCore sInstance;
 
-    private String mHostname;
-    private String mAppId;
-    private String mDeviceId;
-    private Context baseContext;
+    private static String mHostname;
+    private static String mAppId;
+    private static String mDeviceId;
+    private static Context baseContext;
 
-    private Socket mGlobalSocket;
+    private static Socket mGlobalSocket;
 
     public static void initialize(Context context){
         if( sInstance == null ){
@@ -86,11 +87,12 @@ public class XPushCore {
         this.baseContext = context;
     }
 
-    public void init(){
+
+    private void init(){
         if( getBaseContext() != null ) {
             mXpushSession = restoreXpushSession();
             this.mHostname = getBaseContext().getString(R.string.host_name);
-            this.mAppId = getBaseContext().getString(R.string.app_id);
+            mAppId = getBaseContext().getString(R.string.app_id);
             this.mDeviceId = getBaseContext().getString(R.string.device_id);
         }
     }
@@ -108,7 +110,7 @@ public class XPushCore {
         this.init();
     }
 
-    public Context getBaseContext(){
+    public static Context getBaseContext(){
         if( baseContext == null){
             Log.w(TAG, "!!!!! baseContext is null !!!!!");
             baseContext = ApplicationController.getInstance();
@@ -118,6 +120,36 @@ public class XPushCore {
 
     public void setGlobalSocket(Socket socket){
         this.mGlobalSocket = socket;
+    }
+
+    private Socket getClient() {
+        if( mGlobalSocket == null || !mGlobalSocket.connected() ){
+            XPushService.actionStart(getBaseContext());
+
+            long mTick = 10;
+            long count = 0;
+            long mTimeout = 2000;
+
+            while(true) {
+                try {
+                    Thread.sleep(mTick);
+                    count += mTick;
+                    if (count < mTimeout) {
+                        if( mGlobalSocket != null && mGlobalSocket.connected() ){
+                            break;
+                        }
+                    }
+
+                    if(count >= mTimeout) {
+                        break;
+                    }
+                } catch (InterruptedException var3) {
+                    break;
+                }
+            }
+        }
+
+        return this.mGlobalSocket;
     }
 
     public boolean isGlobalConnected(){
@@ -134,7 +166,9 @@ public class XPushCore {
      *
      *
      */
-    public void register(String id, String password, String name, final CallbackEvent callbackEvent){
+    public static void register(String id, String password, String name, final CallbackEvent callbackEvent){
+
+        getInstance();
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -198,7 +232,9 @@ public class XPushCore {
      *
      *
      */
-    public void login(String id, String password, final CallbackEvent callbackEvent){
+    public static void login(String id, String password, final CallbackEvent callbackEvent){
+
+        getInstance();
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -247,7 +283,8 @@ public class XPushCore {
      *
      *
      */
-    public void logout(){
+    public static void logout(){
+        getInstance();
         mXpushSession = null;
         XPushService.actionStop(baseContext);
         sInstance = null;
@@ -264,7 +301,9 @@ public class XPushCore {
      *
      *
      */
-    public void addDevice(String id, String password, final CallbackEvent callbackEvent){
+    public static void addDevice(String id, String password, final CallbackEvent callbackEvent){
+
+        getInstance();
 
         final Map<String,String> params = new HashMap<String, String>();
 
@@ -312,7 +351,10 @@ public class XPushCore {
         queue.add(request);
     }
 
-    public void updateUser(final JSONObject mJsonUserData, final CallbackEvent callbackEvent){
+    public static void updateUser(final JSONObject mJsonUserData, final CallbackEvent callbackEvent){
+
+        getInstance();
+
         final Map<String,String> params = new HashMap<String, String>();
 
         params.put("A", mAppId);
@@ -369,7 +411,8 @@ public class XPushCore {
      * Session Start
      *
      */
-    public XPushSession restoreXpushSession(){
+    public static XPushSession restoreXpushSession(){
+        getInstance();
         if( mXpushSession == null ){
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             final String sessionStr = pref.getString("XPUSH_SESSION", "");
@@ -385,7 +428,8 @@ public class XPushCore {
         return mXpushSession;
     }
 
-    public boolean isLogined(){
+    public static boolean isLogined(){
+        getInstance();
         if( restoreXpushSession() != null ){
             return true;
         } else {
@@ -393,20 +437,13 @@ public class XPushCore {
         }
     }
 
-    public XPushSession getXpushSession(){
+    public static XPushSession getXpushSession(){
+        getInstance();
         if( mXpushSession == null ){
             restoreXpushSession();
         }
 
         return mXpushSession;
-    }
-
-    public void setXpushSession(XPushSession session){
-        mXpushSession = session;
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("XPUSH_SESSION", mXpushSession.toJSON().toString());
-        editor.commit();
     }
 
     /**
@@ -439,7 +476,7 @@ public class XPushCore {
             return;
         }
 
-        mGlobalSocket.emit("channel.create", jsonObject, new Ack() {
+        getInstance().getClient().emit("channel.create", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
@@ -462,14 +499,15 @@ public class XPushCore {
     }
 
 
-    public void getChannel(final String channelId, final CallbackEvent callbackEvent){
+    public static void getChannel(final String channelId, final CallbackEvent callbackEvent){
         getChannel(getBaseContext(), channelId, callbackEvent);
     }
 
-    public void getChannel(Context context, final String channelId, final CallbackEvent callbackEvent){
+    public static void getChannel(Context context, final String channelId, final CallbackEvent callbackEvent){
+        getInstance();
         String url = null;
         try {
-            url = mHostname + "/node/"+ XPushCore.getInstance().getAppId()+"/"+ URLEncoder.encode(channelId, "UTF-8");
+            url = mHostname + "/node/"+ getInstance().getAppId()+"/"+ URLEncoder.encode(channelId, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -505,7 +543,8 @@ public class XPushCore {
         queue.add(request);
     }
 
-    public void storeChannel(XPushChannel channel){
+    public static void storeChannel(XPushChannel channel){
+        getInstance();
         ContentValues values = new ContentValues();
         values.put(ChannelTable.KEY_ID, channel.getId());
         values.put(ChannelTable.KEY_NAME, channel.getName());
@@ -522,7 +561,8 @@ public class XPushCore {
      * Group Start
      *
      */
-    public void getFriends(final CallbackEvent callbackEvent) {
+    public static void getFriends(final CallbackEvent callbackEvent) {
+
 
         JSONObject jsonObject = new JSONObject();
 
@@ -533,7 +573,7 @@ public class XPushCore {
             e.printStackTrace();
         }
 
-        mGlobalSocket.emit("group.list", jsonObject, new Ack() {
+        getInstance().getClient().emit("group.list", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
@@ -542,7 +582,7 @@ public class XPushCore {
                 if (response.has("result")) {
                     try {
                         JSONArray result = (JSONArray) response.getJSONArray("result");
-                        callbackEvent.call( result );
+                        callbackEvent.call(result);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -552,7 +592,8 @@ public class XPushCore {
         });
     }
 
-    public void storeFriends(final Context mContext, final JSONArray result) {
+    public static void storeFriends(final Context mContext, final JSONArray result) {
+        getInstance();
         try {
             List<ContentValues> valuesToInsert = new ArrayList<ContentValues>();
 
@@ -588,17 +629,15 @@ public class XPushCore {
                 valuesToInsert.add(contentValues);
             }
 
-            if( mContext != null) {
-                synchronized (this) {
-                    mContext.getContentResolver().bulkInsert(XpushContentProvider.USER_CONTENT_URI, valuesToInsert.toArray(new ContentValues[0]));
-                }
-            }
+
+            mContext.getContentResolver().bulkInsert(XpushContentProvider.USER_CONTENT_URI, valuesToInsert.toArray(new ContentValues[0]));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    public void addFriend(final Context mContext, final XPushUser user, final CallbackEvent callbackEvent) {
+    public static void addFriend(final Context mContext, final XPushUser user, final CallbackEvent callbackEvent) {
 
         JSONObject jsonObject = new JSONObject();
         JSONArray array = new JSONArray();
@@ -612,7 +651,7 @@ public class XPushCore {
             e.printStackTrace();
         }
 
-        mGlobalSocket.emit("group.add", jsonObject, new Ack() {
+        getInstance().getClient().emit("group.add", jsonObject, new Ack() {
             @Override
             public void call(Object... args) {
                 JSONObject response = (JSONObject) args[0];
@@ -638,11 +677,13 @@ public class XPushCore {
         });
     }
 
-    public void searchUser(final Context context, String searchKey, final CallbackEvent callbackEvent){
-        this.searchUser(context, searchKey, 1, 50, callbackEvent);
+    public static void searchUser(final Context context, String searchKey, final CallbackEvent callbackEvent){
+        searchUser(context, searchKey, 1, 50, callbackEvent);
     }
 
-    public void searchUser(final Context context, String searchKey, int pageNum, int pageSize, final CallbackEvent callbackEvent){
+    public static void searchUser(final Context context, String searchKey, int pageNum, int pageSize, final CallbackEvent callbackEvent){
+
+        getInstance();
 
         JSONObject options = new JSONObject();
 
@@ -726,7 +767,9 @@ public class XPushCore {
         queue.add(request);
     }
 
-    public String[] uploadImage(Uri uri){
+    public static String[] uploadImage(Uri uri){
+
+        getInstance();
 
         String[] results = new String[3];
 
@@ -802,7 +845,6 @@ public class XPushCore {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
 
         return results;
     }
