@@ -68,9 +68,9 @@ public class SplashActivity extends Activity {
             @Override
             public void run() {
                 // connected, not yet splash or not logined
-                if (  ( ( !XPushCore.getInstance().isLogined() || XPushCore.getInstance().isGlobalConnected() )&& System.currentTimeMillis() - started < SPLASH_TIME)
+                if (  ( ( !XPushCore.isLogined() || XPushCore.isGlobalConnected() )&& System.currentTimeMillis() - started < SPLASH_TIME)
                         // not connected, splash * 4
-                        || ( XPushCore.getInstance().isLogined() &&!XPushCore.getInstance().isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
+                        || ( XPushCore.isLogined() &&!XPushCore.isGlobalConnected() && System.currentTimeMillis() - started < (SPLASH_TIME * 4))) {
                     handler.postDelayed(this, 150);
                 } else {
 
@@ -78,7 +78,7 @@ public class SplashActivity extends Activity {
                     overridePendingTransition(0, android.R.anim.fade_in);
 
                     Intent intent = null;
-                    if (null == XPushCore.getInstance().getXpushSession()) {
+                    if (null == XPushCore.getXpushSession()) {
                         intent = new Intent(SplashActivity.this, LoginActivity.class);
                     } else {
                         intent = new Intent(SplashActivity.this, MainActivity.class);

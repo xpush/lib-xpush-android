@@ -27,8 +27,8 @@ public class EditStatusMessageActivity extends FragmentActivity implements TextW
         mStatusMessage = ((EditText)findViewById(R.id.status_message));
         mTextCount = ((TextView)findViewById(R.id.text_count));
 
-        mStatusMessage.setText(XPushCore.getInstance().getXpushSession().getMessage() );
-        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getMessage(), 20) );
+        mStatusMessage.setText(XPushCore.getXpushSession().getMessage() );
+        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getXpushSession().getMessage(), 20) );
         mStatusMessage.setSelection(mStatusMessage.getText().length());
 
         mStatusMessage.addTextChangedListener(this);

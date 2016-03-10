@@ -120,7 +120,7 @@ public class FriendsFragment extends XPushUsersFragment {
             public void call(Object... args) {
                 if (args != null && args.length > 0) {
                     JSONArray users = (JSONArray) args[0];
-                    XPushCore.getInstance().storeFriends(getActivity(), users);
+                    XPushCore.storeFriends(getActivity(), users);
                 }
             }
         });
@@ -134,7 +134,7 @@ public class FriendsFragment extends XPushUsersFragment {
 
         ArrayList<String> userArray = new ArrayList<String>();
         userArray.add( user.getId() );
-        userArray.add(XPushCore.getInstance().getXpushSession().getId());
+        userArray.add(XPushCore.getXpushSession().getId());
 
         XPushChannel channel = new XPushChannel();
         channel.setId(XPushUtils.generateChannelId(userArray));

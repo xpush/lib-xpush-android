@@ -84,30 +84,30 @@ public class XPushCore {
     }
 
     public XPushCore(Context context){
-        this.baseContext = context;
+        baseContext = context;
     }
 
 
     private void init(){
         if( getBaseContext() != null ) {
             mXpushSession = restoreXpushSession();
-            this.mHostname = getBaseContext().getString(R.string.host_name);
+            mHostname = getBaseContext().getString(R.string.host_name);
             mAppId = getBaseContext().getString(R.string.app_id);
-            this.mDeviceId = getBaseContext().getString(R.string.device_id);
+            mDeviceId = getBaseContext().getString(R.string.device_id);
         }
     }
 
-    public String getHostname(){
-        return this.mHostname;
+    public static String getHostname(){
+        return mHostname;
     }
 
-    public String getAppId(){
-        return this.mAppId;
+    public static String getAppId(){
+        return mAppId;
     }
 
-    public void setBaseContext(Context context){
-        this.baseContext = context;
-        this.init();
+    public static void setBaseContext(Context context){
+        baseContext = context;
+        XPushCore.getInstance().init();
     }
 
     public static Context getBaseContext(){
@@ -118,41 +118,50 @@ public class XPushCore {
         return baseContext;
     }
 
-    public void setGlobalSocket(Socket socket){
-        this.mGlobalSocket = socket;
+    public static void setGlobalSocket(Socket socket){
+        mGlobalSocket = socket;
     }
 
     private Socket getClient() {
-        if( mGlobalSocket == null || !mGlobalSocket.connected() ){
-            XPushService.actionStart(getBaseContext());
 
-            long mTick = 10;
-            long count = 0;
-            long mTimeout = 2000;
+        synchronized (mGlobalSocket) {
+            if (mGlobalSocket == null || !mGlobalSocket.connected()) {
 
-            while(true) {
-                try {
-                    Thread.sleep(mTick);
-                    count += mTick;
-                    if (count < mTimeout) {
-                        if( mGlobalSocket != null && mGlobalSocket.connected() ){
+
+                XPushService.actionStart(getBaseContext());
+
+                long mTick = 100;
+                long count = 0;
+                long mTimeout = 6000;
+
+                /*
+                while (true) {
+                    try {
+                        Thread.sleep(mTick);
+
+                        Log.d(TAG, "Trying reconnect : " + mTick);
+                        count += mTick;
+                        if (count < mTimeout) {
+                            if (mGlobalSocket != null && mGlobalSocket.connected()) {
+                                break;
+                            }
+                        }
+
+                        if (count >= mTimeout) {
                             break;
                         }
-                    }
-
-                    if(count >= mTimeout) {
+                    } catch (InterruptedException var3) {
                         break;
                     }
-                } catch (InterruptedException var3) {
-                    break;
                 }
+                */
             }
         }
 
-        return this.mGlobalSocket;
+        return mGlobalSocket;
     }
 
-    public boolean isGlobalConnected(){
+    public static boolean isGlobalConnected(){
         if( mGlobalSocket == null ){
             return false;
         }
@@ -453,7 +462,7 @@ public class XPushCore {
      *
      */
 
-    public void createChannel(final XPushChannel xpushChannel, final CallbackEvent callbackEvent){
+    public static void createChannel(final XPushChannel xpushChannel, final CallbackEvent callbackEvent){
 
         JSONArray userArray = new JSONArray();
         for( String userId : xpushChannel.getUsers() ){
@@ -573,23 +582,27 @@ public class XPushCore {
             e.printStackTrace();
         }
 
-        getInstance().getClient().emit("group.list", jsonObject, new Ack() {
-            @Override
-            public void call(Object... args) {
-                JSONObject response = (JSONObject) args[0];
+        try {
+            getInstance().getClient().emit("group.list", jsonObject, new Ack() {
+                @Override
+                public void call(Object... args) {
+                    JSONObject response = (JSONObject) args[0];
 
-                Log.d(TAG, response.toString());
-                if (response.has("result")) {
-                    try {
-                        JSONArray result = (JSONArray) response.getJSONArray("result");
-                        callbackEvent.call(result);
+                    Log.d(TAG, response.toString());
+                    if (response.has("result")) {
+                        try {
+                            JSONArray result = (JSONArray) response.getJSONArray("result");
+                            callbackEvent.call(result);
 
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        });
+            });
+        } catch ( Exception ee ){
+            ee.printStackTrace();
+        }
     }
 
     public static void storeFriends(final Context mContext, final JSONArray result) {
@@ -645,7 +658,7 @@ public class XPushCore {
         try {
             array.put( user.getId() );
 
-            jsonObject.put("GR", XPushCore.getInstance().getXpushSession().getId()  );
+            jsonObject.put("GR", XPushCore.getXpushSession().getId()  );
             jsonObject.put("U", array );
         } catch (JSONException e) {
             e.printStackTrace();
@@ -799,7 +812,7 @@ public class XPushCore {
                 .addFormDataPart("file", aFile.getName(), RequestBody.create(Constants.MEDIA_TYPE_PNG, aFile)).build();
 
 
-        String appId = XPushCore.getInstance().getAppId();
+        String appId = XPushCore.getAppId();
 
         Request request = new Request.Builder()
                 .url(url)

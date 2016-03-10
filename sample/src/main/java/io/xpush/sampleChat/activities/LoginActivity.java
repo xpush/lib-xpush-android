@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity  {
         final String id = mIdText.getText().toString();
         final String password = mPasswordText.getText().toString();
 
-        XPushCore.getInstance().login(id, password, new CallbackEvent() {
+        XPushCore.login(id, password, new CallbackEvent() {
              @Override
              public void call(Object... args) {
                  if (args == null || args.length == 0) {

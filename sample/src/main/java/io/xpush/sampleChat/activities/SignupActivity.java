@@ -70,7 +70,7 @@ public class SignupActivity extends AppCompatActivity {
         String name = mNameText.getText().toString();
         String password = mPasswordText.getText().toString();
 
-        XPushCore.getInstance().register(id, password, name, new CallbackEvent() {
+        XPushCore.register(id, password, name, new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 if (args == null || args.length == 0) {

@@ -202,9 +202,9 @@ public class SelectFriendFragment extends XPushUsersFragment {
                 }
             }
 
-            if( userArray.indexOf( XPushCore.getInstance().getXpushSession().getId() ) < 0 ) {
-                userArray.add(XPushCore.getInstance().getXpushSession().getId());
-                userNameArray.add(XPushCore.getInstance().getXpushSession().getName());
+            if( userArray.indexOf( XPushCore.getXpushSession().getId() ) < 0 ) {
+                userArray.add(XPushCore.getXpushSession().getId());
+                userNameArray.add(XPushCore.getXpushSession().getName());
             }
 
             XPushChannel channel = new XPushChannel();

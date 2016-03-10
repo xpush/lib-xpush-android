@@ -279,7 +279,7 @@ public class ChatFragment extends XPushChatFragment {
 
         @Override
         protected String[] doInBackground(Void... voids) {
-            String[] uploadResults = XPushCore.getInstance().uploadImage(mUri);
+            String[] uploadResults = XPushCore.uploadImage(mUri);
             return uploadResults;
         }
 

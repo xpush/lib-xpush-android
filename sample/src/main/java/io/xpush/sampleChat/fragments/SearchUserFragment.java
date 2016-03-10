@@ -146,7 +146,7 @@ public class SearchUserFragment extends Fragment  {
     }
 
     public void searchUsers(int page, final boolean resetFlag) {
-        XPushCore.getInstance().searchUser(getActivity(), mSearchKey, page, PAGE_SIZE, new CallbackEvent() {
+        XPushCore.searchUser(getActivity(), mSearchKey, page, PAGE_SIZE, new CallbackEvent() {
 
             @Override
             public void call(Object... args) {
@@ -170,7 +170,7 @@ public class SearchUserFragment extends Fragment  {
     }
 
     public void addFriend(final XPushUser user){
-        XPushCore.getInstance().addFriend( mActivity, user, new CallbackEvent(){
+        XPushCore.addFriend( mActivity, user, new CallbackEvent(){
             @Override
             public void call(Object... args) {
                 if( args == null || args.length == 0 ){

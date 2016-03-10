@@ -60,7 +60,7 @@ public class ProfileFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = getActivity();
-        mSession = XPushCore.getInstance().getXpushSession();
+        mSession = XPushCore.getXpushSession();
         mJsonUserData = mSession.getUserData();
     }
 
@@ -136,7 +136,7 @@ public class ProfileFragment extends Fragment {
     }
 
     private void updateProfile(){
-        XPushCore.getInstance().updateUser(mJsonUserData, new CallbackEvent() {
+        XPushCore.updateUser(mJsonUserData, new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 try {
@@ -160,7 +160,7 @@ public class ProfileFragment extends Fragment {
 
         @Override
         protected String doInBackground(Void... voids) {
-            String[] downloadUrl = XPushCore.getInstance().uploadImage(mUri);
+            String[] downloadUrl = XPushCore.uploadImage(mUri);
             try {
                 mJsonUserData.put("I", downloadUrl[0]);
             } catch (JSONException e) {

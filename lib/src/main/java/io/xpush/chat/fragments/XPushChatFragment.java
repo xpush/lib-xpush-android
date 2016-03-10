@@ -116,6 +116,8 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     private Bundle mChannelBundle;
 
+    private Bundle mSavedInstanceState;
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -133,15 +135,17 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         mDatabase = mDbHelper.getWritableDatabase();
         mDataSource = new XPushMessageDataSource(mDatabase, getActivity().getString(R.string.message_table_name), getActivity().getString(R.string.user_table_name));
 
-        mSession = XPushCore.getInstance().getXpushSession();
+        mSession = XPushCore.getXpushSession();
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
 
         if( savedInstanceState == null ){
             mChannelBundle = mActivity.getIntent().getBundleExtra(XPushChannel.CHANNEL_BUNDLE);
+
         } else {
             mChannelBundle = savedInstanceState.getBundle(XPushChannel.CHANNEL_BUNDLE);
             mViewCount = savedInstanceState.getInt("mViewCount");
             if( mDataLoader == null  ){
+
                 resetChannelFlag = true;
                 restartLoader = true;
             }
@@ -157,17 +161,18 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             if (cursor != null && cursor.getCount() > 0) {
                 cursor.moveToFirst();
                 mXpushChannel = new XPushChannel(cursor);
+                newChannelFlag = false;
             }
         }
 
         mUserId = mSession.getId();
         mUsername = mSession.getName();
-
-        super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
         mActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         getLoaderManager().initLoader(0, null, this);
+
+        mSavedInstanceState = savedInstanceState;
     }
 
     @Override
@@ -183,6 +188,10 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         if( !resetChannelFlag ) {
             resetChannelFlag = mActivity.getIntent().getBooleanExtra("resetChannel", false);
         }
+
+        Log.d(TAG, "resetChannelFlag : " + resetChannelFlag);
+        Log.d(TAG, "newChannelFlag : "+newChannelFlag );
+        Log.d(TAG, "restartLoader : "+restartLoader );
 
         if( resetChannelFlag ) {
             mViewCount = INIT_VIEW_COUNT;
@@ -405,9 +414,16 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
             // Multi Channel. Send Invite Message
             if( (newChannelFlag || resetChannelFlag ) && ( mUsers != null && mUsers.size()  > 2 ) ){
-                String message = mUsername + " Invite " + mXpushChannel.getName();
-                mXpushChannel.getUserNames().add(XPushCore.getInstance().getXpushSession().getName());
-                mChannelCore.sendMessage(message, "IN", mUsers);
+
+                if( mSavedInstanceState == null || ( mSavedInstanceState != null && !mSavedInstanceState.getBoolean("invitedSuccess", false) ) ) {
+                    String message = mUsername + " Invite " + mXpushChannel.getName();
+                    mXpushChannel.getUserNames().add(XPushCore.getXpushSession().getName());
+                    mChannelCore.sendMessage(message, "IN", mUsers);
+
+                    mActivity.getIntent().putExtra("resetChannel", false);
+                    resetChannelFlag = false;
+                }
+
             }
 
             mChannelCore.channelGet(new CallbackEvent() {
@@ -485,6 +501,8 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     @Override
     public void onLoadFinished(Loader<List<XPushMessage>> loader, List<XPushMessage> data) {
 
+        Log.d(TAG, "onLoadFinished");
+
         boolean onStarting = false;
         if( mXpushMessages.size() == 0 ){
             onStarting = true;
@@ -492,7 +510,17 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
         Collections.sort(data, new TimestampAscCompare());
 
-        mXpushMessages.addAll(0, data);
+
+        if(  mXpushMessages.size() ==  0 ) {
+            mXpushMessages.addAll(0, data);
+        } else {
+
+            // Prevent dulplicate
+            if( mXpushMessages.size() > 0 && mXpushMessages.get(0).getUpdated() != data.get(0).getUpdated() && data.size() > 0 ){
+                mXpushMessages.addAll(0, data);
+            }
+        }
+
         mAdapter.notifyDataSetChanged();
 
         if( onStarting ) {
@@ -508,7 +536,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             mRecyclerView.addOnScrollListener(mOnScrollListener);
 
         } else {
-            mRecyclerView.scrollToPosition( mXpushMessages.size() - data.size() + 1);
+            mRecyclerView.scrollToPosition(mXpushMessages.size() - data.size() + 1);
         }
     }
 
@@ -614,7 +642,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     }
 
     private void createChannelAndConnect(XPushChannel xpushChannel){
-        XPushCore.getInstance().createChannel(xpushChannel, new CallbackEvent() {
+        XPushCore.createChannel(xpushChannel, new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 if (args[0] != null) {
@@ -630,7 +658,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     private void getChannelAndConnect(){
 
-        XPushCore.getInstance().getChannel(mActivity, mChannel, new CallbackEvent() {
+        XPushCore.getChannel(mActivity, mChannel, new CallbackEvent() {
             @Override
             public void call(Object... args) {
                 if (args[0] != null) {

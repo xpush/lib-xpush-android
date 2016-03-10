@@ -28,7 +28,7 @@ public class EditNickNameActivity extends FragmentActivity implements TextWatche
         mTextCount = ((TextView)findViewById(R.id.text_count));
 
         mUserName.setText(XPushCore.getInstance().getXpushSession().getName() );
-        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getInstance().getXpushSession().getName(), 20) );
+        mTextCount.setText( ContentUtils.getInputStringLength(XPushCore.getXpushSession().getName(), 20) );
         mUserName.setSelection(mUserName.getText().length());
 
         mUserName.addTextChangedListener(this);
