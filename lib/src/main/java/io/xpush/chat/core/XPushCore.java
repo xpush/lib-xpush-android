@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
 import io.socket.client.Ack;
+import io.socket.client.IO;
 import io.socket.client.Socket;
 import com.squareup.okhttp.MultipartBuilder;
 import com.squareup.okhttp.OkHttpClient;
@@ -32,7 +33,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.socket.client.SocketIOException;
+import io.socket.emitter.Emitter;
+import io.socket.engineio.client.EngineIOException;
 import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.common.Constants;
@@ -62,6 +69,10 @@ public class XPushCore {
     private static Context baseContext;
 
     private static Socket mGlobalSocket;
+
+    private static final AtomicBoolean mGlobalSocketConnected = new AtomicBoolean();
+
+    private static CountDownLatch latch = new CountDownLatch(2);
 
     public static void initialize(Context context){
         if( sInstance == null ){
@@ -120,53 +131,60 @@ public class XPushCore {
 
     public static void setGlobalSocket(Socket socket){
         mGlobalSocket = socket;
+        latch.countDown();
+    }
+
+    public static void setGlobalSocketConnected(){
+        mGlobalSocketConnected.getAndSet(true);
     }
 
     private Socket getClient() {
 
-        synchronized (mGlobalSocket) {
-            if (mGlobalSocket == null || !mGlobalSocket.connected()) {
+        try {
+            if( !mGlobalSocketConnected.get() ) {
 
-
-                XPushService.actionStart(getBaseContext());
-
-                long mTick = 100;
-                long count = 0;
-                long mTimeout = 6000;
-
-                /*
-                while (true) {
-                    try {
-                        Thread.sleep(mTick);
-
-                        Log.d(TAG, "Trying reconnect : " + mTick);
-                        count += mTick;
-                        if (count < mTimeout) {
-                            if (mGlobalSocket != null && mGlobalSocket.connected()) {
-                                break;
-                            }
-                        }
-
-                        if (count >= mTimeout) {
-                            break;
-                        }
-                    } catch (InterruptedException var3) {
-                        break;
+                // create three threads passing a CountDownLatch
+                Thread T1 = new Thread(){
+                    public void run() {
+                        Log.d(TAG, "--- connect --- ");
+                        connect();
                     }
+                };
+
+                Thread T2 = new Thread(){
+                    public void run() {
+                        try {
+                            Thread.sleep(10);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        latch.countDown();
+                    }
+                };
+
+                T1.start();
+                T2.start();
+
+                try {
+                    latch.await(6, TimeUnit.SECONDS);
+                } catch(InterruptedException ie) {
+                    ie.printStackTrace();
                 }
-                */
             }
+        } catch (Exception e) {
+            // Happens if someone interrupts your thread.
+            e.printStackTrace();
+        }
+
+        if( mGlobalSocket == null ){
+            Log.d(TAG, "null null null");
         }
 
         return mGlobalSocket;
     }
 
     public static boolean isGlobalConnected(){
-        if( mGlobalSocket == null ){
-            return false;
-        }
-
-        return mGlobalSocket.connected();
+        return mGlobalSocketConnected.get();
     }
 
     /**
@@ -576,8 +594,7 @@ public class XPushCore {
         JSONObject jsonObject = new JSONObject();
 
         try {
-            jsonObject.put("GR", mXpushSession.getId() );
-
+            jsonObject.put("GR", mXpushSession.getId());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -659,7 +676,7 @@ public class XPushCore {
             array.put( user.getId() );
 
             jsonObject.put("GR", XPushCore.getXpushSession().getId()  );
-            jsonObject.put("U", array );
+            jsonObject.put("U", array);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -861,4 +878,54 @@ public class XPushCore {
 
         return results;
     }
+
+    private Socket socket;
+    private synchronized void connect() {
+        // fetch the device ID from the preferences.
+        String appId = getBaseContext().getString(R.string.app_id);
+        String url = mXpushSession.getServerUrl() + "/global";
+
+        IO.Options opts = new IO.Options();
+        opts.forceNew = true;
+        opts.reconnectionAttempts = 20;
+        try {
+            opts.query = "A="+appId+"&U="+ URLEncoder.encode(mXpushSession.getId(), "UTF-8")+"&TK="+mXpushSession.getToken()+"&D="+mXpushSession.getDeviceId();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        IO.Options mOpts = opts;
+        Log.i(TAG, "Connecting with URL: " + url);
+        try {
+            socket = IO.socket(url, mOpts);
+            socket.on(Socket.EVENT_CONNECT, onConnectSuccess);
+            socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            setGlobalSocket(socket);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        socket.connect();
+    }
+
+    private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            Log.d(TAG, "connect sucesss");
+            setGlobalSocketConnected();
+        }
+    };
+
+    private Emitter.Listener onConnectError = new Emitter.Listener() {
+        @Override
+        public void call(Object... args) {
+            if( args[0] instanceof SocketIOException) {
+                SocketIOException e = (SocketIOException) args[0];
+                Log.d(TAG, e.getMessage());
+            } else if ( args[0] instanceof EngineIOException){
+                EngineIOException e = (EngineIOException) args[0];
+                Log.d(TAG, e.getMessage());
+            }
+        }
+    };
 }

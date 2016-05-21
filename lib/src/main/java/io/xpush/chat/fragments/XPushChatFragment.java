@@ -420,7 +420,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                     mXpushChannel.getUserNames().add(XPushCore.getXpushSession().getName());
                     mChannelCore.sendMessage(message, "IN", mUsers);
 
-                    mActivity.getIntent().putExtra("resetChannel", false);
+                    mActivity.getIntent().putExtra("resetChannel", true);
                     resetChannelFlag = false;
                 }
 

@@ -201,7 +201,7 @@ public class XPushService extends Service {
      * 리시버 등록(connection)
      */
     private synchronized void start() {
-
+        Log.i(TAG, "start");
         if( XPushCore.getXpushSession() == null) {
 
             Log.i(TAG, "Not logged in user");
@@ -209,7 +209,7 @@ public class XPushService extends Service {
             stopKeepAlives();
             return;
         } else {
-            XPushCore.setBaseContext( this.getBaseContext() );
+            XPushCore.setBaseContext(this.getBaseContext());
             mXpushSession = XPushCore.restoreXpushSession();
         }
 
@@ -281,7 +281,6 @@ public class XPushService extends Service {
         log("Connecting...");
         mConnecting = true;
         // fetch the device ID from the preferences.
-        String hostName = "";
         String appId = getString(R.string.app_id);
         String url = mXpushSession.getServerUrl() + "/global";
 
@@ -313,7 +312,6 @@ public class XPushService extends Service {
                 try {
                     mClient.connect();
                     XPushCore.setGlobalSocket(mClient);
-
                     mStarted = true;
                     Log.i(TAG, "Successfully connected and subscribed starting keep alives");
 
