@@ -516,7 +516,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         } else {
 
             // Prevent dulplicate
-            if( mXpushMessages.size() > 0 && mXpushMessages.get(0).getUpdated() != data.get(0).getUpdated() && data.size() > 0 ){
+            if( mXpushMessages.size() > 0 && data.size() > 0 && mXpushMessages.get(0).getUpdated() != data.get(0).getUpdated() ){
                 mXpushMessages.addAll(0, data);
             }
         }

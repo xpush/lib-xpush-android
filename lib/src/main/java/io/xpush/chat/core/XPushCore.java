@@ -4,6 +4,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
@@ -56,6 +58,10 @@ import io.xpush.chat.util.ContentUtils;
 import io.xpush.chat.util.XPushUtils;
 
 public class XPushCore {
+
+    private static final int NETWORK_WIFI = 1;
+    private static final int NETWORK_MOBILE = 2;
+    private static final int NETWORK_NOT_AVAILABLE = 0;
 
     private static XPushSession mXpushSession;
 
@@ -881,6 +887,11 @@ public class XPushCore {
 
     private Socket socket;
     private synchronized void connect() {
+        if( getOnlineType() != NETWORK_NOT_AVAILABLE ){
+            Log.d(TAG, "Toast Network is not available");
+            return;
+        }
+
         // fetch the device ID from the preferences.
         String appId = getBaseContext().getString(R.string.app_id);
         String url = mXpushSession.getServerUrl() + "/global";
@@ -928,4 +939,23 @@ public class XPushCore {
             }
         }
     };
+
+    private int getOnlineType() {
+        try {
+            ConnectivityManager conMan = (ConnectivityManager) baseContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo.State wifi = conMan.getNetworkInfo(1).getState(); // wifi
+            if (wifi == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTING)
+                return NETWORK_WIFI;
+
+            NetworkInfo.State mobile = conMan.getNetworkInfo(0).getState();
+            if (mobile == NetworkInfo.State.CONNECTED || mobile == NetworkInfo.State.CONNECTING)
+                return NETWORK_MOBILE;
+
+        } catch (NullPointerException e) {
+            return NETWORK_NOT_AVAILABLE;
+        }
+
+        return NETWORK_NOT_AVAILABLE;
+    }
 }

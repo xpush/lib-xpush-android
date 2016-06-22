@@ -9,11 +9,13 @@ import android.os.Build;
 import android.os.Looper;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.util.TypedValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.PriorityQueue;
 
 public class ContentUtils {
 
@@ -25,8 +27,11 @@ public class ContentUtils {
         String filePath = "";
         String wholeID = DocumentsContract.getDocumentId(uri);
 
+        String id = ";";
         // Split at colon, use second item in the array
-        String id = wholeID.split(":")[1];
+        if( wholeID.indexOf( ":" ) > 0 ) {
+            id = wholeID.split(":")[1];
+        }
 
         String[] column = { MediaStore.Images.Media.DATA };
 
@@ -51,7 +56,9 @@ public class ContentUtils {
         String[] proj = { MediaStore.Images.Media.DATA };
         String result = null;
 
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
 
         CursorLoader cursorLoader = new CursorLoader(
                 context,
@@ -69,7 +76,9 @@ public class ContentUtils {
 
     public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri){
 
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
 
         String[] proj = { MediaStore.Images.Media.DATA };
         Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
@@ -89,14 +98,12 @@ public class ContentUtils {
             // SDK < API11
             if (Build.VERSION.SDK_INT < 11) {
                 realPath = ContentUtils.getRealPathFromURI_BelowAPI11(context, uri);
-
                 // SDK >= 11 && SDK < 19
             } else if (Build.VERSION.SDK_INT < 19) {
                 realPath = ContentUtils.getRealPathFromURI_API11to18(context, uri);
-
                 // SDK > 19 (Android 4.4)
             } else {
-                if (String.valueOf(uri).contains("documents")) {
+                if (uri.toString().indexOf("documents") > 0) {
                     realPath = ContentUtils.getRealPathFromURI_API19(context, uri);
                 } else {
                     realPath = ContentUtils.getRealPathFromURI_API11to18(context, uri);
