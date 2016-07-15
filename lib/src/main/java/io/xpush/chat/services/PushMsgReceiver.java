@@ -35,7 +35,8 @@ public class PushMsgReceiver extends BroadcastReceiver {
             Bundle extras = intent.getExtras();
 
             if(action.isEmpty()){
-            }else if ("io.xpush.chat.MGRECVD".equals(action)) {
+
+            } else if ("io.xpush.chat.MGRECVD".equals(action)) {
 
                 String channel = intent.getStringExtra("rcvd.C");
                 String name = intent.getStringExtra("rcvd.NM");
@@ -43,7 +44,7 @@ public class PushMsgReceiver extends BroadcastReceiver {
                 int type= intent.getIntExtra("rcvd.TP", XPushMessage.TYPE_RECEIVE_MESSAGE);
 
                 showNotification(mContext, name, channel, message, type);
-            }else if("com.google.android.c2dm.intent.RECEIVE".equals(action)) {    // gcm msg receive
+            } else if("com.google.android.c2dm.intent.RECEIVE".equals(action)) {    // gcm msg receive
                 if (!extras.isEmpty()) {
                     Log.d(TAG, extras.toString());
                     try {

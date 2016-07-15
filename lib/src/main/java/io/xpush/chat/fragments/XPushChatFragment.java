@@ -2,7 +2,9 @@ package io.xpush.chat.fragments;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -49,6 +52,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.xpush.chat.R;
 import io.xpush.chat.core.CallbackEvent;
@@ -64,6 +68,7 @@ import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.services.PushMsgReceiver;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
 
@@ -117,6 +122,9 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     private Bundle mChannelBundle;
 
     private Bundle mSavedInstanceState;
+
+
+    private AtomicBoolean isPaused = new AtomicBoolean();
 
     @Override
     public void onAttach(Activity activity) {
@@ -184,6 +192,9 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
     @Override
     public void onResume(){
         super.onResume();
+        Log.d(TAG, " ===== resume ===== ");
+        isPaused.set(true);
+
         newChannelFlag = mActivity.getIntent().getBooleanExtra("newChannel", false);
         if( !resetChannelFlag ) {
             resetChannelFlag = mActivity.getIntent().getBooleanExtra("resetChannel", false);
@@ -228,6 +239,13 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                 getChannelAndConnect();
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, " ===== pause ===== ");
+        isPaused.set(false);
     }
 
     @Override
@@ -635,6 +653,26 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                     addMessage(xpushMessage);
                 }
             });
+
+            PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn = false;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+                isScreenOn = pm.isInteractive();
+            } else {
+                isScreenOn = pm.isScreenOn();
+            }
+
+            if( !isScreenOn || !isPaused.get() ) {
+                Intent broadcastIntent = new Intent(mActivity, PushMsgReceiver.class);
+                broadcastIntent.setAction("io.xpush.chat.MGRECVD");
+
+                broadcastIntent.putExtra("rcvd.C", xpushMessage.getChannel());
+                broadcastIntent.putExtra("rcvd.NM", xpushMessage.getSenderName());
+                broadcastIntent.putExtra("rcvd.MG", xpushMessage.getMessage());
+                broadcastIntent.putExtra("rcvd.TP", xpushMessage.getType() );
+
+                mActivity.sendBroadcast(broadcastIntent);
+            }
 
         } catch (Exception e ){
             e.printStackTrace();

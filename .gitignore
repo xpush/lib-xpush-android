@@ -63,3 +63,5 @@ Temporary Items
 
 sample/build
 lib/build
+
+android/**/*.iml

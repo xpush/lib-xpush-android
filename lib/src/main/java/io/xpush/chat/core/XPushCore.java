@@ -887,8 +887,8 @@ public class XPushCore {
 
     private Socket socket;
     private synchronized void connect() {
-        if( getOnlineType() != NETWORK_NOT_AVAILABLE ){
-            Log.d(TAG, "Toast Network is not available");
+        if( getOnlineType() == NETWORK_NOT_AVAILABLE ){
+            Log.d(TAG, "Network is not available");
             return;
         }
 
