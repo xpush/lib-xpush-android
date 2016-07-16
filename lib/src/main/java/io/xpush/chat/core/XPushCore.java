@@ -906,7 +906,7 @@ public class XPushCore {
         }
 
         IO.Options mOpts = opts;
-        Log.i(TAG, "Connecting with URL: " + url);
+        Log.i(TAG, "Connecting with URL in XPushCore : " + url);
         try {
             socket = IO.socket(url, mOpts);
             socket.on(Socket.EVENT_CONNECT, onConnectSuccess);

@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -68,6 +70,7 @@ import io.xpush.chat.persist.DBHelper;
 import io.xpush.chat.persist.MessageTable;
 import io.xpush.chat.persist.XPushMessageDataSource;
 import io.xpush.chat.persist.XpushContentProvider;
+import io.xpush.chat.services.BadgeIntentService;
 import io.xpush.chat.services.PushMsgReceiver;
 import io.xpush.chat.view.adapters.MessageListAdapter;
 import io.xpush.chat.view.listeners.RecyclerOnScrollListener;
@@ -427,8 +430,13 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             values.put(ChannelTable.KEY_ID, mChannel );
             values.put(ChannelTable.KEY_COUNT, 0);
 
+            // Reset Unread Message Count
             Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + mChannel );
             mActivity.getContentResolver().update(singleUri, values, null, null);
+
+            // Reset Badge
+            Intent intent = new Intent(mActivity,BadgeIntentService.class);
+            mActivity.startService(intent);
 
             // Multi Channel. Send Invite Message
             if( (newChannelFlag || resetChannelFlag ) && ( mUsers != null && mUsers.size()  > 2 ) ){

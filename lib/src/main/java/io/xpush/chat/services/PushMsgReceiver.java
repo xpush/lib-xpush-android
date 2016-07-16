@@ -143,6 +143,10 @@ public class PushMsgReceiver extends BroadcastReceiver {
 
         if(wl_cpu != null)
             wl_cpu.release();
+
+        // Reset Badge
+        Intent badgeIntent = new Intent(mContext,BadgeIntentService.class);
+        mContext.startService(badgeIntent);
     }
 
     public static boolean isInteractive(PowerManager pm) {
