@@ -644,7 +644,31 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             values.put(ChannelTable.KEY_MESSAGE, xpushMessage.getMessage());
             values.put(ChannelTable.KEY_MESSAGE_TYPE, xpushMessage.getType());
             values.put(ChannelTable.KEY_UPDATED, xpushMessage.getUpdated());
-            values.put(ChannelTable.KEY_COUNT, 0);
+
+            PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
+            boolean isScreenOn = false;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+                isScreenOn = pm.isInteractive();
+            } else {
+                isScreenOn = pm.isScreenOn();
+            }
+
+            // Update channel count
+            if( !isScreenOn || !isPaused.get() ) {
+
+                Uri singleUri = Uri.parse(XpushContentProvider.CHANNEL_CONTENT_URI + "/" + xpushMessage.getChannel());
+                Cursor cursor = mActivity.getContentResolver().query(singleUri, ChannelTable.ALL_PROJECTION, null, null, null);
+                if (cursor != null && cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    int count = cursor.getInt(cursor.getColumnIndexOrThrow(ChannelTable.KEY_COUNT));
+                    values.put(ChannelTable.KEY_COUNT, count + 1);
+                } else {
+                    values.put(ChannelTable.KEY_COUNT, 1);
+                }
+
+            } else {
+                values.put(ChannelTable.KEY_COUNT, 0);
+            }
 
             values.put(XpushContentProvider.SQL_INSERT_OR_REPLACE, true);
             mActivity.getContentResolver().insert(XpushContentProvider.CHANNEL_CONTENT_URI, values);
@@ -661,14 +685,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                     addMessage(xpushMessage);
                 }
             });
-
-            PowerManager pm = (PowerManager) mActivity.getSystemService(Context.POWER_SERVICE);
-            boolean isScreenOn = false;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
-                isScreenOn = pm.isInteractive();
-            } else {
-                isScreenOn = pm.isScreenOn();
-            }
 
             if( !isScreenOn || !isPaused.get() ) {
                 Intent broadcastIntent = new Intent(mActivity, PushMsgReceiver.class);

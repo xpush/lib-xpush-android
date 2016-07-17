@@ -25,6 +25,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import io.xpush.chat.R;
 import io.xpush.chat.persist.ChannelTable;
@@ -41,6 +42,7 @@ public class BadgeIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+
         DBHelper mDbHelper = new DBHelper(getApplicationContext());
         SQLiteDatabase mDatabase = mDbHelper.getReadableDatabase();
 

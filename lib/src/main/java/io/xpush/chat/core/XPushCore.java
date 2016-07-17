@@ -2,13 +2,16 @@ package io.xpush.chat.core;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.RequestQueue;
@@ -46,6 +49,7 @@ import io.xpush.chat.ApplicationController;
 import io.xpush.chat.R;
 import io.xpush.chat.common.Constants;
 import io.xpush.chat.models.XPushChannel;
+import io.xpush.chat.models.XPushMessage;
 import io.xpush.chat.models.XPushSession;
 import io.xpush.chat.models.XPushUser;
 import io.xpush.chat.network.LoginRequest;
@@ -911,6 +915,7 @@ public class XPushCore {
             socket = IO.socket(url, mOpts);
             socket.on(Socket.EVENT_CONNECT, onConnectSuccess);
             socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            socket.on("_event", onNewMessage);
             setGlobalSocket(socket);
         } catch (Exception e) {
             e.printStackTrace();
@@ -918,6 +923,14 @@ public class XPushCore {
 
         socket.connect();
     }
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+        @Override
+        public void call(final Object... args) {
+            JSONObject json = (JSONObject) args[0];
+            XPushService.handleMessage(baseContext, json);
+        }
+    };
 
     private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
         @Override
