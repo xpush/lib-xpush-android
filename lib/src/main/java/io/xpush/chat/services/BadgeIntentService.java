@@ -17,15 +17,9 @@
 package io.xpush.chat.services;
 
 import android.app.IntentService;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import io.xpush.chat.R;
 import io.xpush.chat.persist.ChannelTable;
@@ -50,17 +44,9 @@ public class BadgeIntentService extends IntentService {
         mCount.moveToFirst();
         int count = mCount.getInt(0);
         mCount.close();
-
-        // Reset Badge
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        SharedPreferences.Editor editor = pref.edit();
-        int badgeCount = pref.getInt("BADGE_COUNT", 0);
-        editor.putInt("BADGE_COUNT", count);
-        editor.commit();
-
-        ShortcutBadger.with(getApplicationContext()).count(badgeCount);
-
         mDatabase.close();
         mDbHelper.close();
+
+        ShortcutBadger.with(getApplicationContext()).count(count);
     }
 }
