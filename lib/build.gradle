@@ -48,7 +48,7 @@ dependencies {
 
     //compile 'org.jsoup:jsoup:1.8.2'
 
-    compile 'com.google.android.gms:play-services-gcm:+'
+    compile 'com.google.android.gms:play-services-gcm:9.2.1'
 
     //compile 'com.github.nkzawa:engine.io-client:0.5.1'
     compile 'io.socket:socket.io-client:0.6.2'

@@ -279,6 +279,10 @@ public class XPushCore {
         params.put("U", id);
         params.put("PW", password);
         params.put("D", mDeviceId);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
+            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
+        }
 
         String url = mHostname+"/auth";
 
@@ -349,11 +353,6 @@ public class XPushCore {
         params.put("PW", password);
         params.put("D", mDeviceId);
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
-            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
-        }
-
         String url = mHostname+"/device/add";
 
         LoginRequest request = new LoginRequest(getBaseContext(), url, params,
@@ -388,7 +387,14 @@ public class XPushCore {
         queue.add(request);
     }
 
+    public static void updateToken(final CallbackEvent callbackEvent){
+        updateUser(null, callbackEvent);
+    }
+
     public static void updateUser(final JSONObject mJsonUserData, final CallbackEvent callbackEvent){
+        if( mXpushSession == null ){
+            return;
+        }
 
         getInstance();
 
@@ -396,9 +402,17 @@ public class XPushCore {
 
         params.put("A", mAppId);
         params.put("U", mXpushSession.getId());
-        params.put("DT", mJsonUserData.toString());
         params.put("PW", mXpushSession.getPassword());
         params.put("D", mXpushSession.getDeviceId());
+
+        if( mJsonUserData != null ) {
+            params.put("DT", mJsonUserData.toString());
+        }
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        if( null != pref.getString("REGISTERED_NOTIFICATION_ID", null)){
+            params.put("N", pref.getString("REGISTERED_NOTIFICATION_ID", null) );
+        }
 
         String url = getBaseContext().getString(R.string.host_name)+"/user/update";
 
@@ -412,18 +426,33 @@ public class XPushCore {
                             if( "ok".equalsIgnoreCase(response.getString("status")) ){
                                 Log.d(TAG, response.getString("status"));
 
-                                if( mJsonUserData.has("I") ) {
-                                    mXpushSession.setImage(mJsonUserData.getString("I"));
-                                }
-                                if( mJsonUserData.has("NM") ) {
-                                    mXpushSession.setName(mJsonUserData.getString("NM"));
+                                if( mJsonUserData != null ) {
+                                    if (mJsonUserData.has("I")) {
+                                        mXpushSession.setImage(mJsonUserData.getString("I"));
+                                    }
+                                    if (mJsonUserData.has("NM")) {
+                                        mXpushSession.setName(mJsonUserData.getString("NM"));
+                                    }
+                                    if (mJsonUserData.has("MG")) {
+                                        mXpushSession.setMessage(mJsonUserData.getString("MG"));
+                                    }
                                 }
 
-                                if( mJsonUserData.has("MG") ) {
-                                    mXpushSession.setMessage(mJsonUserData.getString("MG"));
+                                if( params.containsKey("N")) {
+                                    mXpushSession.setNotiId(params.get("N"));
                                 }
 
-                                callbackEvent.call( mJsonUserData );
+                                // SessionData Update
+                                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(baseContext);
+                                SharedPreferences.Editor editor = pref.edit();
+                                editor.putString("XPUSH_SESSION", mXpushSession.toJSON().toString());
+                                editor.commit();
+
+                                if( mJsonUserData != null ) {
+                                    callbackEvent.call(mJsonUserData);
+                                } else {
+                                    callbackEvent.call(response);
+                                }
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
@@ -18,11 +19,16 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ImageSpan;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import io.xpush.chat.core.CallbackEvent;
 import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.view.SlidingTabLayout;
 import io.xpush.sampleChat.R;
@@ -57,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if( mPosition == 0 ) {
+                if (mPosition == 0) {
                     searchUser();
                 } else {
                     selectUser();

@@ -90,6 +90,7 @@ public class LoginRequest extends StringRequest {
                 xpushSession.setToken(token);
                 xpushSession.setServerName(server);
                 xpushSession.setServerUrl(serverUrl);
+                xpushSession.setNotiId(getParams().get("N"));
 
                 editor.putString("XPUSH_SESSION", xpushSession.toJSON().toString());
                 editor.commit();

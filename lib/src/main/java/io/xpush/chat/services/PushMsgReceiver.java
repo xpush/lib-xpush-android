@@ -19,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.xpush.chat.R;
+import io.xpush.chat.core.XPushCore;
 import io.xpush.chat.models.XPushChannel;
 import io.xpush.chat.models.XPushMessage;
 
@@ -34,6 +35,12 @@ public class PushMsgReceiver extends BroadcastReceiver {
             String action = intent.getAction().toString();
             Bundle extras = intent.getExtras();
 
+            Log.d(TAG, extras.toString());
+
+            if( XPushCore.getXpushSession() == null){
+                return;
+            }
+
             if(action.isEmpty()){
 
             } else if ("io.xpush.chat.MGRECVD".equals(action)) {
@@ -46,7 +53,6 @@ public class PushMsgReceiver extends BroadcastReceiver {
                 showNotification(mContext, name, channel, message, type);
             } else if("com.google.android.c2dm.intent.RECEIVE".equals(action)) {    // gcm msg receive
                 if (!extras.isEmpty()) {
-                    Log.d(TAG, extras.toString());
                     try {
                         JSONObject userData =  new JSONObject(extras.getString("UO"));
                         showNotification(mContext, userData.getString("NM"), extras.getString("C"), extras.getString("MG"));
