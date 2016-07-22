@@ -35,6 +35,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -56,7 +57,7 @@ public class XPushService extends Service {
     private static final String XPUSH_THREAD_NAME = "XPushService[" + TAG + "]"; // Handler Thread ID
 
     private static final int XPUSH_KEEP_ALIVE = 1000 * 5 * 60; // KeepAlive Interval in MS. 4 min
-    private static final int PING_TIMEOUT = 1000 * 1 * 10; // KeepAlive Interval in MS. 4 min
+    private static final int PING_TIMEOUT = 1000 * 1 * 10; // KeepAlive Interval in MS. 10 second
 
     private static final String ACTION_START = TAG + ".START"; // Action to start
     private static final String ACTION_STOP = TAG + ".STOP"; // Action to stop
@@ -68,13 +69,10 @@ public class XPushService extends Service {
 
     private static final String DEVICE_ID_FORMAT = "andr_%s"; // Device ID Format, add any prefix you'd like
 
-    private boolean mStarted = false; // Is the Client started?
     private String mDeviceId;          // Device ID, Secure.ANDROID_ID
     private Handler mConnHandler;      // Seperate Handler thread for networking
 
     private IO.Options mOpts;
-
-    private Socket mClient;                    // Socketio Client
 
     private AlarmManager mAlarmManager;            // Alarm manager to perform repeating tasks
     private ConnectivityManager mConnectivityManager; // To check for connectivity changes
@@ -83,8 +81,6 @@ public class XPushService extends Service {
     private ScheduledExecutorService heartbeatScheduler;
 
     private Boolean mPingTimeout = false;
-
-    private boolean mConnecting = false;
 
     private XPushSession mXpushSession;
 
@@ -126,6 +122,9 @@ public class XPushService extends Service {
 
     public static void handleMessage(Context ctx, JSONObject jsonObject)
     {
+
+        Log.d(TAG, "=== GLOBAL_MESSAGE === " );
+        Log.d(TAG, jsonObject.toString());
         Intent i = new Intent(ctx, XPushService.class);
         i.setAction(ACTION_GLOBAL_MESSAGE);
         i.putExtra("GLOBAL_MESSAGE", jsonObject.toString());
@@ -165,6 +164,7 @@ public class XPushService extends Service {
         mAlarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         mConnectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
     }
+
 
     /**
      * Service onStartCommand
@@ -223,7 +223,6 @@ public class XPushService extends Service {
         if( XPushCore.getXpushSession() == null) {
 
             Log.i(TAG, "Not logged in user");
-            mStarted = false;
             stopKeepAlives();
             return;
         } else {
@@ -231,16 +230,12 @@ public class XPushService extends Service {
             mXpushSession = XPushCore.restoreXpushSession();
         }
 
-        if (mStarted) {
-            if( !isConnected() ) {
-                Log.i(TAG, "not connected");
-                connect();
-            } else {
-                Log.i(TAG, "set global socket");
-                XPushCore.setGlobalSocket(mClient);
-                Log.i(TAG, "Attempt to start while already started and connected");
-                return;
-            }
+        if( !isConnected() ) {
+            Log.i(TAG, "not connected");
+            connect();
+        } else {
+            Log.i(TAG, "Attempt to start while already started and connected");
+            return;
         }
 
         if (hasScheduledKeepAlives()) {
@@ -256,27 +251,21 @@ public class XPushService extends Service {
     }
 
     private synchronized void stop() {
-        if (!mStarted) {
-            Log.i(TAG, "Attemtpign to stop connection that isn't running");
-            return;
-        }
 
         Log.d(TAG, "stop");
-
-        if (mClient != null) {
+        final Socket mClient = XPushCore.getInstance().getGlobalSocket();
+        if (XPushCore.getInstance().getGlobalSocket() != null) {
             mConnHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         Log.d(TAG, "disconnect");
                         if (mClient != null && mClient.connected()) {
-                            mClient.disconnect();
+                            XPushCore.getInstance().disconnect();
                         }
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-                    mClient = null;
-                    mStarted = false;
 
                     stopKeepAlives();
                 }
@@ -293,48 +282,18 @@ public class XPushService extends Service {
     private synchronized void connect() {
 
         if( mXpushSession == null ){
-            mStarted = false;
             return;
         }
 
-        log("Connecting...");
-        mConnecting = true;
-        // fetch the device ID from the preferences.
-        String appId = getString(R.string.app_id);
-        String url = mXpushSession.getServerUrl() + "/global";
-
-        IO.Options opts = new IO.Options();
-        opts.forceNew = true;
-        opts.reconnectionAttempts = 20;
-        try {
-            opts.query = "A="+appId+"&U="+ URLEncoder.encode(mXpushSession.getId(), "UTF-8")+"&TK="+mXpushSession.getToken()+"&D="+mXpushSession.getDeviceId();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        mOpts = opts;
-        Log.i(TAG, "Connecting with URL: " + url);
-        try {
-            mClient = IO.socket(url, mOpts);
-            mClient.on(Socket.EVENT_CONNECT, onConnectSuccess);
-            mClient.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            mClient.on(Socket.EVENT_CONNECT_TIMEOUT, onConnectError);
-            mClient.on("_event", onNewMessage);
-            mClient.on("pong", onPong);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        XPushCore.getInstance().connect();
+        XPushCore.getInstance().on("pong", onPong);
 
         mConnHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    mClient.connect();
-                    XPushCore.setGlobalSocket(mClient);
-                    mStarted = true;
-                    Log.i(TAG, "Successfully connected and subscribed starting keep alives");
-
                     startKeepAlives();
+                    Log.d(TAG, "start keepAlive");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -383,9 +342,8 @@ public class XPushService extends Service {
     }
 
     private synchronized void reconnectIfNecessary() {
-        Log.d(TAG, "reconnectIfNecessary - " + "mStarted : " + mStarted + ", mConnecting : " + mConnecting);
-        if (mStarted && mClient != null ) {
-            if( !mClient.connected() && !mConnecting  ){
+        if (XPushCore.getInstance().getGlobalSocket() != null ) {
+            if( !XPushCore.getInstance().getGlobalSocket().connected() ){
                 connect();
             }
         } else {
@@ -400,18 +358,14 @@ public class XPushService extends Service {
     }
 
     public boolean isConnected() {
-
-        if (mStarted && mClient != null && !mClient.connected()) {
+        Socket mClient = XPushCore.getInstance().getGlobalSocket();
+        if ( mClient != null && !XPushCore.getInstance().getGlobalSocket().connected()) {
             Log.i(TAG, "mClient.isConnected() : " + mClient.connected() );
             Log.i(TAG, "Mismatch between what we think is connected and what is connected");
         }
 
         if (mClient != null) {
-            return (mStarted && mClient.connected() && !mPingTimeout ) ? true : false;
-        }
-
-        if( mConnecting ){
-            return false;
+            return (mClient.connected() && !mPingTimeout ) ? true : false;
         }
 
         return false;
@@ -424,18 +378,17 @@ public class XPushService extends Service {
             if (isNetworkAvailable()) {
                 reconnectIfNecessary();
             } else {
-                mClient.disconnect();
+                XPushCore.getInstance().disconnect();
                 stopKeepAlives();
-                mClient = null;
             }
 
         }
     };
 
     private synchronized void sendKeepAlive() {
-
+        Socket mClient = XPushCore.getInstance().getGlobalSocket();
         Log.i(TAG, "Sending Keepalive to " + mXpushSession.getServerUrl());
-        if (mStarted == true && mClient != null && mClient.connected()  ) {
+        if ( mClient != null && mClient.connected()  ) {
             Log.i(TAG, "ping " + mXpushSession.getServerUrl());
 
             mClient.emit("ping", "ping");
@@ -474,8 +427,6 @@ public class XPushService extends Service {
         Log.e(TAG, "socket connection Lost");
         stopKeepAlives();
 
-        mClient = null;
-
         if (isNetworkAvailable()) {
             reconnectIfNecessary();
         }
@@ -508,22 +459,6 @@ public class XPushService extends Service {
         }
     }
 
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
-        @Override
-        public void call(final Object... args) {
-            JSONObject json = (JSONObject) args[0];
-            handleMessage(json);
-        }
-    };
-
-    private Emitter.Listener onConnectSuccess = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            log("connect sucesss");
-            mConnecting = false;
-        }
-    };
-
     private Emitter.Listener onPong = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
@@ -536,20 +471,6 @@ public class XPushService extends Service {
         }
     };
 
-    private Emitter.Listener onConnectError = new Emitter.Listener() {
-        @Override
-        public void call(Object... args) {
-            if( args[0] instanceof SocketIOException ) {
-                SocketIOException e = (SocketIOException) args[0];
-                log(e.getMessage());
-            } else if ( args[0] instanceof  EngineIOException){
-                EngineIOException e = (EngineIOException) args[0];
-                log(e.getMessage());
-            }
-            mConnecting = false;
-        }
-    };
-
     private ScheduledExecutorService getHeartbeatScheduler() {
         if (this.heartbeatScheduler == null || this.heartbeatScheduler.isShutdown()) {
             this.heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
@@ -559,6 +480,9 @@ public class XPushService extends Service {
 
     @Override
     public void onDestroy(){
+
+        this.stop();
+
         super.onDestroy();
         mDbHelper.close();
         mDatabase.close();
@@ -612,7 +536,7 @@ public class XPushService extends Service {
                             // Multi Channel Message
                             if( null != xpushMessage.getUsers() && xpushMessage.getUsers().size() > 2 && xpushMessage.getUsers().size() < 5 ) {
 
-                                mClient.emit("channel.get", new JSONObject().put("C", xpushMessage.getChannel()), new Ack() {
+                                XPushCore.getInstance().getGlobalSocket().emit("channel.get", new JSONObject().put("C", xpushMessage.getChannel()), new Ack() {
                                     @Override
                                     public void call(Object... args) {
                                         JSONObject response = (JSONObject) args[0];

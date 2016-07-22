@@ -80,7 +80,11 @@ public class XPushCore {
 
     private static Socket mGlobalSocket;
 
+
+    private HashMap<String, Emitter.Listener> mEvents;
+
     private static final AtomicBoolean mGlobalSocketConnected = new AtomicBoolean();
+    private static final AtomicBoolean mConnecting = new AtomicBoolean();
 
     private static CountDownLatch latch = new CountDownLatch(2);
 
@@ -918,12 +922,19 @@ public class XPushCore {
         return results;
     }
 
-    private Socket socket;
-    private synchronized void connect() {
+    public synchronized void connect() {
+
         if( getOnlineType() == NETWORK_NOT_AVAILABLE ){
             Log.d(TAG, "Network is not available");
             return;
         }
+
+        if( mConnecting.get() ){
+            Log.d(TAG, "Tring connect");
+            return;
+        }
+
+        mConnecting.set(true);
 
         // fetch the device ID from the preferences.
         String appId = getBaseContext().getString(R.string.app_id);
@@ -941,16 +952,25 @@ public class XPushCore {
         IO.Options mOpts = opts;
         Log.i(TAG, "Connecting with URL in XPushCore : " + url);
         try {
-            socket = IO.socket(url, mOpts);
-            socket.on(Socket.EVENT_CONNECT, onConnectSuccess);
-            socket.on(Socket.EVENT_CONNECT_ERROR, onConnectError);
-            socket.on("_event", onNewMessage);
-            setGlobalSocket(socket);
+            mGlobalSocket = IO.socket(url, mOpts);
+            HashMap<String, Emitter.Listener> events = new HashMap<>();
+
+            events.put(Socket.EVENT_CONNECT, onConnectSuccess);
+            events.put(Socket.EVENT_CONNECT_ERROR, onConnectError);
+            events.put("_event", onNewMessage);
+
+            if (events != null) {
+                for (String eventName : events.keySet()) {
+                    mGlobalSocket.on(eventName, events.get(eventName));
+                }
+            }
+
+            mEvents = events;
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        socket.connect();
+        mGlobalSocket.connect();
     }
 
     private Emitter.Listener onNewMessage = new Emitter.Listener() {
@@ -965,6 +985,7 @@ public class XPushCore {
         @Override
         public void call(Object... args) {
             Log.d(TAG, "connect sucesss");
+            mConnecting.set(false);
             setGlobalSocketConnected();
         }
     };
@@ -972,6 +993,7 @@ public class XPushCore {
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
         public void call(Object... args) {
+
             if( args[0] instanceof SocketIOException) {
                 SocketIOException e = (SocketIOException) args[0];
                 Log.d(TAG, e.getMessage());
@@ -979,6 +1001,7 @@ public class XPushCore {
                 EngineIOException e = (EngineIOException) args[0];
                 Log.d(TAG, e.getMessage());
             }
+            mConnecting.set(false);
         }
     };
 
@@ -999,5 +1022,31 @@ public class XPushCore {
         }
 
         return NETWORK_NOT_AVAILABLE;
+    }
+
+    public void disconnect(){
+        for (String eventName : mEvents.keySet()) {
+            this.off(eventName);
+        }
+        Log.d(TAG, "=== disconnect global socket ===");
+        mGlobalSocket.disconnect();
+    }
+
+    public Socket getGlobalSocket(){
+        return mGlobalSocket;
+    }
+
+    public boolean isConnecting(){
+        return mConnecting.get();
+    }
+
+    public void on(String event, Emitter.Listener eventListener) {
+        if( !mEvents.containsKey( event) ){
+            mGlobalSocket.on(event, eventListener);
+        }
+    }
+
+    public void off(String event) {
+        mGlobalSocket.off(event);
     }
 }
