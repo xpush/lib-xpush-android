@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SampleChat</string>
-    <string name="host_name">http://54.178.160.166:8000</string>
+    <string name="host_name">http://10.53.30.180:8000</string>
     <string name="app_id">zeroapp</string>
     <string name="device_id">android</string>
     <string name="gcm_defaultSenderId">944977353393</string>

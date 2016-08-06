@@ -521,8 +521,8 @@ public class XPushService extends Service {
                             getContentResolver().update(singleUri, values, null, null);
                         } else {
                             values.put(ChannelTable.KEY_COUNT, 1);
-                            if( xpushMessage.getType() == XPushMessage.TYPE_INVITE) {
-                                xpushMessage.setType(XPushMessage.TYPE_INVITE);
+                            if( xpushMessage.getType() == XPushMessage.TYPE_INVITE || xpushMessage.getType() == XPushMessage.TYPE_LEAVE ) {
+                                values.put(ChannelTable.KEY_MESSAGE_TYPE, xpushMessage.getType() );
                                 values.remove(ChannelTable.KEY_IMAGE);
                             } else {
                                 values.put(ChannelTable.KEY_NAME, xpushMessage.getSenderName());
@@ -569,7 +569,7 @@ public class XPushService extends Service {
                             }
                         }
 
-                        if( xpushMessage.getType() != XPushMessage.TYPE_INVITE) {
+                        if( ( xpushMessage.getType() != XPushMessage.TYPE_INVITE && xpushMessage.getType() != XPushMessage.TYPE_LEAVE ) ) {
 
                             if (mXpushSession.getId().equals(xpushMessage.getSenderId())) {
                                 if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {

@@ -218,7 +218,11 @@ public class SelectFriendFragment extends XPushUsersFragment {
             Bundle bundle = channel.toBundle();
             Intent intent = new Intent(mActivity, ChatActivity.class);
             intent.putExtra(channel.CHANNEL_BUNDLE, bundle);
-            intent.putExtra("resetChannel", true);
+            if( mCurrentChannelUsers == null || mCurrentChannelUsers.size() == 0  ){
+                intent.putExtra("newChannel", true);
+            } else {
+                intent.putExtra("resetChannel", true);
+            }
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP  | Intent.FLAG_ACTIVITY_SINGLE_TOP );
             startActivity(intent);
 

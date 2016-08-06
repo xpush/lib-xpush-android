@@ -977,6 +977,7 @@ public class XPushCore {
         @Override
         public void call(final Object... args) {
             JSONObject json = (JSONObject) args[0];
+            Log.d(TAG, "on GlobalMesssage" );
             XPushService.handleMessage(baseContext, json);
         }
     };

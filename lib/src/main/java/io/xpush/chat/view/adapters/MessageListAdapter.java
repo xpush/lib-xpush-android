@@ -45,7 +45,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             layout = R.layout.item_send_message;
         } else if (viewType == XPushMessage.TYPE_RECEIVE_MESSAGE ) {
             layout = R.layout.item_receive_message;
-        } else if (viewType == XPushMessage.TYPE_INVITE ) {
+        } else if (viewType == XPushMessage.TYPE_INVITE || viewType == XPushMessage.TYPE_LEAVE ) {
             layout = R.layout.item_invite_message;
         } else if (viewType == XPushMessage.TYPE_SEND_IMAGE ) {
             layout = R.layout.item_send_image;
@@ -62,7 +62,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
         XPushMessage xpushMessage = mXPushMessages.get(position);
 
         viewHolder.setUsername(xpushMessage.getSenderName());
-        viewHolder.setIime(xpushMessage.getUpdated());
+        viewHolder.setTime(xpushMessage.getUpdated());
         viewHolder.setImage(xpushMessage.getImage());
         viewHolder.setMessage(xpushMessage.getMessage(), xpushMessage.getType(), xpushMessage.getMetadata());
     }
@@ -161,7 +161,7 @@ public class MessageListAdapter extends RecyclerView.Adapter<MessageListAdapter.
             }
         }
 
-        public void setIime(long timestamp) {
+        public void setTime(long timestamp) {
             if (null == tvTime) return;
             tvTime.setText(DateUtils.getDate(timestamp, "a h:mm"));
         }

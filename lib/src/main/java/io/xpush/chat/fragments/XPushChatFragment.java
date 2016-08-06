@@ -94,7 +94,7 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     protected String mChannel;
     protected Activity mActivity;
-    protected ArrayList<String> mUsers;
+    protected ArrayList<String> mUsers = new ArrayList<String>();
 
     private XPushSession mSession;
 
@@ -438,20 +438,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             Intent intent = new Intent(mActivity,BadgeIntentService.class);
             mActivity.startService(intent);
 
-            // Multi Channel. Send Invite Message
-            if( (newChannelFlag || resetChannelFlag ) && ( mUsers != null && mUsers.size()  > 2 ) ){
-
-                if( mSavedInstanceState == null || ( mSavedInstanceState != null && !mSavedInstanceState.getBoolean("invitedSuccess", false) ) ) {
-                    String message = mUsername + " Invite " + mXpushChannel.getName();
-                    mXpushChannel.getUserNames().add(XPushCore.getXpushSession().getName());
-                    mChannelCore.sendMessage(message, "IN", mUsers);
-
-                    mActivity.getIntent().putExtra("resetChannel", true);
-                    resetChannelFlag = false;
-                }
-
-            }
-
             mChannelCore.channelGet(new CallbackEvent() {
                 @Override
                 public void call(Object... args) {
@@ -462,9 +448,15 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                             try {
                                 JSONArray dts = response.getJSONObject("result").getJSONArray("UDTS");
 
+                                mXpushUsers.clear();
+                                mUsers.clear();
                                 for( int inx = 0 ; inx < dts.length() ; inx++ ){
+                                    XPushUser tmpUser = new XPushUser(dts.getJSONObject(inx));
                                     mXpushUsers.add(new XPushUser(dts.getJSONObject(inx)));
+                                    mUsers.add( tmpUser.getId() );
                                 }
+
+                                sendInviteMessage();
 
                             } catch (Exception e ){
                                 e.printStackTrace();
@@ -476,6 +468,30 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         }
     };
 
+    private void sendInviteMessage(){
+
+        if( (newChannelFlag || resetChannelFlag ) && ( mXpushUsers != null && mXpushUsers.size()  > 2 ) ){
+
+            if( mSavedInstanceState == null || ( mSavedInstanceState != null && !mSavedInstanceState.getBoolean("invitedSuccess", false) ) ) {
+
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        String message = mUsername + " Invite " + mXpushChannel.getName();
+                        mXpushChannel.getUserNames().add(XPushCore.getXpushSession().getName());
+                        mChannelCore.sendMessage(message, "IN", mUsers);
+                    }
+                }, 150);
+
+                if( !newChannelFlag ) {
+                    mActivity.getIntent().putExtra("resetChannel", false);
+                    resetChannelFlag = false;
+                }
+            }
+
+        }
+    }
 
     private Emitter.Listener onConnectError = new Emitter.Listener() {
         @Override
@@ -526,8 +542,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
 
     @Override
     public void onLoadFinished(Loader<List<XPushMessage>> loader, List<XPushMessage> data) {
-
-        Log.d(TAG, "onLoadFinished");
 
         boolean onStarting = false;
         if( mXpushMessages.size() == 0 ){
@@ -612,6 +626,8 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
                 if( newChannelFlag ) {
                     values.put(ChannelTable.KEY_NAME, mXpushChannel.getName());
                 }
+            } else if ( xpushMessage.getType() == XPushMessage.TYPE_LEAVE){
+                xpushMessage.setType(XPushMessage.TYPE_LEAVE);
             } else {
                 if (mSession.getId().equals(xpushMessage.getSenderId())) {
                     if( xpushMessage.getType() == XPushMessage.TYPE_IMAGE ) {
@@ -757,7 +773,16 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
             mChannelCore.channelLeave(new CallbackEvent() {
                 @Override
                 public void call(Object... args) {
-                    leave();
+
+                    // SEND leave message
+                    mChannelCore.sendMessage(mUsername + " leave this chat room", "OUT");
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            leave();
+                        }
+                    }, 150);
                 }
             });
         } else {
@@ -774,7 +799,6 @@ public abstract class XPushChatFragment extends Fragment implements LoaderManage
         for( XPushMessage message : messages  ){
             images.add( message.getMessage() );
         }
-        Log.d(TAG, images.toString());
         return images;
     }
 
